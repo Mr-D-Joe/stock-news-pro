@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pydantic
+requests
+yfinance
+pandas
+beautifulsoup4
+feedparser
+openai
+python-dotenv
+# Future: grpcio grpcio-tools for Protobuf support
