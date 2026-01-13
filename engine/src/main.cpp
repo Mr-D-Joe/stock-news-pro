@@ -1,18 +1,15 @@
 #include <iostream>
-#include "database.h"
+#include "dispatcher.h"
 
 int main() {
-    std::cout << "--- Stock News Data Engine ---" << std::endl;
+    std::cout << "--- Stock News Data Engine (v2) ---" << std::endl;
     
-    if (!db_init("stock_news.db")) {
-        return 1;
-    }
+    stocknews::Dispatcher dispatcher;
 
-    std::cout << "Storing test data..." << std::endl;
-    db_store_news("AAPL", "Apple launches new AI chip", "2026-01-13");
-    db_store_news("TSLA", "Tesla production reaches record high", "2026-01-13");
+    std::cout << "Simulating real-time data stream..." << std::endl;
+    dispatcher.dispatch_news("GOOGL", "Alphabet Reports Strong Q4 Results");
+    dispatcher.dispatch_news("AMZN", "Amazon Expansion into Healthcare Gains Momentum");
 
-    db_close();
     std::cout << "Engine cycle complete." << std::endl;
     
     return 0;
