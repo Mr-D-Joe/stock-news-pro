@@ -10,6 +10,8 @@ set(SOURCES
     src/database.c
 )
 
+find_package(SQLite3 REQUIRED)
 add_executable(news_engine ${SOURCES})
+target_link_libraries(news_engine SQLite3::SQLite3)
 
 # Future: Add gRPC/Protobuf dependencies
