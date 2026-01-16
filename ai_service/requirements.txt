@@ -1,11 +1,20 @@
+pytest>=7.0
+pytest-asyncio>=0.21
+playwright>=1.30.0
 fastapi
 uvicorn
 pydantic
-requests
-yfinance
+pydantic-settings>=2.0.0
+requests>=2.28
+yfinance>=0.2.30
 pandas
 beautifulsoup4
-feedparser
-openai
+feedparser>=6.0.0
+openai>=1.0.0
 python-dotenv
+# Deep Fetching
+duckduckgo-search>=4.0
+pypdf>=3.0
+json_repair>=0.25.0
+
 # Future: grpcio grpcio-tools for Protobuf support

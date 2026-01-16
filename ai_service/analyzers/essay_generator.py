@@ -3,19 +3,13 @@
 from __future__ import annotations
 
 import logging
-import re
 from typing import Optional
 
-from stock_news_ai.analyzers.base_client import BaseAIClient, AIError
-from stock_news_ai.analyzers.provider_factory import ProviderFactory
-from stock_news_ai.analyzers.prompts import (
-    SYSTEM_INSTRUCTION_ANALYST,
-    build_anomaly_detection_prompt,
-    build_essay_prompt,
-)
-from stock_news_ai.config import Settings
-from stock_news_ai.models.article import AnalysisResult, ArticleCollection, CalendarEvent
-from stock_news_ai.pipeline.base import PipelineContext, PipelineStep
+from ai_service.analyzers.base_client import BaseAIClient
+from ai_service.analyzers.provider_factory import ProviderFactory
+from ai_service.config import Settings
+from ai_service.models.article import AnalysisResult, ArticleCollection
+from ai_service.pipeline.base import PipelineContext, PipelineStep
 
 logger = logging.getLogger(__name__)
 
@@ -28,14 +22,18 @@ class EssayGenerator(PipelineStep[ArticleCollection, AnalysisResult]):
     def __init__(
         self,
         settings: Optional[Settings] = None,
-        language: str = "German",
-        include_anomaly_analysis: bool = False,  # Disabled by default for free tier
-        max_articles_for_ai: int = 20,  # Limit articles to reduce token usage
+        language: Optional[str] = None,
+        include_anomaly_analysis: Optional[bool] = None,
+        max_articles_for_ai: Optional[int] = None,
     ):
         self.settings = settings or Settings()
-        self.language = language
-        self.include_anomaly_analysis = include_anomaly_analysis
-        self.max_articles_for_ai = max_articles_for_ai
+        self.language = language or self.settings.default_language
+        self.include_anomaly_analysis = (
+            include_anomaly_analysis 
+            if include_anomaly_analysis is not None 
+            else self.settings.enable_anomaly_detection
+        )
+        self.max_articles_for_ai = max_articles_for_ai or self.settings.max_articles_for_ai
         self._client: Optional[BaseAIClient] = None
 
     @property
@@ -56,294 +54,201 @@ class EssayGenerator(PipelineStep[ArticleCollection, AnalysisResult]):
     def process(
         self, input_data: ArticleCollection, context: PipelineContext
     ) -> AnalysisResult:
-        """Generate essay from article collection."""
+        """
+        Generate essay from article collection.
+        This legacy method adapts the new JSON flow to the old AnalysisResult interface.
+        """
         self._ensure_client_callbacks(context)
-        if input_data.count == 0:
-            logger.warning("No articles to analyze")
-            return AnalysisResult(
-                essay="No articles were collected for analysis.",
-                summary="No data available.",
-                article_collection=input_data,
-            )
-
-        # Get focus parameters and language from context
-        stocks = input_data.query_stocks or context.config.stocks
-        sectors = input_data.query_sectors or context.config.sectors
+        
+        # Prepare data for new analysis method
+        ticker = input_data.query_stocks[0] if input_data.query_stocks else "UNKNOWN"
         language = context.config.language if hasattr(context.config, 'language') else self.language
-
-        logger.info(f"Generating essay for {input_data.count} articles")
         
-        # Limit articles for AI to reduce token usage and API calls
-        articles_for_ai = input_data
-        if input_data.count > self.max_articles_for_ai:
-            logger.info(f"Limiting to top {self.max_articles_for_ai} articles for AI analysis")
-            limited_articles = input_data.articles[:self.max_articles_for_ai]
-            articles_for_ai = ArticleCollection(
-                articles=limited_articles,
-                query_stocks=input_data.query_stocks,
-                query_sectors=input_data.query_sectors,
-                collected_at=input_data.collected_at,
-            )
-            articles_for_ai.assign_citation_ids()
+        # Convert articles to summarized strings (proper None handling)
+        news_context = [
+            f"[{a.source}] {a.title}: {(a.summary or '')[:200]}"
+            for a in input_data.articles[:self.max_articles_for_ai]
+        ]
         
-        # Generate main essay
-        essay_prompt = build_essay_prompt(
-            articles=articles_for_ai,
-            focus_stocks=stocks,
-            focus_sectors=sectors,
-            language=self.language,
-            sensitivity_profile=input_data.impact_analysis.sensitivity_profile if input_data.impact_analysis else None,
-            fundamentals=input_data.fundamentals,
+        # Call the new structured analysis
+        data = self.generate_analysis(
+            ticker=ticker,
+            company_name=ticker, # Fallback, ideally passed in
+            language=language,
+            news_context=news_context,
+            fundamentals=input_data.fundamentals
         )
         
-        try:
-            essay = self.client.generate(
-                prompt=essay_prompt,
-                system_instruction=SYSTEM_INSTRUCTION_ANALYST,
-                temperature=0.7,
-            )
-        except AIError as e:
-            logger.error(f"Essay generation failed: {e}")
-            essay = f"Essay generation failed: {e}"
-
-        # Initialize result
-        result = AnalysisResult(
-            essay=essay,
+        # Map JSON dict back to AnalysisResult for compatibility
+        return AnalysisResult(
+            essay=data.get("essay", ""),
+            summary=data.get("summary", ""),
+            swot=data.get("swot", {}),
+            key_findings=data.get("key_findings", []),
+            watch_items=data.get("watch_items", []),
             article_collection=input_data,
-            impact_analysis=input_data.impact_analysis,
-            price_history=input_data.price_history,
             fundamentals=input_data.fundamentals,
+            metadata={"status": "generated_via_json_mode"}
         )
 
-        # Extract key findings and summary from the essay
-        result.summary = self._extract_summary(essay)
-        result.key_findings = self._extract_key_findings(essay)
-        result.swot = self._extract_swot(essay)
-        result.watch_items = self._extract_watch_items(essay)
-        result.upcoming_events = self._extract_upcoming_events(essay)
-
-        # Optionally run anomaly detection
-        if self.include_anomaly_analysis and input_data.count >= 5:
-            anomalies = self._detect_anomalies(input_data)
-            result.anomalies = anomalies
-
-        # Determine overall sentiment
-        result.sentiment = self._analyze_sentiment(essay)
-
-        logger.info(f"Generated essay: {len(essay)} chars, {len(result.key_findings)} findings")
-        return result
-
-    def _extract_summary(self, essay: str) -> str:
-        """Extract executive summary from essay."""
-        # Look for summary section
-        lower = essay.lower()
-        if "executive summary" in lower:
-            start = lower.find("executive summary")
-            # Find the next section header or take first paragraph
-            lines = essay[start:].split("\n")
-            summary_lines = []
-            for line in lines[1:]:  # Skip the header
-                if line.strip().startswith("#") or line.strip().startswith("##"):
-                    break
-                if line.strip():
-                    summary_lines.append(line.strip())
-                if len(summary_lines) >= 3:
-                    break
-            if summary_lines:
-                return " ".join(summary_lines)
+    def generate_analysis(
+        self,
+        ticker: str, 
+        company_name: str, 
+        language: str, 
+        news_context: list = None,
+        fundamentals: dict = None,
+        deep_sources: list = None
+    ) -> dict:
+        """
+        Generate a complete DeltaValue analysis using AI's built-in knowledge.
+        Returns a structured dictionary (JSON).
+        Accepts both mainstream news and deep web sources.
+        """
+        import json
         
-        # Fallback: first paragraph
-        paragraphs = essay.split("\n\n")
-        for p in paragraphs:
-            if len(p.strip()) > 50 and not p.startswith("#"):
-                return p.strip()[:500]
+        client = self.client # Use the property to ensure initialization
         
-        return essay[:300] if essay else ""
-
-    def _extract_key_findings(self, essay: str) -> list[str]:
-        """Extract key findings bullet points from essay."""
-        findings = []
-        lines = essay.split("\n")
-        in_findings = False
-        
-        for line in lines:
-            lower = line.lower()
-            if "key finding" in lower or "key insight" in lower or "key takeaway" in lower:
-                in_findings = True
-                continue
-            
-            if in_findings:
-                # Stop at next major section
-                if line.startswith("##") or line.startswith("# "):
-                    break
-                # Capture bullet points
-                stripped = line.strip()
-                match = re.match(r'^[-*•→\d.]+\s+(.+)$', stripped)
-                if match:
-                    finding = match.group(1).strip()
-                    if finding and len(finding) > 10:
-                        findings.append(finding)
-        
-        return findings[:10]  # Limit to 10 findings
-
-    def _extract_swot(self, essay: str) -> dict[str, list[str]]:
-        """Extract SWOT analysis categories and items from the essay."""
-        swot = {"Strengths": [], "Weaknesses": [], "Opportunities": [], "Threats": []}
-        lines = essay.split("\n")
-        current_category = None
-        
-        # Keywords to identify SWOT sections (German and English)
-        cat_map = {
-            "strength": "Strengths", "stärken": "Strengths",
-            "weakness": "Weaknesses", "schwächen": "Weaknesses",
-            "opportunity": "Opportunities", "chancen": "Opportunities",
-            "threat": "Threats", "risiken": "Threats", "gefahren": "Threats"
-        }
-        
-        in_swot_section = False
-        for line in lines:
-            lower = line.lower()
-            
-            # Detect SWOT section or a specific category header
-            if "swot" in lower:
-                in_swot_section = True
-                continue
-                
-            # Check for category change
-            found_header = False
-            for kw, cat in cat_map.items():
-                if kw in lower and (line.startswith("###") or line.startswith("**") or line.endswith(":")):
-                    current_category = cat
-                    found_header = True
-                    break
-            
-            if found_header:
-                continue
-                
-            if current_category:
-                # Capture bullet points if we have a category
-                if line.startswith("##") or (line.startswith("# ") and not in_swot_section):
-                    current_category = None
-                    continue
-                    
-                stripped = line.strip()
-                match = re.match(r'^[-*•→\d.]+\s+(.+)$', stripped)
-                if match:
-                    item = match.group(1).strip()
-                    if item and len(item) > 10:
-                        swot[current_category].append(item)
-                    
-        # Filter out empty categories
-        return {k: v for k, v in swot.items() if v}
-
-    def _extract_watch_items(self, essay: str) -> list[str]:
-        """Extract critical watch items from essay."""
-        items = []
-        lines = essay.split("\n")
-        in_watch = False
-        
-        watch_keywords = ["watch item", "beobachtung", "beachtet", "focus", "achtung", "kritisch"]
-        
-        for line in lines:
-            lower = line.lower()
-            if any(kw in lower for kw in watch_keywords) and (line.startswith("##") or "**" in line):
-                in_watch = True
-                continue
-            
-            if in_watch:
-                if line.startswith("##") or line.startswith("# "):
-                    break
-                stripped = line.strip()
-                match = re.match(r'^[-*•→\d.]+\s+(.+)$', stripped)
-                if match:
-                    item = match.group(1).strip()
-                    if item and len(item) > 10:
-                        items.append(item)
-                        
-        return items[:5]
-
-    def _extract_upcoming_events(self, essay: str) -> list[CalendarEvent]:
-        """Extract upcoming calendar events from essay."""
-        events = []
-        lines = essay.split("\n")
-        in_events = False
-        
-        event_keywords = ["calender", "kalender", "termin", "date", "event", "upcoming", "bevorstehend"]
-        
-        for line in lines:
-            lower = line.lower()
-            if any(kw in lower for kw in event_keywords) and (line.startswith("##") or "**" in line):
-                in_events = True
-                continue
-            
-            if in_events:
-                if line.startswith("##") or line.startswith("# "):
-                    break
-                stripped = line.strip()
-                # Look for patterns like: "2024-05-15: Q1 Earnings Call" or "- 15. Mai: HV"
-                match = re.match(r'^[-*•→\d.]+\s+([^:]+):\s+(.+)$', stripped)
-                if match:
-                    date_part = match.group(1).strip()
-                    title_part = match.group(2).strip()
-                    events.append(CalendarEvent(
-                        title=title_part,
-                        date=date_part,
-                        description=f"Automated extraction: {title_part}"
-                    ))
+        # Build mainstream news section (ALL unique articles with summaries)
+        news_section = "No recent mainstream news."
+        if news_context:
+            # Deduplicate by title (fuzzy match via lowercase strip)
+            seen_titles = set()
+            unique_items = []
+            for item in news_context:
+                if isinstance(item, dict):
+                    title = item.get('title', '').lower().strip()
+                    if title and title not in seen_titles:
+                        seen_titles.add(title)
+                        unique_items.append(item)
                 else:
-                    # Fallback for simple bullet points without colon
-                    match = re.match(r'^[-*•→\d.]+\s+(.+)$', stripped)
-                    if match:
-                        text = match.group(1).strip()
-                        if any(char.isdigit() for char in text) and len(text) > 5:
-                            events.append(CalendarEvent(
-                                title=text,
-                                date="Check news for date",
-                                description=text
-                            ))
-                        
-        return events[:5]
+                    unique_items.append(item)
+            
+            items = []
+            for item in unique_items:  # ALL unique articles
+                if isinstance(item, dict):
+                    source = item.get('source', 'News')
+                    title = item.get('title', 'Unknown')
+                    summary = (item.get('summary') or '')[:300]  # Include summary content
+                    if summary:
+                        items.append(f"- [{source}] {title}: {summary}")
+                    else:
+                        items.append(f"- [{source}] {title}")
+                else:
+                    items.append(f"- {str(item)}")
+            news_section = "\\n".join(items)
+            logger.info(f"Essay: Using {len(unique_items)} unique news articles (deduplicated from {len(news_context)})")
 
-    def _detect_anomalies(self, articles: ArticleCollection) -> list[str]:
-        """Run anomaly detection on article collection."""
-        prompt = build_anomaly_detection_prompt(articles)
+        # Build Deep Web section (expanded context)
+        deep_section = "No deep web sources found."
+        if deep_sources:
+            items = []
+            for item in deep_sources:
+                source = item.get('source', 'DeepWeb')
+                title = item.get('title', 'Doc')
+                url = item.get('url', 'N/A')
+                summary = item.get('summary', '')[:2000]  # 2000 chars for economic content
+                items.append(f"- [DEEP WEB / {source}] {title} ({url}): {summary}")
+            deep_section = "\n".join(items)
+    
+        # Build fundamentals section
+        fund_section = ""
+        if fundamentals:
+            fund_section = f"""
+    ## Key Fundamentals:
+    - P/E Ratio: {fundamentals.get('pe_ratio', 'N/A')}
+    - PEG Ratio: {fundamentals.get('peg_ratio', 'N/A')}
+    - ROE: {fundamentals.get('roe', 'N/A')}
+    - Debt/Equity: {fundamentals.get('debt_to_equity', 'N/A')}
+    - Target Mean Price: {fundamentals.get('target_mean_price', 'N/A')}
+    - Analyst Rec: {fundamentals.get('recommendation', 'N/A')}
+    - Business Summary: {fundamentals.get('business_summary', 'N/A')[:400]}...
+    """
         
+        prompt = f"""
+        Analyze {company_name} ({ticker}) in {language}.
+        Role: Senior Financial Analyst.
+        Task: Create an investment memo.
+        Output: Return EXACTLY ONE valid JSON object. NOT an array. NO MARKDOWN. NO REPETITION.
+
+        [Fundamentals]
+        {fund_section}
+
+        [News Context]
+        {news_section}
+
+        [Deep Web Alpha]
+        {deep_section}
+
+        JSON Structure:
+        {{
+            "essay": "Executive analysis (3 paras). 1) Strategy, 2) Financials, 3) Verdict. BE CONCISE. DO NOT REPEAT SENTENCES.",
+            "summary": "1 sentence Buy/Hold/Sell decision.",
+            "swot": {{
+                "strengths": ["3 key strengths"],
+                "weaknesses": ["3 key weaknesses"],
+                "opportunities": ["3 opportunities"],
+                "threats": ["3 risks"]
+            }},
+            "buffett_view": "Warren Buffett's view (2 sentences).",
+            "lynch_view": "Peter Lynch's view (2 sentences).",
+            "outlook": "12-month outlook (2 sentences). Highlight Deep Web variances if any.",
+            "key_findings": ["5 key facts. Mark deep web sources as '[Deep Web]'."],
+            "watch_items": ["3 monitor items"]
+        }}
+        """
+    
+
+    
         try:
-            response = self.client.generate(
-                prompt=prompt,
-                temperature=0.3,
-                max_output_tokens=1024,
-            )
-            
-            # Extract bullet points from response
-            anomalies = []
-            for line in response.split("\n"):
-                stripped = line.strip()
-                match = re.match(r'^[-*•→]+\s+(.+)$', stripped)
-                if match:
-                    anomaly = match.group(1).strip()
-                    if anomaly and len(anomaly) > 15:
-                        anomalies.append(anomaly)
-            
-            return anomalies[:5]  # Top 5 anomalies
-            
-        except AIError as e:
-            logger.warning(f"Anomaly detection failed: {e}")
-            return []
+            response = client.generate(prompt, temperature=0.3)
+            # Extract JSON from response (handle markdown blocks)
+            cleaned_response = response.strip()
+            if "```json" in cleaned_response:
+                cleaned_response = cleaned_response.split("```json")[1].split("```")[0].strip()
+            elif "```" in cleaned_response:
+                cleaned_response = cleaned_response.split("```")[1].split("```")[0].strip()
+                
+            # Try direct parse first
+            try:
+                # strict=False allows control characters like newlines in strings
+                data = json.loads(cleaned_response, strict=False)
+                
+                # Resilience: Ensure valid dict structure (AI sometimes returns list)
+                if isinstance(data, list):
+                    logger.warning(f"AI returned list instead of dict (Standard Parse). Attempting to recover. (Len: {len(data)})")
+                    if len(data) > 0 and isinstance(data[0], dict):
+                        data = data[0]
+                    else:
+                        raise ValueError("JSON is a list, expected dict")
 
-    def _analyze_sentiment(self, essay: str) -> str:
-        """Determine overall sentiment from essay content."""
-        lower = essay.lower()
-        
-        positive_words = ["positive", "growth", "increase", "profit", "success", "optimistic", "strong"]
-        negative_words = ["negative", "decline", "decrease", "loss", "concern", "risk", "weak"]
-        
-        positive_count = sum(1 for word in positive_words if word in lower)
-        negative_count = sum(1 for word in negative_words if word in lower)
-        
-        if positive_count > negative_count + 2:
-            return "positive"
-        elif negative_count > positive_count + 2:
-            return "negative"
-        else:
-            return "neutral"
+                return data
+            except json.JSONDecodeError:
+                # Fallback to json_repair for malformed JSON (missing commas, unescaped quotes)
+                try:
+                    import json_repair
+                    data = json_repair.loads(cleaned_response)
+                    logger.info("Successfully repaired malformed JSON")
+                    
+                    # Resilience: Ensure valid dict structure (AI sometimes returns list)
+                    if isinstance(data, list):
+                        logger.warning(f"AI returned list instead of dict after repair. (Len: {len(data)})")
+                        if len(data) > 0 and isinstance(data[0], dict):
+                            data = data[0]  # Take first element if it's a valid dict
+                        else:
+                            # Raise error - don't bypass with str(data)
+                            raise ValueError(f"AI returned invalid list structure: {type(data[0] if data else 'empty')}")
+                    
+                    return data
+                except ImportError:
+                     logger.error("json_repair module not found. Please install it: pip install json_repair")
+                except Exception as e:
+                     logger.warning(f"json_repair failed: {e}")
+
+                # If repair failed, look for partial JSON
+                logger.error(f"Could not parse JSON from response: {cleaned_response[:500]}...")
+                raise ValueError("No JSON found")
+        except Exception as e:
+            logger.error(f"Standalone analysis failed: {e}")
+            raise e
+

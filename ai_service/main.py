@@ -1,14 +1,193 @@
+import os
+import logging
 from fastapi import FastAPI
+
+logger = logging.getLogger(__name__)
 from ai_service.analyzers.provider_factory import ProviderFactory
 from ai_service.analyzers.impact_analyzer import ImpactAnalyzer
+from ai_service.models.article import ArticleCollection, AnalysisResult
+from ai_service.processors.browser_extractor import BrowserExtractor
+from ai_service.analyzers.essay_generator import EssayGenerator
+from ai_service.pipeline.base import PipelineContext, PipelineConfig
+from ai_service.health import router as health_router
+from ai_service.api.engine import router as engine_router, normalize_language
+from ai_service.config import Settings
 
-app = FastAPI(title="Stock News AI Service")
+from ai_service.processors.ticker_resolver import TickerResolver
+from ai_service.fetchers.historic_analyzer import HistoricAnalyzer
+from ai_service.processors.html_reporter import HtmlReporter
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%H:%M:%S"
+)
+logger = logging.getLogger(__name__)
+
+# --- RESILIENCE: Signal Handling ---
+import signal
+import sys
+import asyncio
+
+def handle_sigint(signum, frame):
+    logger.warning("Received SIGINT (Ctrl+C). Forcing clean shutdown...")
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, handle_sigint)
+
+app = FastAPI(title="Stock News AI Service", version="1.0.0")
+
+# --- RESILIENCE: Global Exception Handler ---
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Global Crash Handler caught: {exc}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Internal Server Error", "detail": str(exc), "advice": "Please retry. If persistent, check logs."}
+    )
+
+# Register routers
+app.include_router(health_router)
+app.include_router(engine_router)
+
+# Load settings once at startup
+_settings = Settings()
 
 @app.get("/")
 async def root():
-    return {"status": "AI Service Online", "providers": ["gemini", "openai", "perplexity"]}
+    providers = _settings.get_available_providers()
+    return {
+        "status": "AI Service Online", 
+        "providers": providers,
+        "version": "1.0.0"
+    }
 
-@app.post("/analyze/impact")
-async def analyze_impact(symbol: str):
-    # This will be refined to use the data from the C++ engine
-    return {"symbol": symbol, "message": "Impact analysis endpoint ready"}
+@app.get("/resolve/ticker")
+async def resolve_ticker(query: str):
+    """Resolve fuzzy stock name to ticker."""
+    resolver = TickerResolver(_settings)
+    return await resolver.resolve_stock(query)
+
+@app.get("/resolve/sector")
+async def resolve_sector(query: str):
+    """Resolve fuzzy sector name."""
+    resolver = TickerResolver(_settings)
+    sector = await resolver.resolve_sector(query)
+    return {"sector": sector}
+
+@app.post("/analyze/essay", response_model=AnalysisResult)
+async def analyze_essay(request: ArticleCollection, language: str = "German", use_browser: bool = True):
+    """Generate an essay from the provided articles."""
+    if use_browser:
+        browser = BrowserExtractor()
+        request = await browser._process_async(request)
+
+    context = PipelineContext(
+        config=PipelineConfig(
+            stocks=request.query_stocks,
+            sectors=request.query_sectors or ["General"],
+            language=normalize_language(language)
+        )
+    )
+    
+    generator = EssayGenerator()
+    result = generator.process(request, context)
+    return result
+
+@app.post("/analyze/full_report")
+async def analyze_full_report(request: ArticleCollection, language: str = "German"):
+    """
+    Generate a full HTML report including historical data, AI analysis, and news markers.
+    Fetches news internally if none provided.
+    Delegates to WorkflowOrchestrator.
+    """
+    from ai_service.pipeline.orchestrator import WorkflowOrchestrator
+    
+    # Normalize language input for fault tolerance
+    language = normalize_language(language)
+    
+    orchestrator = WorkflowOrchestrator(_settings)
+    result = await orchestrator.run(request, language)
+    
+    return result
+
+@app.get("/api/quota")
+async def get_quota_status():
+    """
+    Get rate limit status for all AI providers.
+    Shows remaining quota, reset times, and recommended wait times.
+    """
+    from ai_service.analyzers.gemini_client import GeminiClient
+    from datetime import datetime
+    
+    status = {
+        "timestamp": datetime.now().isoformat(),
+        "providers": {}
+    }
+    
+    # Gemini Status (uses shared rate limiter)
+    try:
+        if GeminiClient._rate_limiter:
+            gemini_status = GeminiClient._rate_limiter.get_status()
+            status["providers"]["gemini"] = {
+                "model": _settings.gemini_model,
+                "rate_limited": gemini_status.get("rate_limited", False),
+                "wait_seconds": gemini_status.get("remaining_seconds", 0),
+                "available_at": gemini_status.get("available_at"),
+                "limits": {
+                    "rpm": 15,
+                    "rpd": 1000,
+                    "note": "Free Tier - gemini-2.5-flash-lite"
+                }
+            }
+        else:
+            status["providers"]["gemini"] = {"status": "not initialized"}
+    except Exception as e:
+        status["providers"]["gemini"] = {"error": str(e)}
+    
+    # OpenAI Status
+    status["providers"]["openai"] = {
+        "model": _settings.openai_model,
+        "status": "check OpenAI dashboard for usage",
+        "limits": {
+            "note": "Tier-based. Free tier very limited (~3 RPM)"
+        }
+    }
+    
+    # Groq Status
+    status["providers"]["groq"] = {
+        "model": _settings.groq_model,
+        "limits": {
+            "rpm": 30,
+            "rpd": 1000,
+            "tpm": 12000,
+            "tpd": 100000,
+            "note": "Free Tier. Check Groq Console for precise limits."
+        }
+    }
+    
+    # OpenRouter Status
+    status["providers"]["openrouter"] = {
+        "model": _settings.openrouter_model,
+        "limits": {
+            "rpm": 20,
+            "rpd": 50,
+            "note": "Free users: 50 req/day. $10+ credit: 1000 req/day"
+        }
+    }
+    
+    # Recommendation
+    gemini_wait = status["providers"].get("gemini", {}).get("wait_seconds", 0)
+    if gemini_wait > 0:
+        status["recommendation"] = f"Gemini available in {gemini_wait}s. Wait for premium quality."
+    elif gemini_wait == 0:
+        status["recommendation"] = "Gemini ready. Premium analysis available."
+    else:
+        status["recommendation"] = "Check individual providers."
+    
+    return status
+

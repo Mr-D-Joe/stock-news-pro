@@ -11,13 +11,13 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, computed_field
 
-from stock_news_ai.analyzers.base_client import BaseAIClient, AIError
-from stock_news_ai.analyzers.provider_factory import ProviderFactory
-from stock_news_ai.analyzers.prompts import build_impact_relevance_prompt, SYSTEM_INSTRUCTION_ANALYST
-from stock_news_ai.config import Settings
-from stock_news_ai.models.article import Article
-from stock_news_ai.models.impact import ArticleImpact, ImpactAnalysisResult, NewsCategory, StockSensitivity
-from stock_news_ai.models.price_data import PriceHistory
+from ai_service.analyzers.base_client import BaseAIClient, AIError
+from ai_service.analyzers.provider_factory import ProviderFactory
+from ai_service.analyzers.prompts import build_impact_relevance_prompt, SYSTEM_INSTRUCTION_ANALYST
+from ai_service.config import Settings
+from ai_service.models.article import Article
+from ai_service.models.impact import ArticleImpact, ImpactAnalysisResult, NewsCategory, StockSensitivity
+from ai_service.models.price_data import PriceHistory
 
 logger = logging.getLogger(__name__)
 

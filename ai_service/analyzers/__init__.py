@@ -1,13 +1,13 @@
 """Analyzers package."""
 
-from stock_news_ai.analyzers.base import ArticleAnalyzer
-from stock_news_ai.analyzers.essay_generator import EssayGenerator
-from stock_news_ai.analyzers.base_client import BaseAIClient, AIError
-from stock_news_ai.analyzers.gemini_client import GeminiClient, GeminiError
-from stock_news_ai.analyzers.openai_client import OpenAIClient, OpenAIError
-from stock_news_ai.analyzers.perplexity_client import PerplexityClient, PerplexityError
-from stock_news_ai.analyzers.provider_factory import ProviderFactory
-from stock_news_ai.analyzers.prompts import (
+from ai_service.analyzers.base import ArticleAnalyzer
+from ai_service.analyzers.essay_generator import EssayGenerator
+from ai_service.analyzers.base_client import BaseAIClient, AIError
+from ai_service.analyzers.gemini_client import GeminiClient, GeminiError
+from ai_service.analyzers.openai_client import OpenAIClient
+from ai_service.analyzers.perplexity_client import PerplexityClient
+from ai_service.analyzers.provider_factory import ProviderFactory
+from ai_service.analyzers.prompts import (
     SYSTEM_INSTRUCTION_ANALYST,
     build_anomaly_detection_prompt,
     build_essay_prompt,
@@ -22,9 +22,7 @@ __all__ = [
     "GeminiClient",
     "GeminiError",
     "OpenAIClient",
-    "OpenAIError",
     "PerplexityClient",
-    "PerplexityError",
     "ProviderFactory",
     "SYSTEM_INSTRUCTION_ANALYST",
     "build_anomaly_detection_prompt",

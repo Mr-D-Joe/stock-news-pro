@@ -8,8 +8,8 @@ from typing import Any, Optional, Callable
 
 import requests
 
-from stock_news_ai.analyzers.base_client import BaseAIClient, AIError
-from stock_news_ai.config import Settings
+from ai_service.analyzers.base_client import BaseAIClient, AIError
+from ai_service.config import Settings
 
 logger = logging.getLogger(__name__)
 

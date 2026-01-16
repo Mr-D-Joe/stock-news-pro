@@ -1,0 +1,67 @@
+# stock-news-pro .gitignore
+
+# Environment and secrets
+.env
+.env.*
+*.env
+secrets/
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv/
+*.egg-info/
+dist/
+build/
+eggs/
+*.egg
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Cache
+ai_service/cache/
+*.json.bak
+*.cache
+
+# Logs
+*.log
+logs/
+
+# Test
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Java/Maven
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Node (if any)
+node_modules/
+npm-debug.log
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Antigravity brain (local AI context)
+.gemini/

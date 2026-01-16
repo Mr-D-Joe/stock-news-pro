@@ -1,4 +1,5 @@
-from stock_news_ai.models.impact import StockSensitivity, FundamentalData
+from ai_service.models.impact import StockSensitivity, FundamentalData
+from ai_service.models.article import ArticleCollection
 from typing import Optional
 
 def build_essay_prompt(
@@ -10,13 +11,13 @@ def build_essay_prompt(
     fundamentals: Optional[FundamentalData] = None,
 ) -> str:
     """
-    Build a prompt for generating an analytical essay.
+    Build a prompt for generating an analytical essay following the DeltaValue methodology.
     
-    The prompt instructs the AI to:
-    - Analyze all provided articles
-    - Generate a comprehensive essay with inline citations [1], [2], etc.
-    - Identify key trends, anomalies, and patterns
-    - Provide an executive summary
+    DeltaValue Methodology (Expert Analysis):
+    - Fundamental evaluation (P/E, PEG, ROE, etc.)
+    - Qualitative assessment (Moat, Management, Business Model)
+    - Expert perspectives (Buffett, Lynch)
+    - Margin of Safety & Target Price Range
     """
     # Build article context with citation references
     article_context_parts = []
@@ -24,7 +25,7 @@ def build_essay_prompt(
         ref = f"[{article.citation_id}]"
         date_str = article.published.strftime("%Y-%m-%d") if article.published else "n.d."
         
-        article_text = article.text[:2000] if article.text else article.title
+        article_text = article.content[:3000] if article.content else article.title
         
         article_context_parts.append(
             f"{ref} Source: {article.source}\n"
@@ -38,74 +39,83 @@ def build_essay_prompt(
     stocks_str = ", ".join(focus_stocks) if focus_stocks else "various stocks"
     sectors_str = ", ".join(focus_sectors) if focus_sectors else "the market"
     
-    prompt = f"""You are a financial analyst writing a comprehensive market intelligence report.
+    prompt = f"""You are a senior financial analyst at DeltaValue. Your task is to write a comprehensive investment research report for {stocks_str} based on {articles.count} recent articles and the provided fundamental data.
+
+## DeltaValue Methodology
+Your analysis must strictly follow the DeltaValue systematic approach:
+1. **Top-Down & Bottom-Up**: Connect macroeconomic sector trends (Top-Down) with specific company performance (Bottom-Up).
+2. **Qualitative Moat Analysis**: Evaluate "Burggraben" (Economic Moats). Does the company have pricing power, high switching costs, or unique brand value?
+3. **Expert Synthesis**: Provide perspectives from:
+   - **Warren Buffett**: Focus on business quality, ROIC/ROE, durable competitive advantages, and long-term value.
+   - **Peter Lynch**: Focus on "Growth at a Reasonable Price" (GARP), utilizing the PEG Ratio.
+4. **Margin of Safety**: Weigh recent news against intrinsic value. Is bad news a value opportunity or a long-term risk?
 """
     
     if sensitivity_profile:
         prompt += f"""
-## Stock Historical Context
+## Market Volatility Context
 - **Stock**: {sensitivity_profile.symbol}
-- **Volatility Level**: {sensitivity_profile.avg_daily_move_pct}% avg daily move
-- **Sensitivity Score**: {sensitivity_profile.sensitivity_score} (relative to baseline)
-- **Insight**: Use this to weigh news. A {sensitivity_profile.avg_daily_move_pct*2}% move for this stock might be more "normal" than for other companies.
+- **Volatility (Avg. Daily Move)**: {sensitivity_profile.avg_daily_move_pct}%
+- **Sensitivity Score**: {sensitivity_profile.sensitivity_score}
+- **Instruction**: Interpret large price moves in context—is it a genuine trend change or typical volatility for this specific ticker?
 """
 
     if fundamentals:
         prompt += f"""
-## Stock Fundamentals (Expert Analysis Context)
-- **Valuation**: P/E: {fundamentals.trailing_pe}, Forward P/E: {fundamentals.forward_pe}, PEG Ratio: {fundamentals.peg_ratio}
-- **Quality (Buffett/Lynch)**: ROE: {fundamentals.return_on_equity}, ROA: {fundamentals.return_on_assets}, Profit Margin: {fundamentals.profit_margins}
-- **Financial Health**: Debt/Equity: {fundamentals.debt_to_equity}, Free Cashflow: {fundamentals.free_cashflow}
+## Company Fundamentals (DeltaValue Matrix)
+- **Valuation**: P/E: {fundamentals.trailing_pe}, Forward P/E: {fundamentals.forward_pe}, PEG Ratio: {fundamentals.peg_ratio}, P/S: {fundamentals.price_to_sales}, P/B: {fundamentals.price_to_book}
+- **Quality**: ROE: {fundamentals.return_on_equity}, ROA: {fundamentals.return_on_assets}, Profit Margin: {fundamentals.profit_margins}, Operating Margin: {fundamentals.operating_margins}
+- **Financial Health**: Debt/Equity: {fundamentals.debt_to_equity}, Current Ratio: {fundamentals.current_ratio}, Free Cashflow: {fundamentals.free_cashflow}
+- **Market Growth**: Rev Growth (YoY): {fundamentals.revenue_growth}, Earnings Growth (YoY): {fundamentals.earnings_growth}
 - **Analyst Targets**: Mean: {fundamentals.target_mean}, High: {fundamentals.target_high}, Low: {fundamentals.target_low} ({fundamentals.number_of_analysts} analysts)
-- **Business**: Sector: {fundamentals.sector}, Industry: {fundamentals.industry}
-- **Description**: {fundamentals.long_business_summary[:500] if fundamentals.long_business_summary else "N/A"}
 
-### Expert Analysis Rules (DeltaValue Guidelines):
-1. **Peter Lynch (GARP)**: Interpret news in context of the **PEG Ratio**. If PEG < 1, the stock might be underpriced growth.
-2. **Warren Buffett (Moat)**: Look for "Economic Moats" in the news—competitive advantages, pricing power, or brand strength. Relate news to **ROE/ROA** and **High Margins**.
-3. **Margin of Safety**: Assess if negative news is "priced in" or if it creates a value opportunity below intrinsic value.
-4. **Top-Down/Bottom-Up**: Connect macroeconomic sector news (Top-Down) with these specific company fundamentals (Bottom-Up).
-5. **Future Outlook (Price Range)**: Integrate a potential future stock price target range (e.g., for the next 12 months). Use the Analyst Targets and Valuation metrics to justify this.
-
-## Formatting Rules
-- Use `[UP:text]` for positive outlooks or gains (will be rendered in GREEN).
-- Use `[DOWN:text]` for negative outlooks or risks (will be rendered in RED).
-- Every claim must have a citation [1].
+### Analysis Rules:
+- **Lynch Check**: Compute if PEG < 1.0 (Growth opportunity).
+- **Buffett Check**: Verify if Margin > 20% and ROE > 15% (Quality/Moat indicators).
+- **Graham Check (Safety)**: Compare current price to Intrinsic Value estimates.
 """
 
     prompt += f"""
-## Task
-Analyze the following {articles.count} news articles about {stocks_str} in {sectors_str} and write a professional analytical essay.
+## Report Structure (Output in {language})
 
-## Requirements
-1. **Executive Summary** (2-3 sentences): Key takeaways for busy readers
-2. **Main Analysis** (3-5 paragraphs):
-   - Synthesize information across all sources
-   - Identify trends, patterns, and notable developments
-   - Use inline citations [1], [2], etc. to reference specific articles
-   - Highlight any anomalies or unusual news frequency
-3. **Key Findings**: Bullet points of the most important insights
-4. **SWOT Analysis**: A dedicated section for Strengths, Weaknesses, Opportunities, and Threats for the target stock(s)
-5. **Critical Watch Items**: Specific events, metrics, or dates the reader should pay extremely close attention to in the near future
-6. **Risk Assessment**: Potential risks or concerns identified
-7. **Upcoming Calendar Events**: Identify specific dates and events (earnings call, product launches, shareholder meetings, court dates) that will take place in the future.
-8. **Outlook**: Forward-looking assessment based on the news
+### 1. Executive Summary (Expert Take)
+A 2-3 sentence high-level assessment of the current situation. Is the stock a "Buy", "Hold" or "Watch" based on the news influx?
 
-## Citation Rules
-- Every factual claim must have a citation reference like [1], [2]
-- Use multiple citations [1][3] when information appears in multiple sources
-- Do not fabricate information not present in the sources
+### 2. Fundamental & News Integration (DeltaValue Matrix)
+Synthesize the articles with the fundamentals. 
+- How does source [1]'s news impact the ROE/ROA or PEG story?
+- Identify if the news supports a "Burggraben" (Moat) or threatens it.
 
-## Language
-Write the report in {language}.
+### 3. Expert Perspectives (Buffett vs. Lynch View)
+Write dedicated sub-sections for:
+- **The Buffett View**: Focus on long-term compound growth and moats.
+- **The Lynch View**: Focus on catalysts, growth rates, and GARP.
 
-## Articles to Analyze
+### 4. SWOT Analysis
+- **Strengths**: Intrinsic advantages (e.g., ROIC, Brand).
+- **Weaknesses**: Fundamental gaps or negative news.
+- **Opportunities**: Growth catalysts from the news.
+- **Threats**: Competition, Macro shifts, or Regulatory risks.
 
+### 5. DeltaValue Investment Thesis & Price Roadmap
+- **Margin of Safety Assessment**: Is the stock currently "Fair Value", "Undervalued", or "Overvalued"?
+- **12mo Price Range Estimate**: Define a potential target range based on the Analyst Targets and Valuation metrics.
+
+### 6. Critical Watch Items & Upcoming Dates
+Dates or specific metrics to monitor (e.g., Earnings on [Source X]).
+
+## Formatting & Citation Rules:
+- Use `[UP:text]` for positive outlooks (rendered in GREEN).
+- Use `[DOWN:text]` for negative risks (rendered in RED).
+- **EVERY factual claim must have a citation [1].**
+- Language: **{language}**.
+
+## Source Material
 {articles_context}
 
 ---
 
-Now write the analytical essay:"""
+Begin the DeltaValue Expert Analysis:"""
 
     return prompt
 

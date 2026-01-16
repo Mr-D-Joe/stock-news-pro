@@ -1,0 +1,32 @@
+{
+  "bioage": {
+    "symbol": "BJGE",
+    "name": "BioAge Labs, Inc.",
+    "sector": "Biotechnology"
+  },
+  "novo nord": {
+    "symbol": "NVO",
+    "name": "Novo Nordisk A/S",
+    "sector": "Healthcare"
+  },
+  "nvo": {
+    "symbol": "NVO.CO",
+    "name": "Novo Nordisk A/S",
+    "sector": "Healthcare"
+  },
+  "nvo.co": {
+    "symbol": "NVO",
+    "name": "Novo Nordisk A/S",
+    "sector": "Healthcare"
+  },
+  "rheinmet": {
+    "symbol": "RHM.DE",
+    "name": "Rheinmetall AG",
+    "sector": "Automotive"
+  },
+  "goog": {
+    "symbol": "GOOGL",
+    "name": "Alphabet Inc.",
+    "sector": "Technology"
+  }
+}

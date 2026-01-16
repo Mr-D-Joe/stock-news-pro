@@ -5,8 +5,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any
 
-from stock_news_ai.models.article import AnalysisResult, ArticleCollection
-from stock_news_ai.pipeline.base import PipelineContext, PipelineStep
+from ai_service.models.article import AnalysisResult, ArticleCollection
+from ai_service.pipeline.base import PipelineContext, PipelineStep
 
 
 class ArticleAnalyzer(PipelineStep[ArticleCollection, AnalysisResult], ABC):
