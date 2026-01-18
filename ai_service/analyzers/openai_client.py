@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import time
+import random
 from typing import Optional
 
 import requests
@@ -26,6 +27,10 @@ class OpenAIClient(BaseAIClient):
         "gpt-4-turbo",      # Previous generation
         "gpt-3.5-turbo",    # Cheapest, most reliable
     ]
+    
+    # Proactive rate limiting (shared across instances)
+    _last_request_time: float = 0
+    _min_interval: float = 3.0  # 20 RPM = 3 seconds minimum between requests
     
     def __init__(self, settings: Optional[Settings] = None):
         """Initialize OpenAI client."""
@@ -130,6 +135,14 @@ class OpenAIClient(BaseAIClient):
         
         for attempt in range(max_retries):
             try:
+                # Proactive rate limiting - avoid hitting limits
+                elapsed = time.time() - OpenAIClient._last_request_time
+                if elapsed < OpenAIClient._min_interval:
+                    sleep_time = OpenAIClient._min_interval - elapsed
+                    logger.debug(f"Proactive rate limit: waiting {sleep_time:.1f}s")
+                    time.sleep(sleep_time)
+                OpenAIClient._last_request_time = time.time()
+                
                 response = self.session.post(
                     self.BASE_URL,
                     json=payload,
@@ -141,10 +154,14 @@ class OpenAIClient(BaseAIClient):
                     return self._extract_text(data)
                 
                 elif response.status_code == 429:
-                    # Rate limited
+                    # Rate limited - exponential backoff with jitter
                     retry_after = int(response.headers.get("Retry-After", 5))
-                    logger.warning(f"OpenAI rate limited, waiting {retry_after}s...")
-                    time.sleep(retry_after)
+                    # Exponential backoff: base * 2^attempt with jitter (±25%)
+                    exponential_factor = 2 ** min(attempt, 4)  # Cap at 16x
+                    jitter = 0.75 + 0.5 * random.random()  # 0.75 - 1.25
+                    wait_time = min(retry_after * exponential_factor * jitter, 120)  # Max 2 min
+                    logger.warning(f"OpenAI rate limited, waiting {wait_time:.1f}s (attempt {attempt+1})...")
+                    time.sleep(wait_time)
                     continue
                 
                 elif response.status_code == 401:

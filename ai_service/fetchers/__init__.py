@@ -356,9 +356,23 @@ class NewsFetcher:
 _fetcher: Optional[NewsFetcher] = None
 
 
-def get_fetcher() -> NewsFetcher:
-    """Get or create singleton fetcher instance."""
+def get_fetcher():
+    """Get or create singleton fetcher instance.
+    
+    When DEV_MODE=true, returns MockNewsFetcher instead.
+    """
     global _fetcher
+    
+    # Check DEV_MODE
+    from ai_service.config import Settings
+    settings = Settings()
+    
+    if settings.dev_mode:
+        from ai_service.mock import get_mock_fetcher
+        logger.info("DEV_MODE: Using MockNewsFetcher - NO external API calls")
+        return get_mock_fetcher()
+    
     if _fetcher is None:
         _fetcher = NewsFetcher()
     return _fetcher
+

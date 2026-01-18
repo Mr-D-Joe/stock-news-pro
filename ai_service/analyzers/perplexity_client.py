@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import time
+import random
 from typing import Any, Optional, Callable
 
 import requests
@@ -90,8 +91,12 @@ class PerplexityClient(BaseAIClient):
                 response = self.session.post(url, json=body, timeout=120)
                 
                 if response.status_code == 429:
-                    wait_time = 30 * (attempt + 1)
-                    logger.warning(f"Perplexity Rate limit, waiting {wait_time}s")
+                    # Exponential backoff with jitter
+                    base_wait = 30
+                    exponential_factor = 2 ** min(attempt, 4)
+                    jitter = 0.75 + 0.5 * random.random()
+                    wait_time = int(min(base_wait * exponential_factor * jitter, 300))
+                    logger.warning(f"Perplexity Rate limit, waiting {wait_time}s (attempt {attempt+1})")
                     self._wait_with_feedback(wait_time, True)
                     continue
                     
@@ -102,8 +107,11 @@ class PerplexityClient(BaseAIClient):
                 return data["choices"][0]["message"]["content"].strip()
                 
             except requests.RequestException as e:
-                wait_time = 10 * (attempt + 1)
-                logger.warning(f"Perplexity request failed: {e}, retrying in {wait_time}s")
+                # Exponential backoff with jitter for network errors
+                base_wait = 10 * (2 ** min(attempt, 4))
+                jitter = 0.5 + random.random()
+                wait_time = min(base_wait * jitter, 120)
+                logger.warning(f"Perplexity request failed: {e}, retrying in {wait_time:.1f}s")
                 time.sleep(wait_time)
                 continue
                 

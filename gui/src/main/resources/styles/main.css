@@ -28,7 +28,7 @@
     -fx-border-color: #d2d2d7;
     -fx-border-radius: 8px;
     -fx-background-radius: 8px;
-    -fx-padding: 10px 14px;
+    /* Drawing only - Padding handled by Java */
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.04), 4, 0, 0, 1);
 }
 
@@ -100,7 +100,7 @@
     -fx-border-color: #d2d2d7;
     -fx-border-radius: 8px;
     -fx-background-radius: 8px;
-    -fx-padding: 10px 20px;
+    /* Padding handled by Java */
     -fx-cursor: hand;
     -fx-font-weight: 500;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.04), 4, 0, 0, 1);
@@ -140,7 +140,7 @@
 }
 
 .label.header {
-    -fx-font-size: 17px;
+    /* Font size handled by Java binding */
     -fx-font-weight: 600;
     -fx-text-fill: #1d1d1f;
 }
@@ -265,13 +265,15 @@
 }
 
 /* ===================== Cards (Panel containers) ===================== */
-.card {
-    -fx-background-color: #ffffff;
-    -fx-border-color: #e5e5ea;
-    -fx-border-radius: 12px;
-    -fx-background-radius: 12px;
-    -fx-padding: 16px;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 12, 0, 0, 2);
+/* Card Style Metric Box */
+.metric-box-card {
+    -fx-background-color: #f1f5f9;
+    -fx-background-radius: 8;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 8;
+    /* Increased padding for "Larger Fields" presence without layout forcing */
+    -fx-padding: 1.2em 1.5em 1.2em 1.5em;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 4, 0, 0, 2);
 }
 
 /* ===================== Context Menu ===================== */
@@ -311,4 +313,62 @@
     -fx-background-radius: 6px;
     -fx-padding: 6px 10px;
     -fx-font-size: 12px;
+}
+
+/* Start Server Button */
+.start-server-button {
+    -fx-background-color: #3b82f6;
+    -fx-text-fill: white;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    /* Padding and font size handled by Java */
+    -fx-cursor: hand;
+    -fx-font-weight: 600;
+}
+
+.start-server-button:hover {
+    -fx-background-color: #2563eb;
+}
+
+/* ===================== Metric Box Scaling ===================== */
+/* Deep Dive Fix: Using 'em' units ensures layout scales with font size */
+
+.metric-box {
+    /* No hard width caps here, relying on structure */
+    -fx-alignment: center;
+}
+
+.metric-box-card {
+    -fx-background-color: white;
+    /* COLOR_BG_WHITE */
+    -fx-border-color: #e5e5ea;
+    /* COLOR_BORDER_LIGHT */
+    -fx-background-radius: 0.6em;
+    /* Scalable radius */
+    -fx-border-radius: 0.6em;
+    -fx-padding: 0.8em 0.6em;
+    /* Scalable padding: Top/Bottom 0.8em, Left/Right 0.6em */
+    /* Reduced horizontal padding to prevent clipping when font is large */
+}
+
+.metric-box-transparent {
+    -fx-background-color: transparent;
+    -fx-padding: 0.6em 0.8em;
+}
+
+.metric-label {
+    -fx-font-size: 0.75em;
+    /* relative to parent font */
+    -fx-text-fill: #86868b;
+    /* COLOR_TEXT_MUTED */
+    -fx-font-weight: 600;
+}
+
+.metric-value {
+    -fx-font-size: 1.1em;
+    /* relative to parent font */
+    -fx-font-weight: 700;
+    -fx-alignment: center;
+    /* Ensure value doesn't clip easily */
+    -fx-min-width: 0;
 }

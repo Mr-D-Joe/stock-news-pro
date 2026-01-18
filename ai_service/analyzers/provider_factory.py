@@ -159,8 +159,17 @@ class ProviderFactory:
         Args:
             provider: 'gemini', 'openai', 'fallback', or 'perplexity'
             settings: Optional application settings
+        
+        Note:
+            When DEV_MODE=true, returns MockAIClient regardless of provider.
         """
         settings = settings or Settings()
+        
+        # DEV_MODE: Return mock client, no external API calls
+        if settings.dev_mode:
+            from ai_service.mock import MockAIClient
+            logger.info("DEV_MODE: Using MockAIClient - NO external API calls")
+            return MockAIClient(settings)
         
         p_lower = provider.lower()
         
@@ -204,8 +213,17 @@ class ProviderFactory:
         """
         Get a cheap/fast client for low-priority preprocessing tasks.
         Uses Gemini Flash (fast, cheap) as primary. Falls back to FallbackClient.
+        
+        Note:
+            When DEV_MODE=true, returns MockAIClient regardless.
         """
         settings = settings or Settings()
+        
+        # DEV_MODE: Return mock client, no external API calls
+        if settings.dev_mode:
+            from ai_service.mock import MockAIClient
+            logger.info("DEV_MODE: Using MockAIClient for cheap tasks")
+            return MockAIClient(settings)
         
         # Prefer Gemini Flash for preprocessing (fast, reliable, free tier)
         if settings.gemini_api_key:

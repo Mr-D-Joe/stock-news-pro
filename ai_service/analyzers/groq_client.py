@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import time
+import random
 from typing import Optional
 
 import requests
@@ -24,6 +25,10 @@ class GroqClient(BaseAIClient):
         "llama-3.3-70b-versatile",  # Newest, best quality
         "gemma2-9b-it",             # Google's Gemma 2
     ]
+    
+    # Proactive rate limiting (shared across instances)
+    _last_request_time: float = 0
+    _min_interval: float = 2.0  # 30 RPM = 2 seconds minimum
 
     
     def __init__(self, settings: Optional[Settings] = None):
@@ -85,6 +90,14 @@ class GroqClient(BaseAIClient):
         
         for attempt in range(max_retries):
             try:
+                # Proactive rate limiting
+                elapsed = time.time() - GroqClient._last_request_time
+                if elapsed < GroqClient._min_interval:
+                    sleep_time = GroqClient._min_interval - elapsed
+                    logger.debug(f"Groq proactive rate limit: waiting {sleep_time:.1f}s")
+                    time.sleep(sleep_time)
+                GroqClient._last_request_time = time.time()
+                
                 response = self.session.post(self.BASE_URL, json=payload, timeout=60)
                 
                 if response.status_code == 200:
@@ -94,14 +107,19 @@ class GroqClient(BaseAIClient):
                 elif response.status_code == 429:
                     retry_after = int(response.headers.get("Retry-After", 5))
                     
+                    # Exponential backoff with jitter
+                    exponential_factor = 2 ** min(attempt, 4)
+                    jitter = 0.75 + 0.5 * random.random()
+                    wait_time = min(retry_after * exponential_factor * jitter, 120)
+                    
                     # Quality over Speed: Wait if within threshold
                     wait_threshold = self.settings.rate_limit_wait_threshold_seconds
-                    if retry_after > wait_threshold:
-                        logger.warning(f"Groq rate limit wait ({retry_after}s) > {wait_threshold}s. Falling back immediately.")
+                    if wait_time > wait_threshold:
+                        logger.warning(f"Groq rate limit wait ({wait_time:.1f}s) > {wait_threshold}s. Falling back immediately.")
                         raise AIError("Groq rate limit exceeded (wait too long)")
 
-                    logger.warning(f"Groq rate limited, waiting {retry_after}s...")
-                    time.sleep(retry_after)
+                    logger.warning(f"Groq rate limited, waiting {wait_time:.1f}s (attempt {attempt+1})...")
+                    time.sleep(wait_time)
                     continue
                 
                 elif response.status_code == 401:
@@ -113,11 +131,24 @@ class GroqClient(BaseAIClient):
                     raise AIError(f"Groq API error {response.status_code}: {error_msg}")
                     
             except requests.exceptions.Timeout:
+                # Exponential backoff with jitter for timeouts
+                base_wait = 2 * (2 ** min(attempt, 4))
+                jitter = 0.5 + random.random()
+                wait_time = min(base_wait * jitter, 30)
                 if attempt < max_retries - 1:
-                    time.sleep(2)
+                    logger.warning(f"Groq timeout, waiting {wait_time:.1f}s (attempt {attempt+1})")
+                    time.sleep(wait_time)
                     continue
                 raise AIError("Groq request timed out")
             except requests.exceptions.RequestException as e:
+                # Exponential backoff with jitter for network errors
+                base_wait = 5 * (2 ** min(attempt, 4))
+                jitter = 0.5 + random.random()
+                wait_time = min(base_wait * jitter, 60)
+                if attempt < max_retries - 1:
+                    logger.warning(f"Groq request failed: {e}, waiting {wait_time:.1f}s")
+                    time.sleep(wait_time)
+                    continue
                 raise AIError(f"Groq request failed: {e}")
         
         raise AIError(f"Groq max retries exceeded")

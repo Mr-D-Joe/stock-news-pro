@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import time
+import random
 from datetime import datetime
 from typing import Any, Optional, Callable
 
@@ -200,9 +201,14 @@ class GeminiClient(BaseAIClient):
                         wait_seconds = 60 # Default wait for 429
                         is_guess = True
                     
-                    # Apply exponential backoff multiplier only if it was a guess
+                    # Apply exponential backoff with jitter if it was a guess
                     if is_guess:
-                        wait_seconds = max(wait_seconds, 30) * (attempt + 1)
+                        base_wait = max(wait_seconds, 30)
+                        # Exponential backoff: 2^attempt with jitter (±25%)
+                        exponential_factor = 2 ** min(attempt, 4)  # Cap at 16x
+                        jitter = 0.75 + 0.5 * random.random()  # 0.75 - 1.25
+                        wait_seconds = int(base_wait * exponential_factor * jitter)
+                        wait_seconds = min(wait_seconds, 300)  # Max 5 minutes
                     
                     cumulative_wait += wait_seconds
                     
@@ -261,8 +267,11 @@ class GeminiClient(BaseAIClient):
                 
             except requests.RequestException as e:
                 last_error = e
-                wait_time = 10 * (attempt + 1)
-                logger.warning(f"Request failed (attempt {attempt + 1}): {e}, waiting {wait_time}s")
+                # Exponential backoff with jitter for network errors
+                base_wait = 10 * (2 ** min(attempt, 4))  # 10, 20, 40, 80, 160
+                jitter = 0.5 + random.random()  # 50-150% of base
+                wait_time = min(base_wait * jitter, 120)  # Max 2 minutes
+                logger.warning(f"Request failed (attempt {attempt + 1}): {e}, waiting {wait_time:.1f}s")
                 time.sleep(wait_time)
                 continue
         

@@ -69,15 +69,140 @@ async def root():
 @app.get("/resolve/ticker")
 async def resolve_ticker(query: str):
     """Resolve fuzzy stock name to ticker."""
-    resolver = TickerResolver(_settings)
+    if _settings.dev_mode:
+        from ai_service.mock import get_mock_ticker_resolver
+        resolver = get_mock_ticker_resolver(_settings)
+    else:
+        resolver = TickerResolver(_settings)
     return await resolver.resolve_stock(query)
 
 @app.get("/resolve/sector")
 async def resolve_sector(query: str):
     """Resolve fuzzy sector name."""
-    resolver = TickerResolver(_settings)
+    if _settings.dev_mode:
+        from ai_service.mock import get_mock_ticker_resolver
+        resolver = get_mock_ticker_resolver(_settings)
+    else:
+        resolver = TickerResolver(_settings)
     sector = await resolver.resolve_sector(query)
     return {"sector": sector}
+
+@app.get("/api/fundamentals")
+async def get_fundamentals(ticker: str):
+    """
+    Get fundamental data for a stock.
+    Returns valuation metrics, analyst targets, and business context.
+    Uses mock data in DEV_MODE, real HistoricAnalyzer in production.
+    """
+    ticker = ticker.upper().strip()
+    
+    if _settings.dev_mode:
+        from ai_service.mock import get_mock_historic_analyzer
+        analyzer = get_mock_historic_analyzer(_settings)
+        fundamentals = await analyzer.get_fundamentals(ticker)
+        
+        if not fundamentals:
+            return {"error": f"Ticker {ticker} not found in mock data", "found": False}
+        
+        return {
+            "ticker": ticker,
+            "found": True,
+            "fundamentals": {
+                "pe_ratio": fundamentals.get("pe_ratio"),
+                "peg_ratio": fundamentals.get("peg_ratio"),
+                "roe": fundamentals.get("roe"),
+                "debt_to_equity": fundamentals.get("debt_to_equity"),
+                "target_mean_price": fundamentals.get("target_mean_price"),
+                "target_high_price": fundamentals.get("target_high_price"),
+                "target_low_price": fundamentals.get("target_low_price"),
+                "recommendation": fundamentals.get("recommendation"),
+                "executive_summary": fundamentals.get("executive_summary", ""),
+                "business_summary": fundamentals.get("business_summary"),
+                "sector": fundamentals.get("sector"),
+                "industry": fundamentals.get("industry"),
+                "market_cap": fundamentals.get("market_cap"),
+                "beta": fundamentals.get("beta"),
+                "dividend_yield": fundamentals.get("dividend_yield"),
+                "revenue_growth": fundamentals.get("revenue_growth"),
+                "profit_margin": fundamentals.get("profit_margin"),
+            }
+        }
+    else:
+        # Production: Use real HistoricAnalyzer
+        analyzer = HistoricAnalyzer(_settings)
+        fundamentals = await analyzer.get_fundamentals(ticker) if hasattr(analyzer.get_fundamentals, '__call__') else analyzer.get_fundamentals(ticker)
+        
+        if not fundamentals:
+            return {"error": f"Could not fetch fundamentals for {ticker}", "found": False}
+        
+        return {
+            "ticker": ticker,
+            "found": True,
+            "fundamentals": fundamentals
+        }
+
+@app.get("/api/price_history")
+async def get_price_history(ticker: str, period: str = "1y"):
+    """
+    Get price history for a stock.
+    
+    Periods: 24h, 1wk, 1mo, 3mo, 1y, 10y
+    For 24h: Returns intraday data (15-min intervals)
+    Uses mock data in DEV_MODE.
+    """
+    ticker = ticker.upper().strip()
+    valid_periods = ["24h", "1wk", "1mo", "3mo", "1y", "10y"]
+    if period not in valid_periods:
+        period = "1y"
+    
+    if _settings.dev_mode:
+        from ai_service.mock.mock_data import get_mock_price_data
+        return get_mock_price_data(ticker, period)
+    else:
+        # Production: Use real data source (to be implemented)
+        # For now, return mock data as fallback
+        from ai_service.mock.mock_data import get_mock_price_data
+        return get_mock_price_data(ticker, period)
+
+@app.get("/api/sector_news")
+async def get_sector_news(sector: str):
+    """
+    Get sector-wide news headlines.
+    
+    Returns news for the entire sector, not stock-specific.
+    Used for the sector news ticker in the GUI.
+    """
+    if _settings.dev_mode:
+        from ai_service.mock.mock_data import get_mock_sector_news
+        news = get_mock_sector_news(sector)
+        return {
+            "sector": sector,
+            "news": [
+                {
+                    "title": item["title"],
+                    "source": item["source"],
+                    "date": item["published"].strftime("%Y-%m-%d %H:%M"),
+                    "summary": item.get("summary", "")
+                }
+                for item in news
+            ]
+        }
+    else:
+        # Production: Use real news fetcher (to be implemented)
+        from ai_service.mock.mock_data import get_mock_sector_news
+        news = get_mock_sector_news(sector)
+        return {
+            "sector": sector,
+            "news": [
+                {
+                    "title": item["title"],
+                    "source": item["source"],
+                    "date": item["published"].strftime("%Y-%m-%d %H:%M"),
+                    "summary": item.get("summary", "")
+                }
+                for item in news
+            ]
+        }
 
 @app.post("/analyze/essay", response_model=AnalysisResult)
 async def analyze_essay(request: ArticleCollection, language: str = "German", use_browser: bool = True):

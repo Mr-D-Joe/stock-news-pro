@@ -217,6 +217,59 @@ public class ApiService {
     }
 
     /**
+     * Get fundamental data for a stock (P/E, ROE, targets, etc.).
+     * 
+     * @param ticker Stock ticker
+     * @return CompletableFuture with fundamentals JSON
+     */
+    public CompletableFuture<ApiResponse> getFundamentals(String ticker) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/api/fundamentals?ticker="
+                        + java.net.URLEncoder.encode(ticker, java.nio.charset.StandardCharsets.UTF_8)))
+                .timeout(timeout)
+                .GET()
+                .build();
+
+        return sendRequest(request);
+    }
+
+    /**
+     * Get price history for a stock.
+     * 
+     * @param ticker Stock ticker
+     * @param period Time period: 24h, 1wk, 1mo, 3mo, 1y, 10y
+     * @return CompletableFuture with price data JSON
+     */
+    public CompletableFuture<ApiResponse> getPriceHistory(String ticker, String period) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/api/price_history?ticker="
+                        + java.net.URLEncoder.encode(ticker, java.nio.charset.StandardCharsets.UTF_8)
+                        + "&period=" + java.net.URLEncoder.encode(period, java.nio.charset.StandardCharsets.UTF_8)))
+                .timeout(timeout)
+                .GET()
+                .build();
+
+        return sendRequest(request);
+    }
+
+    /**
+     * Get sector-wide news headlines.
+     * 
+     * @param sector Sector name (e.g. "Technology", "Healthcare")
+     * @return CompletableFuture with sector news JSON
+     */
+    public CompletableFuture<ApiResponse> getSectorNews(String sector) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/api/sector_news?sector="
+                        + java.net.URLEncoder.encode(sector, java.nio.charset.StandardCharsets.UTF_8)))
+                .timeout(timeout)
+                .GET()
+                .build();
+
+        return sendRequest(request);
+    }
+
+    /**
      * Request a full HTML report with charts and historical analysis.
      * 
      * @param tickers  List of stock tickers (usually just one)

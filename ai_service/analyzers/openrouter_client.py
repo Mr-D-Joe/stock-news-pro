@@ -1,5 +1,7 @@
 
 import logging
+import time
+import random
 from typing import Optional, Callable
 from ai_service.config import Settings
 from ai_service.analyzers.base_client import BaseAIClient, AIError
@@ -78,13 +80,19 @@ class OpenRouterClient(BaseAIClient):
                     logger.warning(f"OpenRouter model {model_name} unavailable: {e}. Trying next...")
                     continue
                 
-                # Rate limits
+                # Rate limits - exponential backoff with jitter
                 if "429" in error_str or "rate limit" in error_str:
-                    logger.warning(f"OpenRouter model {model_name} rate limited. Trying next...")
+                    base_wait = 10 * (2 ** min(models_to_try.index(model_name), 3))
+                    jitter = 0.75 + 0.5 * random.random()
+                    wait_time = min(base_wait * jitter, 60)
+                    logger.warning(f"OpenRouter model {model_name} rate limited. Waiting {wait_time:.1f}s...")
+                    time.sleep(wait_time)
                     continue
                 
-                # Other errors - log and try next just in case
-                logger.warning(f"OpenRouter model {model_name} failed: {e}. Trying next...")
+                # Other errors - log and try next with small backoff
+                wait_time = 2 + random.random() * 3  # 2-5 seconds
+                logger.warning(f"OpenRouter model {model_name} failed: {e}. Waiting {wait_time:.1f}s...")
+                time.sleep(wait_time)
                 continue
 
         logger.error(f"OpenRouter generation failed on all models. Last error: {last_error}")

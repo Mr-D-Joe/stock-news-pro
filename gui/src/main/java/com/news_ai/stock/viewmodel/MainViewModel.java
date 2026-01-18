@@ -39,6 +39,27 @@ public class MainViewModel {
     private final ObservableList<NewsItem> newsItems = FXCollections.observableArrayList();
     private final ObservableList<String> activityLog = FXCollections.observableArrayList();
 
+    // Fundamentals Properties for dynamic UI binding
+    private final StringProperty peRatio = new SimpleStringProperty("-");
+    private final StringProperty pegRatio = new SimpleStringProperty("-");
+    private final StringProperty roe = new SimpleStringProperty("-");
+    private final StringProperty debtToEquity = new SimpleStringProperty("-");
+    private final StringProperty targetMean = new SimpleStringProperty("-");
+    private final StringProperty targetHigh = new SimpleStringProperty("-");
+    private final StringProperty targetLow = new SimpleStringProperty("-");
+    private final StringProperty recommendation = new SimpleStringProperty("-");
+    private final StringProperty businessSummary = new SimpleStringProperty("");
+    private final StringProperty executiveSummary = new SimpleStringProperty("");
+
+    // Chart Properties
+    private final StringProperty selectedChartPeriod = new SimpleStringProperty("1y");
+    private final ObservableList<PricePoint> priceHistory = FXCollections.observableArrayList();
+    private final StringProperty chartDateLabel = new SimpleStringProperty(""); // For 24h mode
+    private final BooleanProperty chartIsHistorical = new SimpleBooleanProperty(false);
+
+    // Sector News Properties
+    private final ObservableList<SectorNewsItem> sectorNews = FXCollections.observableArrayList();
+
     public enum LogLevel {
         INFO, WARN, ERROR, DEBUG
     }
@@ -289,6 +310,9 @@ public class MainViewModel {
                         logActivity("Auto-loaded sector: " + sector, LogLevel.INFO);
                     }
                 }
+
+                // Auto-load fundamentals for display
+                loadFundamentals();
             }
         }));
     }
@@ -315,6 +339,110 @@ public class MainViewModel {
                 }
             }
         }));
+    }
+
+    /**
+     * Load fundamental data for a ticker from API.
+     * Updates all fundamental properties for UI binding.
+     */
+    public void loadFundamentals() {
+        String ticker = getSelectedTicker();
+        if (ticker == null || ticker.isEmpty() || ticker.length() < 2)
+            return;
+
+        logActivity("Loading fundamentals for " + ticker + "...", LogLevel.DEBUG);
+
+        apiService.getFundamentals(ticker).thenAccept(response -> Platform.runLater(() -> {
+            if (response.isSuccess()) {
+                String body = response.getBody();
+
+                // Parse P/E Ratio
+                peRatio.set(extractJsonNumber(body, "pe_ratio"));
+                pegRatio.set(extractJsonNumber(body, "peg_ratio"));
+                roe.set(extractJsonNumber(body, "roe") + "%");
+                debtToEquity.set(extractJsonNumber(body, "debt_to_equity"));
+                targetMean.set("$" + extractJsonNumber(body, "target_mean_price"));
+                targetHigh.set("$" + extractJsonNumber(body, "target_high_price"));
+                targetLow.set("$" + extractJsonNumber(body, "target_low_price"));
+                recommendation.set(extractJsonString(body, "recommendation").toUpperCase());
+                businessSummary.set(extractJsonString(body, "business_summary"));
+                executiveSummary.set(extractJsonString(body, "executive_summary"));
+
+                logActivity("Loaded fundamentals for " + ticker, LogLevel.INFO);
+            } else {
+                logActivity("Failed to load fundamentals: " + response.getError(), LogLevel.WARN);
+                // Reset to defaults
+                peRatio.set("-");
+                pegRatio.set("-");
+                roe.set("-");
+                debtToEquity.set("-");
+                targetMean.set("-");
+                targetHigh.set("-");
+                targetLow.set("-");
+                recommendation.set("-");
+                businessSummary.set("");
+                executiveSummary.set("");
+            }
+        }));
+    }
+
+    private String extractJsonNumber(String json, String key) {
+        try {
+            String search = "\"" + key + "\":";
+            int start = json.indexOf(search);
+            if (start == -1)
+                return "-";
+            start += search.length();
+
+            // Skip whitespace
+            while (start < json.length() && Character.isWhitespace(json.charAt(start)))
+                start++;
+
+            // Handle null
+            if (json.substring(start).startsWith("null"))
+                return "N/A";
+
+            // Find end of number
+            int end = start;
+            while (end < json.length()
+                    && (Character.isDigit(json.charAt(end)) || json.charAt(end) == '.' || json.charAt(end) == '-')) {
+                end++;
+            }
+
+            if (end > start) {
+                double val = Double.parseDouble(json.substring(start, end));
+                // Format based on value
+                if (val >= 1000000000) {
+                    return String.format("%.2fB", val / 1000000000);
+                } else if (val >= 1000000) {
+                    return String.format("%.2fM", val / 1000000);
+                } else if (val >= 100) {
+                    return String.format("%.2f", val);
+                } else {
+                    return String.format("%.2f", val);
+                }
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+        return "-";
+    }
+
+    private String extractJsonString(String json, String key) {
+        try {
+            String search = "\"" + key + "\":\"";
+            int start = json.indexOf(search);
+            if (start == -1)
+                return "";
+            start += search.length();
+            int end = json.indexOf("\"", start);
+            if (end > start) {
+                return json.substring(start, end);
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+        return "";
     }
 
     /**
@@ -585,6 +713,266 @@ public class MainViewModel {
         reportPath.set(value);
     }
 
+    // ==================== Fundamentals Property Getters ====================
+
+    public StringProperty peRatioProperty() {
+        return peRatio;
+    }
+
+    public StringProperty pegRatioProperty() {
+        return pegRatio;
+    }
+
+    public StringProperty roeProperty() {
+        return roe;
+    }
+
+    public StringProperty debtToEquityProperty() {
+        return debtToEquity;
+    }
+
+    public StringProperty targetMeanProperty() {
+        return targetMean;
+    }
+
+    public StringProperty targetHighProperty() {
+        return targetHigh;
+    }
+
+    public StringProperty targetLowProperty() {
+        return targetLow;
+    }
+
+    public StringProperty recommendationProperty() {
+        return recommendation;
+    }
+
+    public StringProperty businessSummaryProperty() {
+        return businessSummary;
+    }
+
+    public StringProperty executiveSummaryProperty() {
+        return executiveSummary;
+    }
+
+    // ==================== Chart Property Getters ====================
+
+    public StringProperty selectedChartPeriodProperty() {
+        return selectedChartPeriod;
+    }
+
+    public ObservableList<PricePoint> getPriceHistory() {
+        return priceHistory;
+    }
+
+    public StringProperty chartDateLabelProperty() {
+        return chartDateLabel;
+    }
+
+    public BooleanProperty chartIsHistoricalProperty() {
+        return chartIsHistorical;
+    }
+
+    public ObservableList<SectorNewsItem> getSectorNews() {
+        return sectorNews;
+    }
+
+    // ==================== Chart Data Loading ====================
+
+    /**
+     * Load price history for the current ticker and selected period.
+     */
+    public void loadPriceHistory() {
+        loadPriceHistory(selectedTicker.get(), selectedChartPeriod.get());
+    }
+
+    /**
+     * Load price history for a specific ticker and period.
+     */
+    public void loadPriceHistory(String ticker, String period) {
+        logActivity("Loading price history: " + ticker + " (" + period + ")", LogLevel.DEBUG);
+
+        apiService.getPriceHistory(ticker, period)
+                .thenAccept(response -> {
+                    if (response.isSuccess()) {
+                        Platform.runLater(() -> {
+                            priceHistory.clear();
+
+                            // Parse the JSON response
+                            String body = response.getBody();
+
+                            // Extract trading_date if present (for 24h mode)
+                            String tradingDate = extractJsonString(body, "trading_date");
+                            boolean isHistorical = body.contains("\"is_historical_day\":true");
+                            chartDateLabel.set(tradingDate != null ? tradingDate : "");
+                            chartIsHistorical.set(isHistorical);
+
+                            // Parse prices array
+                            int dataStart = body.indexOf("\"data\":[");
+                            if (dataStart >= 0) {
+                                int arrayStart = body.indexOf("[", dataStart);
+                                int arrayEnd = body.lastIndexOf("]");
+                                if (arrayStart >= 0 && arrayEnd > arrayStart) {
+                                    String arrayContent = body.substring(arrayStart + 1, arrayEnd);
+                                    // Split by },{ to get individual price objects
+                                    String[] entries = arrayContent.split("\\},\\s*\\{");
+                                    java.util.List<PricePoint> batch = new java.util.ArrayList<>();
+                                    for (String entry : entries) {
+                                        entry = entry.replace("{", "").replace("}", "");
+                                        String date = extractJsonString(entry, "date");
+                                        String time = extractJsonString(entry, "time");
+                                        String closeStr = extractJsonNumber(entry, "close");
+                                        Double close = null;
+                                        try {
+                                            if (closeStr != null && !closeStr.equals("-") && !closeStr.equals("N/A")) {
+                                                close = Double.parseDouble(closeStr);
+                                            }
+                                        } catch (NumberFormatException e) {
+                                            // Ignore parse errors
+                                        }
+
+                                        if (date != null && close != null) {
+                                            batch.add(new PricePoint(date, close, time));
+                                        }
+                                    }
+                                    priceHistory.addAll(batch);
+                                    logActivity("Loaded " + batch.size() + " price points.", LogLevel.INFO);
+                                }
+                            }
+
+                            logActivity("Loaded " + priceHistory.size() + " price points", LogLevel.DEBUG);
+                            if (priceHistory.isEmpty()) {
+                                generateFallbackData();
+                            }
+                        });
+                    } else {
+                        Platform.runLater(this::generateFallbackData);
+                    }
+                })
+                .exceptionally(ex -> {
+                    Platform.runLater(this::generateFallbackData);
+                    logActivity("Failed to load prices: " + ex.getMessage(), LogLevel.ERROR);
+                    return null;
+                });
+    }
+
+    private void generateFallbackData() {
+        logActivity("Generating dynamic fallback chart data...", LogLevel.WARN);
+        priceHistory.clear();
+        String period = selectedChartPeriod.get().toLowerCase();
+
+        // Parameters for "Dynamic" feel
+        int points = 30; // Default
+        double volatility = 5.0;
+        double trend = 0.5;
+
+        switch (period) {
+            case "24h":
+                points = 24;
+                volatility = 2.0;
+                chartDateLabel.set("Mock 24h Data (Backend Unavailable)");
+                break;
+            case "1w":
+                points = 7;
+                volatility = 5.0;
+                chartDateLabel.set("Mock 1w Data (Backend Unavailable)");
+                break;
+            case "1m":
+                points = 30;
+                volatility = 8.0;
+                chartDateLabel.set("Mock 1m Data (Backend Unavailable)");
+                break;
+            case "3m":
+                points = 90;
+                volatility = 12.0;
+                chartDateLabel.set("Mock 3m Data (Backend Unavailable)");
+                break;
+            case "1y":
+                points = 52; // Weekly
+                volatility = 20.0;
+                chartDateLabel.set("Mock 1y Data (Backend Unavailable)");
+                break;
+            case "10y":
+                points = 120; // Monthly
+                volatility = 50.0;
+                chartDateLabel.set("Mock 10y Data (Backend Unavailable)");
+                break;
+            default:
+                chartDateLabel.set("Mock Data (Backend Unavailable)");
+        }
+
+        double price = 100.0 + (Math.random() * 20 - 10);
+        for (int i = 0; i < points; i++) {
+            // Random Walk + Trend + Sine Wave for "Stock-like" look
+            double change = (Math.random() - 0.45) * volatility + trend; // Added trend
+            double wave = Math.sin(i * 0.2) * (volatility / 2);
+            price += change + (wave * 0.1);
+
+            // Ensure price stays positive
+            if (price < 10)
+                price = 10;
+
+            String label = period.equals("24h") ? (i + ":00") : "T-" + (points - i);
+            priceHistory.add(new PricePoint(label, price));
+        }
+    }
+
+    /**
+     * Load sector news for the current sector.
+     */
+    public void loadSectorNews() {
+        loadSectorNews(selectedSector.get());
+    }
+
+    /**
+     * Load sector news for a specific sector.
+     */
+    public void loadSectorNews(String sector) {
+        logActivity("Loading sector news: " + sector, LogLevel.DEBUG);
+
+        apiService.getSectorNews(sector)
+                .thenAccept(response -> {
+                    if (response.isSuccess()) {
+                        Platform.runLater(() -> {
+                            sectorNews.clear();
+
+                            String body = response.getBody();
+                            // Parse news array
+                            int newsStart = body.indexOf("\"news\":[");
+                            if (newsStart >= 0) {
+                                int arrayStart = body.indexOf("[", newsStart);
+                                int arrayEnd = body.lastIndexOf("]");
+                                if (arrayStart >= 0 && arrayEnd > arrayStart) {
+                                    String arrayContent = body.substring(arrayStart + 1, arrayEnd);
+                                    String[] entries = arrayContent.split("\\},\\s*\\{");
+                                    for (String entry : entries) {
+                                        entry = entry.replace("{", "").replace("}", "");
+                                        String title = extractJsonString(entry, "title");
+                                        String source = extractJsonString(entry, "source");
+                                        String date = extractJsonString(entry, "date");
+
+                                        if (title != null) {
+                                            sectorNews.add(new SectorNewsItem(
+                                                    title,
+                                                    source != null ? source : "",
+                                                    date != null ? date : ""));
+                                        }
+                                    }
+                                }
+                            }
+
+                            logActivity("Loaded " + sectorNews.size() + " sector news items", LogLevel.DEBUG);
+                        });
+                    } else {
+                        logActivity("Failed to load sector news: " + response.getError(), LogLevel.WARN);
+                    }
+                })
+                .exceptionally(ex -> {
+                    logActivity("Sector news error: " + ex.getMessage(), LogLevel.ERROR);
+                    return null;
+                });
+    }
+
     /**
      * Simple news item model for list display.
      */
@@ -620,6 +1008,75 @@ public class MainViewModel {
         @Override
         public String toString() {
             return "[" + ticker + "] " + title + " (" + source + ")";
+        }
+    }
+
+    /**
+     * Price point model for chart display.
+     */
+    public static class PricePoint {
+        private final String date;
+        private final double close;
+        private final String time; // For intraday
+
+        public PricePoint(String date, double close) {
+            this.date = date;
+            this.close = close;
+            this.time = null;
+        }
+
+        public PricePoint(String date, double close, String time) {
+            this.date = date;
+            this.close = close;
+            this.time = time;
+        }
+
+        public String getDate() {
+            return date;
+        }
+
+        public double getClose() {
+            return close;
+        }
+
+        public String getTime() {
+            return time;
+        }
+
+        public String getLabel() {
+            return time != null ? time : date;
+        }
+    }
+
+    /**
+     * Sector news item model for ticker display.
+     */
+    public static class SectorNewsItem {
+        private final String title;
+        private final String source;
+        private final String date;
+
+        public SectorNewsItem(String title, String source, String date) {
+            this.title = title;
+            this.source = source;
+            this.date = date;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getSource() {
+            return source;
+        }
+
+        public String getDate() {
+            return date;
+        }
+
+        @Override
+        public String toString() {
+            return title + " (" + source + ")";
         }
     }
 }

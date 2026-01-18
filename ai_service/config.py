@@ -57,6 +57,9 @@ class Settings(BaseSettings):
     enable_browser_extraction: bool = Field(True, validation_alias="ENABLE_BROWSER_EXTRACTION")
     enable_anomaly_detection: bool = Field(False, validation_alias="ENABLE_ANOMALY_DETECTION")
     
+    # Development Mode - uses mock data, no external API calls
+    dev_mode: bool = Field(False, validation_alias="DEV_MODE")
+    
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
     
     def get_available_providers(self) -> list[str]:
