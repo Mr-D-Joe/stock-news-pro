@@ -1,0 +1,16 @@
+{
+    "name": "stock-news-pro",
+    "version": "1.0.0",
+    "description": "Stock News Pro - AI-powered financial analytics dashboard",
+    "scripts": {
+        "dev": "npm run dev --prefix frontend",
+        "dev:mock": "npm run dev --prefix frontend",
+        "dev:real": "concurrently \"npm run backend\" \"VITE_USE_REAL_API=true npm run dev --prefix frontend\"",
+        "backend": "cd ai_service && source venv/bin/activate && uvicorn main:app --port 8000 --reload",
+        "build": "npm run build --prefix frontend",
+        "tauri": "npm run tauri --prefix frontend"
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.2"
+    }
+}

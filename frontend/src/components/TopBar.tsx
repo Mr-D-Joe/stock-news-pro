@@ -1,6 +1,6 @@
 import React from 'react';
 import { Globe, Play, Loader2, Search, Target, PieChart } from 'lucide-react';
-import { useAppContext } from '../context/AppContext';
+import { useLegacyAppContext } from '../context/AppContext';
 import { cn } from '@/lib/utils';
 import type { AnalysisScope } from '../types';
 
@@ -14,7 +14,7 @@ export const TopBar: React.FC = () => {
         runAnalysis,
         resolveStockInput,
         resolveLanguageInput
-    } = useAppContext();
+    } = useLegacyAppContext();
     const { selectedStock, selectedSector, selectedLanguage, selectedScope, analysisStatus } = state;
 
     return (

@@ -3,14 +3,14 @@ import type { EventMonitorCardProps } from '../../types';
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { Zap, Clock } from 'lucide-react';
 
-import { useAppContext } from '../../context/AppContext';
+import { useLegacyAppContext } from '../../context/AppContext';
 import { cn } from '@/lib/utils';
 import type { Timeframe } from '../../types';
 
 export const EventMonitorCard: React.FC<EventMonitorCardProps> = ({ chartData, sectorNews }) => {
 
     // Connect to Context for Timeframe Control
-    const { state, setTimeframe } = useAppContext();
+    const { state, setTimeframe } = useLegacyAppContext();
     const { selectedTimeframe: selectedPeriod } = state;
 
     // Filter Data based on global Timeframe

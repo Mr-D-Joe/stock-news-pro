@@ -1,157 +1,108 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import type { AppState, Timeframe, AnalysisScope } from '../types';
+/**
+ * AppContext - UI State Management Only
+ * 
+ * Per DESIGN.md:
+ * - Line 118: Server-state MUST be managed via TanStack Query
+ * - Line 119: Local UI state MUST stay in smallest possible component scope
+ * - Line 123-124: Data fetching MUST be via custom hooks
+ * 
+ * This context ONLY manages UI state (selected values, timeframes, etc.)
+ * Data fetching is delegated to hooks in useDataFetching.ts
+ */
+
+import { createContext, useContext, useState, type ReactNode } from 'react';
+import type { Timeframe, AnalysisScope, AnalysisResult } from '../types';
 import { ApiService } from '../services/ApiService';
 
-interface AppContextType {
-    state: AppState;
-    setStockInput: (input: string) => void;
-    setSectorInput: (input: string) => void;
-    setLanguageInput: (input: string) => void;
-    setTimeframe: (tf: Timeframe) => void;
-    setScope: (scope: AnalysisScope) => void;
-    runAnalysis: (tickerOverride?: string) => Promise<void>;
-    resolveStockInput: (input: string) => Promise<string | null>;
-    resolveLanguageInput: (input: string) => Promise<void>;
+// ==================== Types ====================
+interface UIState {
+    selectedStock: string;
+    selectedSector: string;
+    selectedLanguage: string;
+    selectedTimeframe: Timeframe;
+    selectedScope: AnalysisScope;
 }
 
+interface AppContextType {
+    // UI State
+    uiState: UIState;
+
+    // UI Setters
+    setSelectedStock: (stock: string) => void;
+    setSelectedSector: (sector: string) => void;
+    setSelectedLanguage: (language: string) => void;
+    setTimeframe: (tf: Timeframe) => void;
+    setScope: (scope: AnalysisScope) => void;
+
+    // Resolution helpers (pure functions, no fetching)
+    resolveLanguage: (input: string) => string;
+
+    // Analysis result (set by components using hooks)
+    analysisResult: AnalysisResult | null;
+    setAnalysisResult: (result: AnalysisResult | null) => void;
+    analysisStatus: 'idle' | 'loading' | 'success' | 'error';
+    setAnalysisStatus: (status: 'idle' | 'loading' | 'success' | 'error') => void;
+}
+
+// ==================== Context ====================
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+// ==================== Provider ====================
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-    const [state, setState] = useState<AppState>({
-        selectedStock: "ACME",
-        selectedSector: "Industrials",
-        selectedLanguage: "English", // Default
+    // UI State (not server data)
+    const [uiState, setUIState] = useState<UIState>({
+        selectedStock: 'ACME',
+        selectedSector: 'Industrials',
+        selectedLanguage: 'English',
         selectedTimeframe: '24H',
         selectedScope: 'Combined',
-        analysisStatus: 'idle',
-        analysisResult: null,
-        stocks: []
     });
 
-    // Client-Side Cache (Stores Search Hits and Analysis Results to avoid re-fetching)
-    // Key format: "SEARCH:<Ticker>" or "ANALYSIS:<Ticker>:<Sector>:<Language>"
-    const [cache, setCache] = useState<Map<string, any>>(new Map());
+    // Analysis result (populated by components using TanStack Query hooks)
+    const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+    const [analysisStatus, setAnalysisStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
-    useEffect(() => {
-        // Load initial stocks (Mock or Real based on env)
-        if ('getStocks' in ApiService) {
-            (ApiService as any).getStocks().then((stocks: any) => {
-                setState(s => ({ ...s, stocks }));
-            });
-        }
-    }, []);
+    // UI Setters
+    const setSelectedStock = (stock: string) =>
+        setUIState(s => ({ ...s, selectedStock: stock }));
 
-    const setStockInput = (input: string) => setState(s => ({ ...s, selectedStock: input }));
-    const setSectorInput = (input: string) => setState(s => ({ ...s, selectedSector: input }));
-    const setLanguageInput = (input: string) => setState(s => ({ ...s, selectedLanguage: input }));
+    const setSelectedSector = (sector: string) =>
+        setUIState(s => ({ ...s, selectedSector: sector }));
 
-    // ... Timeframe/Scope Setters ...
-    const setTimeframe = (tf: Timeframe) => setState(s => ({ ...s, selectedTimeframe: tf }));
-    const setScope = (scope: AnalysisScope) => setState(s => ({ ...s, selectedScope: scope }));
+    const setSelectedLanguage = (language: string) =>
+        setUIState(s => ({ ...s, selectedLanguage: language }));
 
-    const runAnalysis = async (tickerOverride?: string) => {
-        const targetStock = tickerOverride || state.selectedStock;
-        if (!targetStock) return;
+    const setTimeframe = (tf: Timeframe) =>
+        setUIState(s => ({ ...s, selectedTimeframe: tf }));
 
-        setState(s => ({ ...s, analysisStatus: 'loading' }));
-        const targetSector = state.selectedSector;
-        const targetLang = state.selectedLanguage;
+    const setScope = (scope: AnalysisScope) =>
+        setUIState(s => ({ ...s, selectedScope: scope }));
 
-        // Compound Cache Key
-        const cacheKey = `ANALYSIS:${targetStock.toUpperCase()}:${targetSector.toUpperCase()}:${targetLang.toUpperCase()}`;
-
-        try {
-            // 1. Check Output Cache
-            if (cache.has(cacheKey)) {
-                console.log(`[Cache Hit] Serving Analysis for ${cacheKey}`);
-                setState(s => ({
-                    ...s,
-                    analysisStatus: 'success',
-                    analysisResult: cache.get(cacheKey)
-                }));
-                return;
-            }
-
-            // 2. Resolve Alias (if not already done via smart input)
-            const resolvedSymbol = 'resolveSymbol' in ApiService
-                ? (ApiService as any).resolveSymbol(targetStock)
-                : targetStock;
-
-            // 3. Perform Analysis (Language Aware)
-            const result = await ApiService.runAnalysis(resolvedSymbol || targetStock, targetSector, targetLang);
-
-            // 4. Update Cache
-            setCache(prev => {
-                const newCache = new Map(prev);
-                newCache.set(cacheKey, result);
-                if (newCache.size > 50) { // Limit cache size
-                    const first = newCache.keys().next().value;
-                    if (first) newCache.delete(first);
-                }
-                return newCache;
-            });
-
-            setState(s => ({
-                ...s,
-                analysisStatus: 'success',
-                analysisResult: result
-            }));
-        } catch (error) {
-            console.error(error);
-            setState(s => ({ ...s, analysisStatus: 'error' }));
-        }
-    };
-
-    // Smart Resolution Logic for Stock
-    const resolveStockInput = async (input: string): Promise<string | null> => {
-        if (!input) return null;
-        try {
-            const result = await ApiService.searchStock(input);
-            // RealApiService returns Stock, MockApiService returns {symbol, sector, confidence}
-            if (result) {
-                const confidence = 'confidence' in result ? (result as any).confidence : 1.0;
-                if (confidence > 0.8) {
-                    console.log(`[Smart Resolve] ${input} -> ${result.symbol}`);
-                    const stockData = state.stocks.find(s => s.symbol === result.symbol);
-                    const derivedSector = stockData ? stockData.sector : (result.sector || state.selectedSector);
-
-                    setState(s => ({ ...s, selectedStock: result.symbol, selectedSector: derivedSector }));
-                    return result.symbol;
-                }
-            }
-        } catch (e) {
-            console.error(e);
-        }
-        return null;
-    };
-
-    // Smart Resolution Logic for Language
-    const resolveLanguageInput = async (input: string) => {
-        if (!input) return;
-        const resolved = ApiService.resolveLanguage(input);
-        if (resolved !== state.selectedLanguage) {
-            console.log(`[Lang Resolve] ${input} -> ${resolved}`);
-            setState(s => ({ ...s, selectedLanguage: resolved }));
-        }
+    // Pure resolution function (no API call - per Token Governance)
+    const resolveLanguage = (input: string): string => {
+        return ApiService.resolveLanguage(input);
     };
 
     return (
         <AppContext.Provider value={{
-            state,
-            setStockInput,
-            setSectorInput,
-            setLanguageInput,
+            uiState,
+            setSelectedStock,
+            setSelectedSector,
+            setSelectedLanguage,
             setTimeframe,
             setScope,
-            runAnalysis,
-            resolveStockInput,
-            resolveLanguageInput
+            resolveLanguage,
+            analysisResult,
+            setAnalysisResult,
+            analysisStatus,
+            setAnalysisStatus,
         }}>
             {children}
         </AppContext.Provider>
     );
 };
 
+// ==================== Hook ====================
 export const useAppContext = () => {
     const context = useContext(AppContext);
     if (context === undefined) {
@@ -159,3 +110,41 @@ export const useAppContext = () => {
     }
     return context;
 };
+
+// ==================== Legacy Compatibility Layer ====================
+// This provides backward compatibility for existing components
+// TODO: Migrate components to use new structure, then remove this
+export const useLegacyAppContext = () => {
+    const ctx = useAppContext();
+
+    return {
+        state: {
+            selectedStock: ctx.uiState.selectedStock,
+            selectedSector: ctx.uiState.selectedSector,
+            selectedLanguage: ctx.uiState.selectedLanguage,
+            selectedTimeframe: ctx.uiState.selectedTimeframe,
+            selectedScope: ctx.uiState.selectedScope,
+            analysisStatus: ctx.analysisStatus,
+            analysisResult: ctx.analysisResult,
+            stocks: [], // Now fetched via useStocks() hook
+        },
+        setStockInput: ctx.setSelectedStock,
+        setSectorInput: ctx.setSelectedSector,
+        setLanguageInput: ctx.setSelectedLanguage,
+        setTimeframe: ctx.setTimeframe,
+        setScope: ctx.setScope,
+        resolveLanguageInput: async (input: string) => {
+            const resolved = ctx.resolveLanguage(input);
+            ctx.setSelectedLanguage(resolved);
+        },
+        // Legacy stubs - these accept args but warn about deprecation
+        runAnalysis: async (_tickerOverride?: string) => {
+            console.warn('[DEPRECATED] Use useRunAnalysisMutation() hook instead');
+        },
+        resolveStockInput: async (_input: string): Promise<string | null> => {
+            console.warn('[DEPRECATED] Use useStockSearch() hook instead');
+            return null;
+        },
+    };
+};
+

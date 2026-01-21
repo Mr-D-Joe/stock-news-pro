@@ -1,4 +1,4 @@
-import { AppProvider, useAppContext } from './context/AppContext';
+import { AppProvider, useLegacyAppContext } from './context/AppContext';
 import { TopBar } from '@/components/TopBar';
 import { MarketOverviewCard } from '@/components/dashboard/MarketOverviewCard';
 import { EventMonitorCard } from '@/components/dashboard/EventMonitorCard';
@@ -9,7 +9,7 @@ import { StatusBar } from '@/components/StatusBar';
 import { Activity } from 'lucide-react';
 
 const Dashboard = () => {
-  const { state } = useAppContext();
+  const { state } = useLegacyAppContext();
   const { analysisStatus, analysisResult } = state;
 
   return (
@@ -82,7 +82,7 @@ const Dashboard = () => {
                 <EventMonitorCard
                   chartData={analysisResult.chartData}
                   selectedPeriod="1Y"
-                  sectorNews={analysisResult.sectorNews.map(n => n.title).slice(0, 5)}
+                  sectorNews={analysisResult.sectorNews.map((n: { title: string }) => n.title).slice(0, 5)}
                 />
 
                 {/* C. AI OUTPUTS STACKED */}

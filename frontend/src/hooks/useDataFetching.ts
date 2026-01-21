@@ -1,0 +1,110 @@
+/**
+ * Custom Hooks for Data Fetching
+ * 
+ * Per DESIGN.md Line 123-124:
+ * - Data fetching MUST be handled via custom hooks
+ * - UI components MUST NEVER perform raw fetch or business logic
+ */
+
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ApiService } from '../services/ApiService';
+import type { AnalysisResult, Stock } from '../types';
+
+// ==================== Query Keys ====================
+export const queryKeys = {
+    analysis: (ticker: string, sector: string, language: string) =>
+        ['analysis', ticker.toUpperCase(), sector.toUpperCase(), language.toUpperCase()] as const,
+    stockSearch: (query: string) => ['stock', 'search', query.toLowerCase()] as const,
+    stocks: () => ['stocks'] as const,
+};
+
+// ==================== useAnalysis Hook ====================
+interface UseAnalysisOptions {
+    enabled?: boolean;
+}
+
+export function useAnalysis(
+    ticker: string,
+    sector: string,
+    language: string,
+    options: UseAnalysisOptions = {}
+) {
+    return useQuery({
+        queryKey: queryKeys.analysis(ticker, sector, language),
+        queryFn: async (): Promise<AnalysisResult> => {
+            return ApiService.runAnalysis(ticker, sector, language);
+        },
+        enabled: options.enabled !== false && !!ticker && !!sector,
+        staleTime: 5 * 60 * 1000, // 5 min - per DESIGN.md Token Usage Governance
+        gcTime: 30 * 60 * 1000,   // 30 min garbage collection
+        retry: 1,
+    });
+}
+
+// ==================== useStockSearch Hook ====================
+interface SearchResult {
+    symbol: string;
+    name?: string;
+    sector: string;
+    price?: number;
+    change?: number;
+    history?: number[];
+    confidence?: number;
+}
+
+export function useStockSearch(query: string, options: { enabled?: boolean } = {}) {
+    return useQuery({
+        queryKey: queryKeys.stockSearch(query),
+        queryFn: async (): Promise<SearchResult | null> => {
+            if (!query || query.length < 1) return null;
+            return ApiService.searchStock(query) as Promise<SearchResult | null>;
+        },
+        enabled: options.enabled !== false && !!query && query.length >= 1,
+        staleTime: 10 * 60 * 1000, // 10 min cache for stock lookups
+        gcTime: 60 * 60 * 1000,    // 1 hour
+    });
+}
+
+// ==================== useStocks Hook ====================
+export function useStocks() {
+    return useQuery({
+        queryKey: queryKeys.stocks(),
+        queryFn: async (): Promise<Stock[]> => {
+            // Only MockApiService has getStocks
+            if ('getStocks' in ApiService) {
+                return (ApiService as any).getStocks();
+            }
+            return [];
+        },
+        staleTime: Infinity, // Static data
+    });
+}
+
+// ==================== useRunAnalysis Mutation ====================
+export function useRunAnalysisMutation() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ ticker, sector, language }: {
+            ticker: string;
+            sector: string;
+            language: string
+        }) => {
+            return ApiService.runAnalysis(ticker, sector, language);
+        },
+        onSuccess: (data, variables) => {
+            // Update cache with result
+            queryClient.setQueryData(
+                queryKeys.analysis(variables.ticker, variables.sector, variables.language),
+                data
+            );
+        },
+    });
+}
+
+export default {
+    useAnalysis,
+    useStockSearch,
+    useStocks,
+    useRunAnalysisMutation,
+};
