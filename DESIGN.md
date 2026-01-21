@@ -1,346 +1,456 @@
-# DESIGN.md — Project Constitution
+# DESIGN.md — Project Constitution  
 # Stock News Pro
 
 ⚠️ **THIS DOCUMENT IS NORMATIVE AND IMMUTABLE**
 
 This file is the **single source of truth** for:
-- UI structure
-- architecture
-- technology decisions
-- layout rules
-- component responsibilities
-- frontend/backend boundaries
 
-It **overrides and supersedes**:
-- README.md
-- SYSTEM_REPORT.md
-- any other markdown or documentation
-- any LLM-generated analysis, suggestions, or refactorings
-- all historical design decisions
+- Architecture  
+- Frontend design  
+- Backend design  
+- API contracts  
+- Data flow  
+- Code rules  
+- Security rules  
+- External API usage rules  
+- LLM integration rules  
+- Token usage governance  
+- Testing and quality standards  
+- Build and release governance  
+- Documentation hierarchy  
+
+It overrides and supersedes:
+
+- README.md  
+- SYSTEM_REPORT.md  
+- any other markdown or documentation  
+- any LLM-generated analysis, refactorings or suggestions  
+- all historical design decisions  
+
+No other document may define rules, constraints, or architectural authority.
+
+---
+
+## GOVERNANCE PRINCIPLE
+
+DESIGN.md is the project constitution.  
+SYSTEM_REPORT.md is an audit report.  
+README.md is orientation documentation.
+
+No other document may introduce binding rules.
+
+---
+
+## DOCUMENT PRIORITY ORDER
+
+1. DESIGN.md — binding law  
+2. SYSTEM_REPORT.md — descriptive audit only  
+3. README.md — informational only  
+4. Code comments — non-authoritative  
 
 ---
 
 ## LLM COMPLIANCE RULES (NON-NEGOTIABLE)
 
-All LLMs (including but not limited to Gemini, Claude, OpenAI, Anthropic models):
+All LLMs MUST:
 
-MUST:
-- read this document in full before producing any output
-- follow it **exactly**
-- treat every rule as binding law
+- Read this document fully before responding.  
+- Follow every rule exactly.  
+- Treat all rules as binding law.  
+- Explicitly report missing requirements instead of inventing them.  
+- Provide a short **Reasoning block** before generating any code explaining alignment with this document.
 
-MUST NOT:
-- modify this document
-- rewrite, summarize, reorder, or reformat it
-- reinterpret rules creatively
-- infer missing requirements
-- introduce alternative architectural approaches
+All LLMs MUST NOT:
 
-If requirements are missing or unclear, they MUST be **reported explicitly** and NOT invented.
+- Modify this document.  
+- Reformat this document.  
+- Summarize this document.  
+- Reinterpret rules.  
+- Introduce alternative architectures.  
+- Invent APIs, types, or parameters.  
+- Override any rule.
 
-Violation of this document constitutes a **hard failure**.
-
----
-
-## DOCUMENT PRIORITY ORDER (BINDING)
-
-1. DESIGN.md (this document) — **binding law**
-2. SYSTEM_REPORT.md — descriptive audit report only (non-normative)
-3. README.md — informational, non-binding
-4. Code comments — non-authoritative
+Violation of this document constitutes a hard failure.
 
 ---
 
-## UI LAYOUT & SCALING RULES  
-### (JavaFX — Legacy Notes, Non-Extensible)
+# ARCHITECTURE CONSTITUTION
 
-This section documents **historical constraints** from the JavaFX phase.
-It exists for **reference only**.
+## Core Architecture Model
 
-JavaFX is **deprecated** and must not be extended.
+The system follows strict separation:
 
----
+- Frontend: React + TypeScript  
+- Backend: JSON API  
+- Desktop Shell: Tauri  
+- Data Flow: Unidirectional  
+- Rendering: Component-based  
+- State: Explicit and controlled  
 
-## 1. Core Design Principle
-
-> **Function beats appearance. Always.**
-
-The UI must remain:
-- stable
-- deterministic
-- readable
-- scalable
-
-at **any window size**.
-
-If a visual or stylistic choice violates layout stability, it is **forbidden**.
+Frontend and backend are fully decoupled.  
+Neither side may assume internals of the other.
 
 ---
 
-## 2. Fundamental Constraint
+# FRONTEND RULES
 
-> **Text must NEVER control container width.**
+Frontend stack:
 
-Containers define width.  
-Text adapts to containers — **never the other way around**.
+- React  
+- TypeScript  
+- TailwindCSS  
+- ShadCN/UI  
+- Vite  
+- Tauri shell  
 
-Any implementation that allows text to influence layout width is a **bug**.
+Frontend MUST:
+
+- Be component-based.  
+- Use props/state/context only.  
+- Avoid direct DOM manipulation.  
+- Avoid global mutable state.  
+- Avoid layout calculations in JS.  
+- Avoid JS-based width calculations for layout.  
+- Use CSS `aspect-ratio` or Container Queries for dynamic sizing.  
+
+State management:
+
+- Server-state MUST be managed via **TanStack Query**.  
+- Local UI state MUST stay in the smallest possible component scope.  
+
+Data fetching:
+
+- MUST be handled via custom hooks.  
+- UI components MUST NEVER perform raw fetch or business logic.  
+
+Styling:
+
+- Styling MUST use Tailwind utility classes exclusively.  
+- No CSS-in-JS.  
+
+Components MUST:
+
+- Have single responsibility.  
+- Be independently testable.  
+- Receive only required data.  
+- Never fetch data directly.  
 
 ---
 
-## 3. Text Rules (Strict)
+# BACKEND RULES
 
-### Allowed
-- `TextAlignment.LEFT`
-- `setWrapText(true)`
-- `setMaxWidth(Double.MAX_VALUE)`
+Backend MUST:
 
-### Forbidden (No Exceptions)
-- `TextAlignment.JUSTIFY`
-- CSS `-fx-text-alignment: justify`
-- Dynamic width bindings on text or labels
-- Any attempt to “fill” horizontal space via text alignment
+- Expose JSON APIs only.  
+- Never expose UI logic.  
+- Never depend on frontend implementation.  
+- Be replaceable without frontend rewrite.  
+- Return explicit error states.  
 
-**Reason:**  
-Justified text introduces non-linear spacing and breaks responsive layouts.
+Backend MUST NOT:
+
+- Return silent fallback data.  
+- Return generated data without marking it.  
+- Encode errors as successful responses.
 
 ---
 
-## 4. Scaling Rules
+# API CONTRACT RULES
 
-### 4.1 Font Scaling (Allowed)
-- Applied **only** at root node
-- Via CSS only:
-  ```css
-  -fx-font-size: <scaled-value>px;
+All APIs MUST:
 
-	•	Optional dampening (e.g. sqrt(width))
+- Be versioned.  
+- Be typed.  
+- Return structured JSON.  
+- Return explicit error objects.  
+- Never return ambiguous success states.  
 
-4.2 Padding & Spacing (Forbidden to Scale)
-	•	Padding and spacing MUST be fixed values
-	•	No bindings
-	•	No heuristics
-	•	No proportional scaling
+Frontend MUST:
 
-Reason:
-Scaled padding causes container growth and layout instability when text wraps.
-
-⸻
-
-5. Width Management Rules
-
-Allowed
-	•	setMaxWidth(<reasonable value>)
-	•	Editorial / readable widths (760–900px)
-	•	Centering via parent containers
-
-Forbidden
-	•	prefWidthProperty().bind(...)
-	•	layoutBoundsProperty() feedback loops
-	•	Width calculations based on text metrics
-	•	Scale transforms (ScaleX, ScaleY)
-
-⸻
-
-6. Centering Strategy (Mandatory Pattern)
-
-Center content by constraining width, not by stretching text.
-
-Canonical pattern:
-	•	Outer container expands freely
-	•	Inner container has a defined maxWidth
-	•	No width bindings
-	•	No scale transforms
-
-⸻
-
-7. Approved Layout Utility (Legacy)
-
-CenteredContentPane
-
-Characteristics:
-	•	Outer container expands freely
-	•	Inner container has a max readable width
-	•	No width bindings
-	•	No scale transforms
-	•	Stable across all screen sizes
-
-If content grows infinitely, the class is misused.
-
-⸻
-
-8. Known Anti-Patterns (Hard Fail)
-
-The following patterns are forbidden:
-	•	Justified text in responsive layouts
-	•	Binding padding or spacing to window size
-	•	Binding width to font size
-	•	Using scale transforms for responsiveness
-	•	Allowing labels or text nodes to define container width
-	•	Mixing linear layout logic with non-linear scaling math
-
-If detected → remove immediately.
-
-⸻
-
-9. Definition of “Done”
-
-A UI change is correct only if:
-	•	No container grows without explicit max width
-	•	Text wrapping does not increase container width
-	•	Window resizing causes no jitter
-	•	UI remains readable from small laptops to large monitors
-
-⸻
-
-10. Final Rule
-
-Unexpected growth = bug, not styling issue.
-Fix the layout, not the symptom.
-
-⸻
-
-GUI STRATEGY — EFFECTIVE 2026
-
-Decision
-
-The JavaFX / HBox / VBox approach is officially abandoned.
-
-Reasons
-	•	Instability on resize
-	•	Poor maintainability
-	•	Not future-proof
-	•	Non-component-based
-
-⸻
-
-New Standard Architecture
-
-Frontend
-	•	React + TypeScript
-	•	TailwindCSS (utility-first)
-	•	ShadCN/UI for tested components
-	•	Strict component-based architecture
-
-Each Card, Chart, News-Ticker, Input, etc.:
-	•	isolated
-	•	reusable
-	•	independently testable
-
-⸻
-
-Backend
-	•	JSON API (REST or WebSocket)
-	•	Provides:
-	•	charts
-	•	sector news
-	•	metrics
-	•	AI reports
-	•	Fully decoupled from frontend
-
-⸻
-
-Desktop Integration (Optional)
-	•	Tauri (preferred) or Electron
-	•	Native menus
-	•	File system access
-	•	Auto-updates
-
-⸻
-
-Design Principles
-	•	Responsive by default
-	•	No pixel micromanagement
-	•	Backend changes propagate automatically
-	•	Centralized theme & styling
-	•	SaaS-grade professional UI
-
-⸻
-
-LLM COMPLIANCE RULES — GUI BUILD
-	•	JavaFX layout must not be reused
-	•	GUI must be rebuilt from scratch
-	•	React + Tailwind + ShadCN only
-	•	Backend remains unchanged
-	•	Focus:
-	•	stability
-	•	maintainability
-	•	scalability
-	•	future-proof design
-
-⸻
-
-GUI LAYOUT — VISUAL SCHEMA
-
-┌───────────────────────────────────────────────┐
-│                 Top-Bar                       │
-│ ┌────────┐ ┌─────────┐ ┌─────────┐ ┌───────┐ │
-│ │Ticker  │ │Sector   │ │Language │ │Action │ │
-│ │Input   │ │Dropdown │ │Dropdown │ │Buttons│ │
-│ └────────┘ └─────────┘ └─────────┘ └───────┘ │
-└───────────────────────────────────────────────┘
-
-┌───────────────────────────────┬───────────────────────────────┐
-│         Market Overview       │         Event Monitor         │
-│ ┌─────────────────────────┐  │ ┌─────────────────────────┐  │
-│ │ Executive Summary       │  │ │ Price Chart             │  │
-│ │ - Key Metrics           │  │ │ - LineChart (responsive)│  │
-│ │ - Summary Text          │  │ │ - Period Selector       │  │
-│ └─────────────────────────┘  │ │ - Chart Footer (Date)    │  │
-│ ┌─────────────────────────┐  │ └─────────────────────────┘  │
-│ │ Quality & Valuation     │  │ ┌─────────────────────────┐  │
-│ │ Metrics (Rows)          │  │ │ Sector News Ticker       │  │
-│ └─────────────────────────┘  │ │ - Scrollable Headlines   │ │
-└───────────────────────────────┴───────────────────────────────┘
-
-┌───────────────────────────────────────────────┐
-│                 Status-Bar                    │
-│ ┌───────────────┐             ┌─────────────┐ │
-│ │Status Message │             │Version Info │ │
-│ └───────────────┘             └─────────────┘ │
-└───────────────────────────────────────────────┘
-
-
-⸻
-
-Component Structure / Folder Hierarchy
-
-/frontend
-  /components
-    TopBar.tsx
-    Dashboard/
-      MarketOverviewCard.tsx
-      EventMonitorCard.tsx
-    StatusBar.tsx
-  /layouts
-    MainLayout.tsx
-  /services
-    ApiService.ts
-  /utils
-    formatters.ts
-
-
-⸻
-
-Props / State Conventions
-	•	Components receive only required data
-	•	No global DOM access
-	•	Charts, metrics, news via props/state/context
-
-⸻
-
-Testing & Tooling
-	•	Component tests for Cards, TopBar, StatusBar
-	•	Optional Storybook
-	•	CI: render-level regression tests
-
-⸻
-
-Performance & Theme
-	•	Charts: Canvas or SVG
-	•	News-Ticker: CSS animation only
-	•	Flexbox + Tailwind (no width bindings)
-	•	Centralized Tailwind theme (tailwind.config.js)
+- Treat APIs as unreliable.  
+- Handle latency.  
+- Handle errors.  
+- Handle partial results.  
 
 ---
 
+# DATA FLOW RULES
+
+Data flow is strictly unidirectional:
+
+User Input → State Update → API Call → Result → UI Render  
+
+No reverse coupling.  
+No UI mutation from services.  
+No state mutation from components.
+
+The Tauri backend is the Single Source of Truth for:
+
+- File system access  
+- Local cache persistence  
+- System-level data  
+
+---
+
+# TAURI IPC RULES
+
+All Tauri commands MUST:
+
+- Be strictly typed on both sides.  
+- Use Rust structs and matching TypeScript interfaces.  
+- Never use `any` in IPC boundaries.  
+
+All Tauri commands MUST:
+
+- Be wrapped in a typed service layer.  
+- Never be invoked directly inside React components.  
+
+Direct `invoke()` calls inside components are forbidden.
+
+---
+
+# LLM INTEGRATION RULES
+
+LLMs are external, unreliable, non-deterministic services.
+
+LLM outputs MUST:
+
+- Be labeled as generated.  
+- Never overwrite verified data.  
+- Never silently replace API data.  
+
+LLM hallucinations MUST NOT be masked.
+
+If data is missing, the LLM MUST report the gap.
+
+---
+
+# TOKEN USAGE GOVERNANCE
+
+LLM tokens are a controlled enterprise resource.
+
+The system MUST:
+
+- Minimize LLM calls.  
+- Cache LLM results.  
+- Deduplicate identical prompts.  
+- Avoid LLM calls for UI-only actions.  
+- Never call LLM for formatting or layout tasks.  
+- Never call LLM redundantly for identical context.  
+
+The system MUST:
+
+- Track token usage.  
+- Log token consumption.  
+- Support future token budgeting.
+
+LLMs MUST NOT be used where deterministic code can solve the task.
+
+---
+
+# MOCK ENVIRONMENT RULES
+
+Mocks exist only for:
+
+- UI development  
+- Demo  
+- Offline testing  
+
+Mocks MUST:
+
+- Be clearly labeled.  
+- Be replaceable by real APIs.  
+- Never leak into production paths.
+
+---
+
+# EXTERNAL API USAGE RULES
+
+External APIs MUST:
+
+- Be rate-limited.  
+- Be cached.  
+- Be abstracted behind service layers.  
+- Never be called from UI components.  
+
+API keys MUST:
+
+- Never be hardcoded.  
+- Never be committed.  
+- Be injected via environment variables.  
+
+---
+
+# SECURITY RULES
+
+The system MUST:
+
+- Never expose secrets.  
+- Never trust frontend input.  
+- Never assume API correctness.  
+- Never execute remote code.  
+
+All rendered data MUST be sanitized.
+
+---
+
+# CODE QUALITY RULES
+
+All code MUST:
+
+- Be readable.  
+- Be typed.  
+- Avoid implicit any.  
+- Avoid side effects.  
+- Avoid magic numbers.  
+- Avoid hidden coupling.  
+
+Functions MUST:
+
+- Have single responsibility.  
+- Be testable.  
+- Be deterministic when possible.  
+
+---
+
+# DEPENDENCY GOVERNANCE
+
+Dependencies MUST:
+
+- Be minimal.  
+- Be justified.  
+- Be reviewed before addition.  
+- Be replaceable.  
+
+No dependency may become architecturally critical without explicit approval.
+
+---
+
+# VERSIONING RULES
+
+APIs MUST:
+
+- Use semantic versioning.  
+- Maintain backward compatibility where possible.  
+- Document breaking changes.
+
+---
+
+# ERROR HANDLING RULES
+
+Errors MUST:
+
+- Be explicit.  
+- Be typed.  
+- Be user-visible when relevant.  
+- Never be swallowed silently.
+
+---
+
+# LOGGING & OBSERVABILITY
+
+The system MUST:
+
+- Log errors.  
+- Log API failures.  
+- Log LLM failures.  
+- Support future observability integration.
+
+---
+
+# BUILD & CI GOVERNANCE
+
+Builds MUST:
+
+- Be reproducible.  
+- Be deterministic.  
+- Fail on lint or type errors.
+
+---
+
+# RELEASE GOVERNANCE
+
+Releases MUST:
+
+- Be versioned.  
+- Be documented.  
+- Be traceable to commits.
+
+---
+
+# TESTING RULES
+
+Testing is mandatory.
+
+Minimum:
+
+- UI component tests (Vitest).  
+- API service tests.  
+- Contract tests for IPC bridge.
+
+---
+
+# PERFORMANCE RULES
+
+Frontend MUST:
+
+- Avoid unnecessary re-renders.  
+- Memoize heavy computations.  
+- Avoid DOM overdraw.
+
+Charts MUST:
+
+- Never drive layout size.
+
+---
+
+# RESPONSIVE DESIGN RULES
+
+Responsive behavior MUST:
+
+- Be CSS-based.  
+- Use Flexbox/Grid.  
+- Never use scale transforms.  
+- Never bind widths.
+
+---
+
+# LEGACY JAVAFX RULES
+
+JavaFX UI is deprecated.
+
+JavaFX code MUST NOT be reintroduced.
+
+---
+
+# DOCUMENTATION GOVERNANCE
+
+DESIGN.md is law.  
+SYSTEM_REPORT.md is audit.  
+README.md is orientation.
+
+No rule duplication allowed.  
+No contradictions allowed.
+
+---
+
+# CHANGE GOVERNANCE
+
+Any change to DESIGN.md:
+
+- Must be explicit.  
+- Must be intentional.  
+- Must be reviewed.  
+- Must be documented in commit history.
+
+---
+
+# FINAL CONSTITUTION RULE
+
+If any part of the system violates this document, the system is wrong — not the document.
+
+Fix the system, not the constitution.
+
+---
+
+END OF DESIGN.md
