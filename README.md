@@ -1,93 +1,195 @@
-# Stock News Pro (Polyglot Edition)
+# Stock News Pro  
 
-A professional-grade stock news analysis system rebuilt for performance,
-scalability, and long-term maintainability.
+Stock News Pro is an enterprise-grade financial analysis platform focused on long-term maintainability, architectural clarity, and controlled AI integration.  
+The project is designed as a desktop-first application with strict governance to prevent code drift, uncontrolled AI behavior, and architectural erosion.
 
-The project combines a high-performance native engine, a modern JavaFX GUI,
-and a Python-based AI orchestration layer into a clean, modular architecture.
+The repository serves as a foundation for evolving a mock-driven prototype into a production-grade financial analytics system. 
 
----
+--- 
 
-## Architecture
+## Project Purpose
 
-The system is composed of four clearly separated components:
+Stock News Pro provides:
 
-- **GUI (`/gui`)**  
-  Universal JavaFX application responsible for visualization, interaction,
-  and user experience.
+- Stock and sector analysis
+- News aggregation and sentiment signals
+- AI-assisted report generation
+- Local-first desktop experience
+- Architecture validation for future production systems
 
-- **Engine (`/engine`)**  
-  High-performance C++ data processing engine with a native database layer.
+--- 
 
-- **AI Service (`/ai_service`)**  
-  Python-based AI orchestration service providing analytics, enrichment,
-  and data abstraction via a REST API.
+## Governance Model
 
-- **Shared (`/shared`)**  
-  Shared Protobuf definitions used for cross-language communication.
+This repository is governed by three documents:
 
-This separation allows independent scaling, testing, and optimization
-of each subsystem.
+| Document | Role |
+|--------|------|
+| DESIGN.md | Binding project constitution |
+| SYSTEM_REPORT.md | Descriptive system audit |
+| README.md | Orientation and navigation only |
 
----
-
-## Design Rules
-
-This project follows **strict UI layout and scaling rules** to ensure a
-stable, predictable, and professional JavaFX user interface across all
-screen sizes.
-
-All contributors, tools, and automated refactors **must comply** with the
-rules defined in:
-
-➡️ **[DESIGN.md](DESIGN.md)**
-
-UI changes that violate these rules are considered incorrect and must be fixed
-before merging.
+DESIGN.md is the single source of architectural truth.  
+SYSTEM_REPORT.md is non-normative and may be regenerated at any time.  
+README.md contains no binding rules and introduces no architectural authority.
 
 ---
 
-## Setup
+## Current Architecture
 
-### 1. AI Service (Python)
+The system follows a strict separation of concerns.
 
-```bash
-cd ai_service
-pip install -r requirements.txt
-uvicorn main:app --reload
-```
+### Frontend
 
-### 2. Engine (C++)
-```bash
-cd engine
-mkdir build && cd build
-cmake ..
-make
-```
+Technologies:
 
-### 3. GUI (Java)
-```bash
-cd gui
-mvn javafx:run
-```
-Development Notes
-	•	Each component can be developed and run independently.
-	•	The GUI communicates with the AI Service via HTTP.
-	•	The Engine is optimized for performance-critical workloads and data handling.
-	•	UI layout stability is a hard requirement and not subject to aesthetic preference.
+- React
+- TypeScript
+- TailwindCSS
+- ShadCN/UI
+- Vite
+- Tauri desktop shell
 
-## GitHub Integration
+Responsibilities:
 
-To push this project to GitHub:
-1. Create a new repository on GitHub.
-2. Run:
-```bash
-git remote add origin https://github.com/YOUR_USERNAME/stock-news-pro.git
-git branch -M main
-git push -u origin main
-```
-License
+- UI rendering
+- User interaction
+- State presentation
+- No business logic
+- No API logic
 
-This project is currently under active development.
-Licensing information will be added at a later stage.
+---
+
+### Backend (Planned)
+
+Characteristics:
+
+- JSON API
+- Fully decoupled from frontend
+- Language-agnostic
+- Replaceable
+
+Responsibilities:
+
+- Data aggregation
+- Business logic
+- Persistence
+- API contract enforcement
+
+---
+
+### AI Integration
+
+Characteristics:
+
+- Currently mock-driven
+- Designed for controlled LLM integration
+- Governed by token usage and reliability rules defined in DESIGN.md
+
+Responsibilities:
+
+- Report generation
+- Text analysis
+- Enrichment services
+
+---
+
+### Desktop Shell
+
+Technology:
+
+- Tauri
+
+Responsibilities:
+
+- Native window management
+- File system access
+- Persistence
+- IPC communication
+- No UI logic
+
+---
+
+## Repository Structure
+
+```text
+/frontend        React frontend application
+/ai_service      Mock and future AI service layer
+/engine          Legacy engine (deprecated)
+/shared          Shared schemas or contracts
+
+Legacy JavaFX and C++ components are deprecated and kept only for historical reference.
+
+⸻
+
+## Development Philosophy
+
+This project follows:
+
+- Strict architectural separation
+- Governance-first development
+- LLM discipline and token control
+- Auditability
+- Deterministic behavior over convenience
+
+All architectural and behavioral rules are defined in DESIGN.md.
+
+⸻ 
+
+## Development Setup
+
+### Frontend
+
+cd frontend
+npm install
+npm run dev
+
+### AI Service (Mock / Optional)
+
+The current frontend prototype runs in standalone mode using an internal MockApiService.
+No external backend service is required for UI development.
+
+The Python AI service is provided for future backend integration and experimentation.
+
+cd ai_service 
+pip install -r requirements.txt 
+uvicorn main:app --reload 
+
+## Contribution Policy
+
+All contributions must comply with:
+	•	DESIGN.md
+	•	Architectural separation principles
+	•	Typed interfaces
+	•	No hidden coupling
+
+Pull requests violating DESIGN.md will be rejected.
+
+⸻
+
+## Project Status
+
+Current stage:
+	•	High-fidelity prototype
+	•	Mock-driven
+	•	Architecture-ready
+	•	Not production-ready
+
+⸻
+
+## License
+
+License information will be defined at a later stage.
+
+⸻
+
+## Final Note 
+
+This repository is intentionally governed more strictly than typical projects.
+
+This is by design to support:
+	•	AI-assisted development
+	•	Enterprise auditability
+	•	Long-term maintainability
+	•	Architectural integrity
 
