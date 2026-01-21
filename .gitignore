@@ -65,3 +65,21 @@ Thumbs.db
 
 # Antigravity brain (local AI context)
 .gemini/
+
+# Runtime exports
+exports/
+ai_service/exports/
+
+# Tooling
+.agent/
+
+# Python
+__pycache__/
+*.pyc
+
+# Runtime exports
+exports/
+ai_service/exports/
+
+# Tooling
+.agent/
