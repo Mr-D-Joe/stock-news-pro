@@ -38,9 +38,10 @@ class EssayGenerator(PipelineStep[ArticleCollection, AnalysisResult]):
 
     @property
     def client(self) -> BaseAIClient:
-        """Lazy-initialize AI client."""
+        """Lazy-initialize AI client using fallback chain (OpenAI -> Gemini)."""
         if self._client is None:
-            self._client = ProviderFactory.get_client("gemini", self.settings)
+            # Use fallback client: OpenAI (primary) -> Gemini (secondary)
+            self._client = ProviderFactory.get_client("fallback", self.settings)
         return self._client
 
     def _ensure_client_callbacks(self, context: PipelineContext) -> None:

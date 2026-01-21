@@ -111,6 +111,12 @@ class NewsItem(BaseModel):
     url: Optional[str] = None
     published: Optional[datetime] = None
     summary: Optional[str] = None
+    fetched_at: datetime = None  # When we fetched this news
+    
+    def __init__(self, **data):
+        super().__init__(**data)
+        if self.fetched_at is None:
+            self.fetched_at = datetime.now()
 
 
 class NewsSubmission(BaseModel):
@@ -181,6 +187,24 @@ class DBQueryRequest(BaseModel):
 
 _news_cache: list[NewsItem] = []
 _analysis_cache: dict[str, AnalysisResponse] = {}
+_analysis_hash_cache: dict[str, str] = {}  # cache_key -> content_hash
+
+
+def _compute_news_hash(articles: list) -> str:
+    """Compute MD5 hash of news content to detect changes."""
+    import hashlib
+    content = "".join(sorted([a.title for a in articles]))
+    return hashlib.md5(content.encode()).hexdigest()
+
+
+def _get_fresh_news(ticker: str = None, max_age_hours: int = 24) -> list[NewsItem]:
+    """Get only fresh news items (within max_age_hours)."""
+    from datetime import timedelta
+    cutoff = datetime.now() - timedelta(hours=max_age_hours)
+    items = _news_cache
+    if ticker:
+        items = [n for n in items if n.ticker.upper() == ticker.upper()]
+    return [n for n in items if n.fetched_at and n.fetched_at >= cutoff]
 
 
 class RateLimitStatus(BaseModel):
@@ -280,16 +304,28 @@ async def request_analysis(request: AnalysisRequest):
     Request AI analysis for specific tickers.
     
     Engine calls this to get AI-generated insights.
+    Uses caching with content hash to avoid redundant AI calls.
     """
     from ai_service.models.article import Article, ArticleCollection
     from ai_service.analyzers.essay_generator import EssayGenerator
     from ai_service.pipeline.base import PipelineContext, PipelineConfig
+    
+    # Build cache key
+    cache_key = f"{'-'.join(sorted(request.tickers))}:{normalize_language(request.language)}"
     
     # Build article collection from cached news
     relevant_news = [
         n for n in _news_cache 
         if n.ticker.upper() in [t.upper() for t in request.tickers]
     ]
+    
+    # OPTIMIZATION: Check if news content has changed since last analysis
+    current_hash = _compute_news_hash(relevant_news) if relevant_news else "empty"
+    
+    if cache_key in _analysis_cache and cache_key in _analysis_hash_cache:
+        if _analysis_hash_cache[cache_key] == current_hash:
+            logger.info(f"🔄 Using cached analysis for {cache_key} (content unchanged)")
+            return _analysis_cache[cache_key]
     
     if not relevant_news:
         raise HTTPException(
@@ -357,9 +393,10 @@ async def request_analysis(request: AnalysisRequest):
         metadata=analysis_meta
     )
     
-    # Cache the analysis
-    cache_key = "-".join(sorted(request.tickers))
+    # Cache the analysis with content hash
     _analysis_cache[cache_key] = response
+    _analysis_hash_cache[cache_key] = current_hash
+    logger.info(f"💾 Cached analysis for {cache_key} (hash: {current_hash[:8]}...)")
     
     return response
 
@@ -398,9 +435,11 @@ async def store_record(record: DBRecordRequest):
 @router.delete("/cache")
 async def clear_cache():
     """Clear all caches (for testing/maintenance)."""
-    global _news_cache, _analysis_cache
+    global _news_cache, _analysis_cache, _analysis_hash_cache
     _news_cache = []
     _analysis_cache = {}
+    _analysis_hash_cache = {}
+    logger.info("🗑️ All caches cleared")
     return {"cleared": True}
 
 
