@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import type { AppState, Timeframe, AnalysisScope } from '../types';
-import { MockApiService } from '../services/MockApiService';
+import { ApiService } from '../services/ApiService';
 
 interface AppContextType {
     state: AppState;
@@ -33,11 +33,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [cache, setCache] = useState<Map<string, any>>(new Map());
 
     useEffect(() => {
-        MockApiService.getStocks().then(stocks => {
-            setState(s => ({ ...s, stocks }));
-            // Auto-Run Analysis on Mount to bind Mock Data immediately
-            // runAnalysis(); // Removed auto-run as initial state has no stock
-        });
+        // Load initial stocks (Mock or Real based on env)
+        if ('getStocks' in ApiService) {
+            (ApiService as any).getStocks().then((stocks: any) => {
+                setState(s => ({ ...s, stocks }));
+            });
+        }
     }, []);
 
     const setStockInput = (input: string) => setState(s => ({ ...s, selectedStock: input }));
@@ -71,11 +72,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 return;
             }
 
-            // 2. Resolve Alias (if not already done via smart input) - Keeping simplified here
-            const resolvedSymbol = MockApiService.resolveSymbol(targetStock);
+            // 2. Resolve Alias (if not already done via smart input)
+            const resolvedSymbol = 'resolveSymbol' in ApiService
+                ? (ApiService as any).resolveSymbol(targetStock)
+                : targetStock;
 
             // 3. Perform Analysis (Language Aware)
-            const result = await MockApiService.runAnalysis(resolvedSymbol || targetStock, targetLang);
+            const result = await ApiService.runAnalysis(resolvedSymbol || targetStock, targetSector, targetLang);
 
             // 4. Update Cache
             setCache(prev => {
@@ -103,14 +106,18 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const resolveStockInput = async (input: string): Promise<string | null> => {
         if (!input) return null;
         try {
-            const result = await MockApiService.searchStock(input);
-            if (result && result.confidence > 0.8) {
-                console.log(`[Smart Resolve] ${input} -> ${result.symbol}`);
-                const stockData = state.stocks.find(s => s.symbol === result.symbol);
-                const derivedSector = stockData ? stockData.sector : (result.sector || state.selectedSector);
+            const result = await ApiService.searchStock(input);
+            // RealApiService returns Stock, MockApiService returns {symbol, sector, confidence}
+            if (result) {
+                const confidence = 'confidence' in result ? (result as any).confidence : 1.0;
+                if (confidence > 0.8) {
+                    console.log(`[Smart Resolve] ${input} -> ${result.symbol}`);
+                    const stockData = state.stocks.find(s => s.symbol === result.symbol);
+                    const derivedSector = stockData ? stockData.sector : (result.sector || state.selectedSector);
 
-                setState(s => ({ ...s, selectedStock: result.symbol, selectedSector: derivedSector }));
-                return result.symbol;
+                    setState(s => ({ ...s, selectedStock: result.symbol, selectedSector: derivedSector }));
+                    return result.symbol;
+                }
             }
         } catch (e) {
             console.error(e);
@@ -121,7 +128,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     // Smart Resolution Logic for Language
     const resolveLanguageInput = async (input: string) => {
         if (!input) return;
-        const resolved = await MockApiService.resolveLanguage(input);
+        const resolved = ApiService.resolveLanguage(input);
         if (resolved !== state.selectedLanguage) {
             console.log(`[Lang Resolve] ${input} -> ${resolved}`);
             setState(s => ({ ...s, selectedLanguage: resolved }));

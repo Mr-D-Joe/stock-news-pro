@@ -220,7 +220,7 @@ export const MockApiService = {
     },
 
     // Fuzzy Language Resolution
-    resolveLanguage: async (input: string): Promise<string> => {
+    resolveLanguage: (input: string): string => {
         const lower = input.toLowerCase().trim();
         if (["de", "ger", "german", "deutsch"].some(x => lower.includes(x))) return "German";
         if (["en", "eng", "english", "englisch"].some(x => lower.includes(x))) return "English";
