@@ -1,11 +1,63 @@
-# DESIGN.md  
-## UI Layout & Scaling Rules (JavaFX)
+# DESIGN.md — Project Constitution
+# Stock News Pro
 
-This document defines **non-negotiable layout and scaling rules** for this project.
-Its purpose is to **prevent layout fighting, uncontrolled growth, and instability**
-caused by text rendering, font scaling, or width bindings.
+⚠️ **THIS DOCUMENT IS NORMATIVE AND IMMUTABLE**
 
-These rules override all aesthetic preferences.
+This file is the **single source of truth** for:
+- UI structure
+- architecture
+- technology decisions
+- layout rules
+- component responsibilities
+- frontend/backend boundaries
+
+It **overrides and supersedes**:
+- README.md
+- SYSTEM_REPORT.md
+- any other markdown or documentation
+- any LLM-generated analysis, suggestions, or refactorings
+- all historical design decisions
+
+---
+
+## LLM COMPLIANCE RULES (NON-NEGOTIABLE)
+
+All LLMs (including but not limited to Gemini, Claude, OpenAI, Anthropic models):
+
+MUST:
+- read this document in full before producing any output
+- follow it **exactly**
+- treat every rule as binding law
+
+MUST NOT:
+- modify this document
+- rewrite, summarize, reorder, or reformat it
+- reinterpret rules creatively
+- infer missing requirements
+- introduce alternative architectural approaches
+
+If requirements are missing or unclear, they MUST be **reported explicitly** and NOT invented.
+
+Violation of this document constitutes a **hard failure**.
+
+---
+
+## DOCUMENT PRIORITY ORDER (BINDING)
+
+1. DESIGN.md (this document) — **binding law**
+2. SYSTEM_REPORT.md — descriptive audit report only (non-normative)
+3. README.md — informational, non-binding
+4. Code comments — non-authoritative
+
+---
+
+## UI LAYOUT & SCALING RULES  
+### (JavaFX — Legacy Notes, Non-Extensible)
+
+This section documents **historical constraints** from the JavaFX phase.
+It exists for **reference only**.
+
+JavaFX is **deprecated** and must not be extended.
 
 ---
 
@@ -21,18 +73,18 @@ The UI must remain:
 
 at **any window size**.
 
-If a visual style violates layout stability, it is forbidden.
+If a visual or stylistic choice violates layout stability, it is **forbidden**.
 
 ---
 
-## 2. Fundamental Constraint (Most Important Rule)
+## 2. Fundamental Constraint
 
 > **Text must NEVER control container width.**
 
-Containers define width.
-Text adapts to containers — never the other way around.
+Containers define width.  
+Text adapts to containers — **never the other way around**.
 
-Any implementation that allows text to influence layout width is considered a bug.
+Any implementation that allows text to influence layout width is a **bug**.
 
 ---
 
@@ -47,24 +99,22 @@ Any implementation that allows text to influence layout width is considered a bu
 - `TextAlignment.JUSTIFY`
 - CSS `-fx-text-alignment: justify`
 - Dynamic width bindings on text or labels
-- Any attempt to "fill" horizontal space via text alignment
+- Any attempt to “fill” horizontal space via text alignment
 
 **Reason:**  
-Justified text introduces non-linear word spacing and causes feedback loops
-when combined with responsive layouts and font scaling.
+Justified text introduces non-linear spacing and breaks responsive layouts.
 
 ---
 
 ## 4. Scaling Rules
 
 ### 4.1 Font Scaling (Allowed)
-
-- Font scaling is applied **ONLY** at the root node
-- Implemented via CSS:
+- Applied **only** at root node
+- Via CSS only:
   ```css
   -fx-font-size: <scaled-value>px;
 
-  	•	Scaling may be dampened (e.g. sqrt(width))
+	•	Optional dampening (e.g. sqrt(width))
 
 4.2 Padding & Spacing (Forbidden to Scale)
 	•	Padding and spacing MUST be fixed values
@@ -81,14 +131,14 @@ Scaled padding causes container growth and layout instability when text wraps.
 
 Allowed
 	•	setMaxWidth(<reasonable value>)
-	•	Editorial / readable widths (e.g. 760–900 px)
+	•	Editorial / readable widths (760–900px)
 	•	Centering via parent containers
 
 Forbidden
 	•	prefWidthProperty().bind(...)
-	•	layoutBoundsProperty() feedback
+	•	layoutBoundsProperty() feedback loops
 	•	Width calculations based on text metrics
-	•	Scale transforms (ScaleX, ScaleY, global scaling)
+	•	Scale transforms (ScaleX, ScaleY)
 
 ⸻
 
@@ -96,25 +146,17 @@ Forbidden
 
 Center content by constraining width, not by stretching text.
 
-Canonical Pattern
-	•	Outer container:
-	•	Takes full available width
-	•	Centers content horizontally
-	•	Inner content container:
-	•	Has a defined maxWidth
-	•	Uses full width up to that limit
-
-This pattern is implemented via CenteredContentPane.
-
-Any deviation must be explicitly justified.
+Canonical pattern:
+	•	Outer container expands freely
+	•	Inner container has a defined maxWidth
+	•	No width bindings
+	•	No scale transforms
 
 ⸻
 
-7. Approved Layout Utility
+7. Approved Layout Utility (Legacy)
 
 CenteredContentPane
-
-This is the only approved solution for centered, scalable content areas.
 
 Characteristics:
 	•	Outer container expands freely
@@ -123,36 +165,182 @@ Characteristics:
 	•	No scale transforms
 	•	Stable across all screen sizes
 
-If content grows infinitely, this class was not used correctly.
+If content grows infinitely, the class is misused.
 
 ⸻
 
 8. Known Anti-Patterns (Hard Fail)
 
-The following patterns are known to break JavaFX layouts and are forbidden:
+The following patterns are forbidden:
 	•	Justified text in responsive layouts
 	•	Binding padding or spacing to window size
-	•	Binding prefWidth/maxWidth to font size
-	•	Using Scale transforms for responsiveness
-	•	Allowing labels or text nodes to define layout width
+	•	Binding width to font size
+	•	Using scale transforms for responsiveness
+	•	Allowing labels or text nodes to define container width
 	•	Mixing linear layout logic with non-linear scaling math
 
-If any of these appear in code reviews, they must be removed immediately.
+If detected → remove immediately.
 
 ⸻
 
 9. Definition of “Done”
 
-A UI change is considered correct only if:
-	•	No container grows without an explicit max width
+A UI change is correct only if:
+	•	No container grows without explicit max width
 	•	Text wrapping does not increase container width
-	•	Resizing the window does not cause layout jitter
-	•	The UI remains readable from small laptops to large monitors
+	•	Window resizing causes no jitter
+	•	UI remains readable from small laptops to large monitors
 
 ⸻
 
 10. Final Rule
 
-If something grows unexpectedly, it is a bug — not a styling issue.
-
+Unexpected growth = bug, not styling issue.
 Fix the layout, not the symptom.
+
+⸻
+
+GUI STRATEGY — EFFECTIVE 2026
+
+Decision
+
+The JavaFX / HBox / VBox approach is officially abandoned.
+
+Reasons
+	•	Instability on resize
+	•	Poor maintainability
+	•	Not future-proof
+	•	Non-component-based
+
+⸻
+
+New Standard Architecture
+
+Frontend
+	•	React + TypeScript
+	•	TailwindCSS (utility-first)
+	•	ShadCN/UI for tested components
+	•	Strict component-based architecture
+
+Each Card, Chart, News-Ticker, Input, etc.:
+	•	isolated
+	•	reusable
+	•	independently testable
+
+⸻
+
+Backend
+	•	JSON API (REST or WebSocket)
+	•	Provides:
+	•	charts
+	•	sector news
+	•	metrics
+	•	AI reports
+	•	Fully decoupled from frontend
+
+⸻
+
+Desktop Integration (Optional)
+	•	Tauri (preferred) or Electron
+	•	Native menus
+	•	File system access
+	•	Auto-updates
+
+⸻
+
+Design Principles
+	•	Responsive by default
+	•	No pixel micromanagement
+	•	Backend changes propagate automatically
+	•	Centralized theme & styling
+	•	SaaS-grade professional UI
+
+⸻
+
+LLM COMPLIANCE RULES — GUI BUILD
+	•	JavaFX layout must not be reused
+	•	GUI must be rebuilt from scratch
+	•	React + Tailwind + ShadCN only
+	•	Backend remains unchanged
+	•	Focus:
+	•	stability
+	•	maintainability
+	•	scalability
+	•	future-proof design
+
+⸻
+
+GUI LAYOUT — VISUAL SCHEMA
+
+┌───────────────────────────────────────────────┐
+│                 Top-Bar                       │
+│ ┌────────┐ ┌─────────┐ ┌─────────┐ ┌───────┐ │
+│ │Ticker  │ │Sector   │ │Language │ │Action │ │
+│ │Input   │ │Dropdown │ │Dropdown │ │Buttons│ │
+│ └────────┘ └─────────┘ └─────────┘ └───────┘ │
+└───────────────────────────────────────────────┘
+
+┌───────────────────────────────┬───────────────────────────────┐
+│         Market Overview       │         Event Monitor         │
+│ ┌─────────────────────────┐  │ ┌─────────────────────────┐  │
+│ │ Executive Summary       │  │ │ Price Chart             │  │
+│ │ - Key Metrics           │  │ │ - LineChart (responsive)│  │
+│ │ - Summary Text          │  │ │ - Period Selector       │  │
+│ └─────────────────────────┘  │ │ - Chart Footer (Date)    │  │
+│ ┌─────────────────────────┐  │ └─────────────────────────┘  │
+│ │ Quality & Valuation     │  │ ┌─────────────────────────┐  │
+│ │ Metrics (Rows)          │  │ │ Sector News Ticker       │  │
+│ └─────────────────────────┘  │ │ - Scrollable Headlines   │ │
+└───────────────────────────────┴───────────────────────────────┘
+
+┌───────────────────────────────────────────────┐
+│                 Status-Bar                    │
+│ ┌───────────────┐             ┌─────────────┐ │
+│ │Status Message │             │Version Info │ │
+│ └───────────────┘             └─────────────┘ │
+└───────────────────────────────────────────────┘
+
+
+⸻
+
+Component Structure / Folder Hierarchy
+
+/frontend
+  /components
+    TopBar.tsx
+    Dashboard/
+      MarketOverviewCard.tsx
+      EventMonitorCard.tsx
+    StatusBar.tsx
+  /layouts
+    MainLayout.tsx
+  /services
+    ApiService.ts
+  /utils
+    formatters.ts
+
+
+⸻
+
+Props / State Conventions
+	•	Components receive only required data
+	•	No global DOM access
+	•	Charts, metrics, news via props/state/context
+
+⸻
+
+Testing & Tooling
+	•	Component tests for Cards, TopBar, StatusBar
+	•	Optional Storybook
+	•	CI: render-level regression tests
+
+⸻
+
+Performance & Theme
+	•	Charts: Canvas or SVG
+	•	News-Ticker: CSS animation only
+	•	Flexbox + Tailwind (no width bindings)
+	•	Centralized Tailwind theme (tailwind.config.js)
+
+---
+
