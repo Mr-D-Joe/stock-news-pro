@@ -57,6 +57,12 @@ app.include_router(engine_router)
 # Load settings once at startup
 _settings = Settings()
 
+# STRICT API GOVERNANCE: Warn if DEV_MODE is off (real APIs will be called)
+if _settings.dev_mode:
+    logger.info("🔒 DEV_MODE is ON - Using mock data, no external API calls")
+else:
+    logger.warning("⚠️ DEV_MODE is OFF - Real external APIs will be called (tokens consumed)")
+
 @app.get("/")
 async def root():
     providers = _settings.get_available_providers()
