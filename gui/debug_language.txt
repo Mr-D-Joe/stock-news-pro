@@ -1,2 +1,0 @@
-DEBUG: exportHtmlReport called. Selected Language: 'japanisch'
-DEBUG: exportHtmlReport called. Selected Language: 'Japanese'
