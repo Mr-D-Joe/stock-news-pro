@@ -11,6 +11,8 @@ import React, { useState } from 'react';
 import { Globe, Play, Loader2, Search, Target, PieChart, FlaskConical, Radio } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { useRunAnalysisMutation } from '../hooks/useDataFetching';
+
+import { useTickerResolutionMutation, isResolutionSuccess } from '../hooks/useTickerResolution';
 import { isUsingRealApi } from '../services/ApiService';
 import { cn } from '@/lib/utils';
 import type { AnalysisScope } from '../types';
@@ -36,6 +38,7 @@ export const TopBar: React.FC = () => {
 
     // TanStack Query Mutation for Analysis (per DESIGN.md L118)
     const analysisMutation = useRunAnalysisMutation();
+    const resolutionMutation = useTickerResolutionMutation();
 
     // Handle stock resolution and analysis
     const handleResolveAndAnalyze = async () => {
@@ -57,8 +60,33 @@ export const TopBar: React.FC = () => {
 
     // Handle stock input blur - resolve the symbol
     const handleStockBlur = () => {
-        // Simple uppercase normalization for now
         const normalized = stockInput.toUpperCase().trim();
+
+        // Only resolve if meaningful change
+        if (normalized && normalized.length > 1) {
+            resolutionMutation.mutate(
+                { query: normalized },
+                {
+                    onSuccess: (result) => {
+                        if (isResolutionSuccess(result)) {
+                            // Update UI with resolved data
+                            setStockInput(result.symbol); // Canonical symbol
+                            setSelectedStock(result.symbol);
+
+                            // Auto-fill sector if available
+                            if (result.sector && result.sector !== 'Unknown') {
+                                setSelectedSector(result.sector);
+                            }
+                            console.log(`[TopBar] Resolved ${normalized} -> ${result.symbol} (${result.name})`);
+                        }
+                    },
+                    onError: (err) => {
+                        console.warn('[TopBar] Resolution failed:', err);
+                    }
+                }
+            );
+        }
+
         if (normalized && normalized !== selectedStock) {
             setSelectedStock(normalized);
         }

@@ -81,6 +81,7 @@ const Dashboard = () => {
                 {/* B. PRICE CHART & MONITOR */}
                 <EventMonitorCard
                   chartData={analysisResult.chartData}
+                  volumeData={analysisResult.volumeData}
                   selectedPeriod="1Y"
                   sectorNews={analysisResult.sectorNews.map((n: { title: string }) => n.title).slice(0, 5)}
                 />

@@ -74,6 +74,7 @@ export interface Essay {
 export interface ChartPoint {
     date: string;
     value: number;
+    volume?: number; // [NEW]
 }
 
 export interface AnalysisResult {
@@ -82,6 +83,7 @@ export interface AnalysisResult {
     sectorNews: NewsItem[]; // [NEW] Separate Ticker 2
     essay: string;
     chartData: ChartPoint[];
+    volumeData?: ChartPoint[]; // [NEW] 48h hourly
 }
 
 export interface AppState {
@@ -103,6 +105,7 @@ export interface StatusBarProps {
 }
 export interface EventMonitorCardProps {
     chartData: ChartPoint[];
+    volumeData?: ChartPoint[]; // [NEW]
     selectedPeriod: string;
     sectorNews: string[];
 }

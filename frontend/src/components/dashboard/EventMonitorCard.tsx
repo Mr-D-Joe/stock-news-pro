@@ -1,13 +1,13 @@
 import React from 'react';
 import type { EventMonitorCardProps } from '../../types';
-import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
-import { Zap, Clock } from 'lucide-react';
+import { LineChart, Line, BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
+import { Zap, Clock, BarChart2 } from 'lucide-react';
 
 import { useAppContext } from '../../context/AppContext';
 import { cn } from '@/lib/utils';
 import type { Timeframe } from '../../types';
 
-export const EventMonitorCard: React.FC<EventMonitorCardProps> = ({ chartData, sectorNews }) => {
+export const EventMonitorCard: React.FC<EventMonitorCardProps> = ({ chartData, volumeData, sectorNews }) => {
 
     // Connect to Context for Timeframe Control (per DESIGN.md L119)
     const { uiState, setTimeframe } = useAppContext();
@@ -52,7 +52,7 @@ export const EventMonitorCard: React.FC<EventMonitorCardProps> = ({ chartData, s
                 </div>
             </div>
 
-            {/* Chart */}
+            {/* Price Chart */}
             <div className="h-64 w-full bg-slate-50/50 rounded-lg border border-slate-100 p-2 relative">
                 <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={finalData}>
@@ -72,10 +72,37 @@ export const EventMonitorCard: React.FC<EventMonitorCardProps> = ({ chartData, s
                         />
                     </LineChart>
                 </ResponsiveContainer>
-                <div className="absolute bottom-2 right-4 text-[10px] text-slate-400 italic">
-                    Last updated: Just now
+                <div className="absolute top-2 left-4 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                    Price Action ({selectedPeriod})
                 </div>
             </div>
+
+            {/* Volume Chart (48H Hourly) - F-UI-11 */}
+            {volumeData && volumeData.length > 0 && (
+                <div className="h-32 w-full bg-slate-50/50 rounded-lg border border-slate-100 p-2 relative">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={volumeData}>
+                            <Tooltip
+                                cursor={{ fill: '#f1f5f9' }}
+                                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                labelStyle={{ color: '#64748b', fontSize: '10px' }}
+                                formatter={(value: number | undefined) => [
+                                    value !== undefined ? new Intl.NumberFormat('en-US', { notation: "compact" }).format(value) : '',
+                                    "Volume"
+                                ]}
+                                labelFormatter={(label) => new Date(label).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            />
+                            <Bar dataKey="volume" fill="#cbd5e1" radius={[2, 2, 0, 0]} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                    <div className="absolute top-2 left-4 flex items-center gap-2">
+                        <BarChart2 className="h-3 w-3 text-slate-400" />
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                            Volume (48H Hourly)
+                        </span>
+                    </div>
+                </div>
+            )}
 
             {/* Enhanced Range Slider with Ticks */}
             <div className="px-2">

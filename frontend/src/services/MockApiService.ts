@@ -338,6 +338,21 @@ export const MockApiService = {
                             date: new Date(Date.now() - daysAgo * 86400000).toISOString().split('T')[0],
                             value: val
                         };
+                    }),
+                    // [NEW] 48h Hourly Volume Data
+                    volumeData: Array.from({ length: 48 }, (_, i) => {
+                        const hoursAgo = 47 - i;
+                        const date = new Date(Date.now() - hoursAgo * 3600000);
+                        // Simulate higher volume during market hours (9-16)
+                        const hour = date.getHours();
+                        const isMarketOpen = hour >= 9 && hour <= 16;
+                        const baseVol = isMarketOpen ? Math.random() * 500000 + 100000 : Math.random() * 50000 + 10000;
+
+                        return {
+                            date: date.toISOString(), // ISO timestamp for hour
+                            value: stock.price + (Math.random() - 0.5), // Price at that hour (approx)
+                            volume: Math.floor(baseVol)
+                        };
                     })
                 };
                 resolve(result);
