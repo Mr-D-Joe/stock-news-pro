@@ -158,6 +158,71 @@ Diese Komponente zeigt fundamentale Bewertungs- und Qualitätsmetriken im Stil v
 | F-AG-04 | Cache Pre-Check vor AI-Calls | MUSS | ✅ Implementiert |
 | F-AG-05 | Token-Usage Tracking | SOLL | ❌ Offen |
 
+### 2.5 Datenverarbeitung (Data Handling)
+
+#### 2.5.1 Ticker Resolution (Real Mode)
+
+| ID | Anforderung | Priorität | Status |
+|----|-------------|-----------|--------|
+| F-DH-01 | **Internet-basierte Ticker-Auflösung** via API (Yahoo Finance, FMP) | MUSS | ❌ Offen |
+| F-DH-02 | **Tippfehler-Toleranz** via Levenshtein-Distanz (≤2 Zeichen) | MUSS | ✅ Implementiert |
+| F-DH-03 | **Firmennamen → Symbol** Mapping (z.B. "Alphabet" → GOOG) | MUSS | ❌ Offen |
+
+> [!IMPORTANT]
+> Die Mock-Aliases (z.B. GOOGLE → ACME) dienen nur zu Testzwecken.
+> In Real Mode MUSS eine echte Ticker-Auflösung erfolgen!
+
+#### 2.5.2 Ticker Resolution Cache
+
+| ID | Anforderung | Spezifikation |
+|----|-------------|---------------|
+| F-DH-10 | **Cache-Typ** | Persistenter Key-Value Store |
+| F-DH-11 | **Cache-Größe** | 1000 Einträge pro Feld (symbol, sector) |
+| F-DH-12 | **Eviction-Policy** | FIFO (First-In-First-Out) |
+| F-DH-13 | **Cache-Key** | Normalisierte Eingabe (uppercase, trimmed) |
+| F-DH-14 | **Cache-Value** | `{ symbol: string, sector: string, name: string, resolvedAt: ISO8601 }` |
+| F-DH-15 | **Cache-Clearing** | Manuell via UI oder bei App-Update |
+
+##### Cache-Struktur (pseudocode)
+
+```typescript
+interface TickerCacheEntry {
+  symbol: string;        // z.B. "GOOG"
+  sector: string;        // z.B. "Technology"
+  name: string;          // z.B. "Alphabet Inc."
+  resolvedAt: string;    // ISO8601 Timestamp
+}
+
+interface TickerCache {
+  entries: Map<string, TickerCacheEntry>;  // Key = normalized input
+  maxSize: 1000;
+  evictionPolicy: 'FIFO';
+}
+```
+
+##### Cache-Workflow
+
+```
+User Input: "alphabet"
+     ↓
+[Normalize] → "ALPHABET"
+     ↓
+[Cache Lookup] ───→ Hit? → Return cached result
+     ↓ Miss
+[API Resolution] → Yahoo/FMP → "GOOG", "Technology", "Alphabet Inc."
+     ↓
+[Cache Write] → Store result, evict oldest if full
+     ↓
+Return result
+```
+
+#### 2.5.3 Mock vs Real Mode Unterscheidung
+
+| Modus | Ticker-Auflösung | Cache |
+|-------|------------------|-------|
+| **DEV_MODE=true** | Lokale Alias-Map | In-Memory, nicht persistent |
+| **DEV_MODE=false** | Internet-API (Yahoo/FMP) | Persistent (localStorage/Tauri) |
+
 ---
 
 ## 3. Nicht-Funktionale Anforderungen
