@@ -38,6 +38,92 @@ Entwicklung einer Desktop-Anwendung zur KI-gestützten Analyse von Aktien und Se
 | F-UI-08 | Preis-Chart mit Recharts | MUSS | ✅ Implementiert |
 | F-UI-09 | AI-Essay Ausgabe | MUSS | ✅ Implementiert |
 | F-UI-10 | Analyse-Scope (Stock/Sector/Market/Combined) | SOLL | ✅ Implementiert |
+| F-UI-11 | **Volumen-Chart (48h, stündlich)** | SOLL | ❌ Neu |
+
+#### 2.1.1 Volumen-Chart Spezifikation
+
+| Aspekt | Spezifikation |
+|--------|---------------|
+| **Zeitraum** | Letzte 48 Stunden |
+| **Granularität** | 1 Stunde (Standard), optional 15-min Drill-down |
+| **Darstellung** | Area-Chart oder Bar-Chart |
+| **Datenpunkte** | 48 (stündlich) / 192 (15-min) |
+| **Position** | Unterhalb Preis-Chart oder als separater Tab |
+
+```
+Volumen-Chart (48h)
+│
+│    ██
+│   ████  ██
+│  ██████████     ██
+│ ████████████   ████  ██
+├─────────────────────────────
+  12:00   18:00   00:00   06:00   12:00
+   (gestern)              (heute)
+```
+
+#### 2.1.2 Quality & Valuation Metrics Card (Buffett/Lynch Style)
+
+Diese Komponente zeigt fundamentale Bewertungs- und Qualitätsmetriken im Stil von Warren Buffett und Peter Lynch.
+
+##### Bewertungs-Metriken (Valuation)
+
+| ID | Metrik | Beschreibung | Formel/Quelle | Status |
+|----|--------|--------------|---------------|--------|
+| F-UI-VAL-01 | **P/E Ratio** | Kurs-Gewinn-Verhältnis | Preis / EPS | ⚠️ Zeigt "None" |
+| F-UI-VAL-02 | **PEG Ratio** | Wachstumskorrektes P/E | P/E / Gewinnwachstum | ⚠️ Zeigt "N/A" |
+
+##### Qualitäts-Metriken (Quality)
+
+| ID | Metrik | Beschreibung | Interpretation | Status |
+|----|--------|--------------|----------------|--------|
+| F-UI-QUA-01 | **ROE** | Return on Equity | >15% = gut (Buffett) | ⚠️ Zeigt "N/A" |
+| F-UI-QUA-02 | **Debt/Equity** | Verschuldungsgrad | <0.5 = konservativ | ⚠️ Zeigt "N/A" |
+
+##### Analysten-Ratings
+
+| ID | Metrik | Anzeige | Farbkodierung | Status |
+|----|--------|---------|---------------|--------|
+| F-UI-ANA-01 | **Target Mean** | $XXX.XX | Neutral (Schwarz) | ✅ Funktional |
+| F-UI-ANA-02 | **Target High** | $XXX.XX | Grün (Upside) | ✅ Funktional |
+| F-UI-ANA-03 | **Target Low** | $XXX.XX | Rot (Downside) | ✅ Funktional |
+| F-UI-ANA-04 | **Recommendation** | BUY/HOLD/SELL | N/A bei fehlend | ⚠️ Zeigt "N/A" |
+
+##### UI-Spezifikation
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ 💎 Quality & Valuation Metrics (Buffett/Lynch Style)        │
+├─────────────────────────────────────────────────────────────┤
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐       │
+│  │ VALUATION:   │  │ GROWTH:      │  │ QUALITY:     │       │
+│  │ P/E RATIO    │  │ PEG RATIO    │  │ ROE          │       │
+│  │   [Value]    │  │   [Value]    │  │   [Value]    │       │
+│  └──────────────┘  └──────────────┘  └──────────────┘       │
+│  ┌──────────────┐                                           │
+│  │ HEALTH:      │                                           │
+│  │ DEBT/EQUITY  │                                           │
+│  │   [Value]    │                                           │
+│  └──────────────┘                                           │
+├─────────────────────────────────────────────────────────────┤
+│  ANALYST TARGET     ANALYST HIGH      ANALYST LOW           │
+│     (MEAN)                                                  │
+│    $321.55          $390.00           $190.00               │
+│                     (grün)            (rot)                 │
+│                                                             │
+│  RECOMMENDATION: [BUY/HOLD/SELL/N/A]                        │
+└─────────────────────────────────────────────────────────────┘
+```
+
+##### Buffett/Lynch Bewertungskriterien
+
+| Metrik | Gut | Neutral | Schlecht |
+|--------|-----|---------|----------|
+| P/E Ratio | <15 | 15-25 | >25 |
+| PEG Ratio | <1.0 | 1.0-2.0 | >2.0 |
+| ROE | >15% | 10-15% | <10% |
+| Debt/Equity | <0.5 | 0.5-1.0 | >1.0 |
+
 
 ### 2.2 Backend (AI Service)
 
