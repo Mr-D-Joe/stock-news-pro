@@ -131,20 +131,54 @@ class TickerResolutionServiceImpl {
         // Use existing MockApiService logic
         // This is a simplified version for DEV_MODE
         const mockMappings: Record<string, { symbol: string; name: string; sector: string }> = {
-            'ALPHABET': { symbol: 'GOOG', name: 'Alphabet Inc.', sector: 'Technology' },
-            'GOOGLE': { symbol: 'GOOG', name: 'Alphabet Inc.', sector: 'Technology' },
+            // Technology (US)
+            'AAPL': { symbol: 'AAPL', name: 'Apple Inc.', sector: 'Technology' },
+            'APPLE': { symbol: 'AAPL', name: 'Apple Inc.', sector: 'Technology' },
+            'MSFT': { symbol: 'MSFT', name: 'Microsoft Corporation', sector: 'Technology' },
+            'MICROSOFT': { symbol: 'MSFT', name: 'Microsoft Corporation', sector: 'Technology' },
             'GOOGL': { symbol: 'GOOGL', name: 'Alphabet Inc.', sector: 'Technology' },
             'GOOG': { symbol: 'GOOG', name: 'Alphabet Inc.', sector: 'Technology' },
-            'APPLE': { symbol: 'AAPL', name: 'Apple Inc.', sector: 'Technology' },
-            'AAPL': { symbol: 'AAPL', name: 'Apple Inc.', sector: 'Technology' },
-            'MICROSOFT': { symbol: 'MSFT', name: 'Microsoft Corporation', sector: 'Technology' },
-            'MSFT': { symbol: 'MSFT', name: 'Microsoft Corporation', sector: 'Technology' },
-            'ROCHE': { symbol: 'ROG', name: 'Roche Holding AG', sector: 'Healthcare' },
-            'ROG': { symbol: 'ROG', name: 'Roche Holding AG', sector: 'Healthcare' },
-            'NOVO': { symbol: 'NVO', name: 'Novo Nordisk A/S', sector: 'Healthcare' },
+            'GOOGLE': { symbol: 'GOOG', name: 'Alphabet Inc.', sector: 'Technology' },
+            'ALPHABET': { symbol: 'GOOG', name: 'Alphabet Inc.', sector: 'Technology' },
+            'AMZN': { symbol: 'AMZN', name: 'Amazon.com Inc.', sector: 'Consumer Cyclical' },
+            'AMAZON': { symbol: 'AMZN', name: 'Amazon.com Inc.', sector: 'Consumer Cyclical' },
+            'NVDA': { symbol: 'NVDA', name: 'NVIDIA Corporation', sector: 'Technology' },
+            'NVIDIA': { symbol: 'NVDA', name: 'NVIDIA Corporation', sector: 'Technology' },
+            'META': { symbol: 'META', name: 'Meta Platforms Inc.', sector: 'Technology' },
+            'FACEBOOK': { symbol: 'META', name: 'Meta Platforms Inc.', sector: 'Technology' },
+            'TSLA': { symbol: 'TSLA', name: 'Tesla Inc.', sector: 'Consumer Cyclical' },
+            'TESLA': { symbol: 'TSLA', name: 'Tesla Inc.', sector: 'Consumer Cyclical' },
+            'NFLX': { symbol: 'NFLX', name: 'Netflix Inc.', sector: 'Communication Services' },
+
+            // Pharma / Healthcare (Global)
+            'LLY': { symbol: 'LLY', name: 'Eli Lilly and Company', sector: 'Healthcare' },
+            'ELI': { symbol: 'LLY', name: 'Eli Lilly and Company', sector: 'Healthcare' },
+            'LILLY': { symbol: 'LLY', name: 'Eli Lilly and Company', sector: 'Healthcare' },
             'NVO': { symbol: 'NVO', name: 'Novo Nordisk A/S', sector: 'Healthcare' },
-            'ACME': { symbol: 'ACME', name: 'ACME Corp', sector: 'Industrials' },
+            'NOVO': { symbol: 'NVO', name: 'Novo Nordisk A/S', sector: 'Healthcare' },
+            'AZN': { symbol: 'AZN', name: 'AstraZeneca PLC', sector: 'Healthcare' },
+            'ASTRA': { symbol: 'AZN', name: 'AstraZeneca PLC', sector: 'Healthcare' },
+            'PFE': { symbol: 'PFE', name: 'Pfizer Inc.', sector: 'Healthcare' },
+            'PFIZER': { symbol: 'PFE', name: 'Pfizer Inc.', sector: 'Healthcare' },
+            'MRK': { symbol: 'MRK', name: 'Merck & Co. Inc.', sector: 'Healthcare' },
+            'MERCK': { symbol: 'MRK', name: 'Merck & Co. Inc.', sector: 'Healthcare' },
+            'JNJ': { symbol: 'JNJ', name: 'Johnson & Johnson', sector: 'Healthcare' },
+            'ROG': { symbol: 'ROG', name: 'Roche Holding AG', sector: 'Healthcare' },
+            'ROCHE': { symbol: 'ROG', name: 'Roche Holding AG', sector: 'Healthcare' },
             'ABSI': { symbol: 'ABSI', name: 'Absci Corp', sector: 'Healthcare' },
+
+            // Finance
+            'JPM': { symbol: 'JPM', name: 'JPMorgan Chase & Co.', sector: 'Financial Services' },
+            'BAC': { symbol: 'BAC', name: 'Bank of America Corp', sector: 'Financial Services' },
+            'V': { symbol: 'V', name: 'Visa Inc.', sector: 'Financial Services' },
+            'MA': { symbol: 'MA', name: 'Mastercard Inc.', sector: 'Financial Services' },
+
+            // Industrial / Other
+            'BA': { symbol: 'BA', name: 'Boeing Company', sector: 'Industrials' },
+            'CAT': { symbol: 'CAT', name: 'Caterpillar Inc.', sector: 'Industrials' },
+            'DIS': { symbol: 'DIS', name: 'Walt Disney Company', sector: 'Communication Services' },
+            'KO': { symbol: 'KO', name: 'Coca-Cola Company', sector: 'Consumer Defensive' },
+            'ACME': { symbol: 'ACME', name: 'ACME Corp', sector: 'Industrials' },
         };
 
         const match = mockMappings[normalizedQuery];
@@ -177,7 +211,7 @@ class TickerResolutionServiceImpl {
 
         return createResolutionError(
             'NOT_FOUND',
-            `No mock data for "${normalizedQuery}"`,
+            `Symbol "${normalizedQuery}" not found in DEV_MODE mocks. Try: AAPL, MSFT, LLY, NVO...`,
             { suggestions: Object.keys(mockMappings).slice(0, 5) }
         );
     }
