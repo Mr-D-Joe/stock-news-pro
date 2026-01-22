@@ -1,21 +1,76 @@
-import React from 'react';
-import { Globe, Play, Loader2, Search, Target, PieChart } from 'lucide-react';
-import { useLegacyAppContext } from '../context/AppContext';
+/**
+ * TopBar Component - DESIGN.md Compliant
+ * 
+ * Per DESIGN.md:
+ * - L118: Server-state via TanStack Query
+ * - L123: Data fetching via custom hooks
+ * - L136: Components never fetch data directly
+ */
+
+import React, { useState } from 'react';
+import { Globe, Play, Loader2, Search, Target, PieChart, FlaskConical, Radio } from 'lucide-react';
+import { useAppContext } from '../context/AppContext';
+import { useRunAnalysisMutation } from '../hooks/useDataFetching';
+import { isUsingRealApi } from '../services/ApiService';
 import { cn } from '@/lib/utils';
 import type { AnalysisScope } from '../types';
 
 export const TopBar: React.FC = () => {
+    // UI State from Context (per DESIGN.md L119)
     const {
-        state,
-        setStockInput,
-        setSectorInput,
-        setLanguageInput,
+        uiState,
+        setSelectedStock,
+        setSelectedSector,
+        setSelectedLanguage,
         setScope,
-        runAnalysis,
-        resolveStockInput,
-        resolveLanguageInput
-    } = useLegacyAppContext();
-    const { selectedStock, selectedSector, selectedLanguage, selectedScope, analysisStatus } = state;
+        resolveLanguage,
+        setAnalysisResult,
+        setAnalysisStatus,
+        analysisStatus,
+    } = useAppContext();
+
+    const { selectedStock, selectedSector, selectedLanguage, selectedScope } = uiState;
+
+    // Local state for input (before resolution)
+    const [stockInput, setStockInput] = useState(selectedStock);
+
+    // TanStack Query Mutation for Analysis (per DESIGN.md L118)
+    const analysisMutation = useRunAnalysisMutation();
+
+    // Handle stock resolution and analysis
+    const handleResolveAndAnalyze = async () => {
+        // Use the ApiService via mutation
+        analysisMutation.mutate(
+            { ticker: stockInput || selectedStock, sector: selectedSector, language: selectedLanguage },
+            {
+                onSuccess: (result) => {
+                    setAnalysisResult(result);
+                    setAnalysisStatus('success');
+                },
+                onError: () => {
+                    setAnalysisStatus('error');
+                },
+            }
+        );
+        setAnalysisStatus('loading');
+    };
+
+    // Handle stock input blur - resolve the symbol
+    const handleStockBlur = () => {
+        // Simple uppercase normalization for now
+        const normalized = stockInput.toUpperCase().trim();
+        if (normalized && normalized !== selectedStock) {
+            setSelectedStock(normalized);
+        }
+    };
+
+    // Handle language blur
+    const handleLanguageBlur = () => {
+        const resolved = resolveLanguage(selectedLanguage);
+        if (resolved !== selectedLanguage) {
+            setSelectedLanguage(resolved);
+        }
+    };
 
     return (
         <div className="w-full bg-white border-b border-gray-200 p-4 shadow-sm flex items-center justify-between gap-4 sticky top-0 z-50">
@@ -32,18 +87,25 @@ export const TopBar: React.FC = () => {
                         type="text"
                         className="w-full pl-9 pr-2 py-2 rounded-lg bg-slate-50 border border-gray-200 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400 uppercase"
                         placeholder="SYMBOL / ALIAS"
-                        value={selectedStock}
-                        onChange={(e) => setStockInput(e.target.value)}
-                        onFocus={(e) => e.target.select()} // Select on Focus (Tab)
-                        onClick={(e) => e.currentTarget.select()} // Select on Click (Mouse)
-                        // Fix for selection jumping: Prevent deselect on release
+                        value={stockInput}
+                        onChange={(e) => {
+                            const newValue = e.target.value;
+                            setStockInput(newValue);
+                            setSelectedStock(newValue);
+                            // Clear old result when ticker changes
+                            if (newValue.toUpperCase() !== selectedStock.toUpperCase()) {
+                                setAnalysisResult(null);
+                                setAnalysisStatus('idle');
+                            }
+                        }}
+                        onFocus={(e) => e.target.select()}
+                        onClick={(e) => e.currentTarget.select()}
                         onMouseUp={(e) => e.preventDefault()}
-                        onBlur={() => resolveStockInput(selectedStock)}
-                        onKeyDown={async (e) => {
+                        onBlur={handleStockBlur}
+                        onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                                 e.currentTarget.blur();
-                                const resolvedParams = await resolveStockInput(selectedStock);
-                                runAnalysis(resolvedParams || selectedStock);
+                                handleResolveAndAnalyze();
                             }
                         }}
                     />
@@ -59,14 +121,14 @@ export const TopBar: React.FC = () => {
                         className="w-full pl-9 pr-2 py-2 rounded-lg bg-slate-50 border border-gray-200 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400 uppercase"
                         placeholder="SECTOR"
                         value={selectedSector}
-                        onChange={(e) => setSectorInput(e.target.value)}
+                        onChange={(e) => setSelectedSector(e.target.value)}
                         onFocus={(e) => e.target.select()}
                         onClick={(e) => e.currentTarget.select()}
                         onMouseUp={(e) => e.preventDefault()}
                     />
                 </div>
 
-                {/* Language Input (New) */}
+                {/* Language Input */}
                 <div className="relative w-32">
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                         <Globe className="h-4 w-4" />
@@ -76,21 +138,19 @@ export const TopBar: React.FC = () => {
                         className="w-full pl-9 pr-2 py-2 rounded-lg bg-slate-50 border border-gray-200 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400"
                         placeholder="LANG"
                         value={selectedLanguage}
-                        onChange={(e) => setLanguageInput(e.target.value)}
+                        onChange={(e) => setSelectedLanguage(e.target.value)}
                         onFocus={(e) => e.target.select()}
                         onClick={(e) => e.currentTarget.select()}
                         onMouseUp={(e) => e.preventDefault()}
-                        onBlur={() => resolveLanguageInput(selectedLanguage)}
+                        onBlur={handleLanguageBlur}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                                 e.currentTarget.blur();
-                                resolveLanguageInput(selectedLanguage);
+                                handleLanguageBlur();
                             }
                         }}
                     />
                 </div>
-
-
 
                 {/* Scope Select */}
                 <div className="relative w-[140px]">
@@ -113,8 +173,8 @@ export const TopBar: React.FC = () => {
             {/* ACTION AREA */}
             <div className="flex items-center gap-4">
                 <button
-                    disabled={!selectedStock || analysisStatus === 'loading'}
-                    onClick={() => runAnalysis()}
+                    disabled={!selectedStock || analysisStatus === 'loading' || analysisMutation.isPending}
+                    onClick={handleResolveAndAnalyze}
                     className={cn(
                         "flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-bold shadow-sm transition-all min-w-[150px] justify-center",
                         !selectedStock
@@ -122,7 +182,7 @@ export const TopBar: React.FC = () => {
                             : "bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200 hover:shadow-md active:translate-y-0.5"
                     )}
                 >
-                    {analysisStatus === 'loading' ? (
+                    {(analysisStatus === 'loading' || analysisMutation.isPending) ? (
                         <>
                             <Loader2 className="h-4 w-4 animate-spin" />
                             ANALYZING...
@@ -136,7 +196,19 @@ export const TopBar: React.FC = () => {
                 </button>
 
                 <div className="flex items-center gap-2 border-l border-gray-200 pl-4">
-                    {/* Status Indicator */}
+                    {/* DEV/LIVE Mode Indicator */}
+                    {isUsingRealApi() ? (
+                        <div className="flex items-center gap-1.5 px-3 py-1 bg-red-50 text-red-700 rounded-full border border-red-200 text-xs font-bold">
+                            <Radio className="h-3 w-3" />
+                            LIVE API
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-700 rounded-full border border-amber-200 text-xs font-bold">
+                            <FlaskConical className="h-3 w-3" />
+                            DEV MODE
+                        </div>
+                    )}
+                    {/* Connection Status */}
                     <div className="flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 rounded-full border border-green-200 text-xs font-bold">
                         <Globe className="h-3 w-3" />
                         ONLINE

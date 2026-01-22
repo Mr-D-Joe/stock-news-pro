@@ -155,6 +155,23 @@ cd ai_service
 pip install -r requirements.txt 
 uvicorn main:app --reload 
 
+### Real Mode (Ticker Resolution)
+
+To enable real ticker resolution via Yahoo Finance API:
+
+1. Create `frontend/.env`:
+```
+VITE_USE_REAL_API=true
+```
+
+2. Rate limits apply automatically:
+   - Yahoo: 5 req/s, 500/day
+   - Results are cached (30 day TTL)
+
+3. The UI will show "LIVE API" indicator when Real Mode is active.
+
+Note: Mock mode uses local aliases and is suitable for UI development.
+
 ## Contribution Policy
 
 All contributions must comply with:

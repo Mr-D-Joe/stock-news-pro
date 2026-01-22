@@ -1,4 +1,4 @@
-import { AppProvider, useLegacyAppContext } from './context/AppContext';
+import { AppProvider, useAppContext } from './context/AppContext';
 import { TopBar } from '@/components/TopBar';
 import { MarketOverviewCard } from '@/components/dashboard/MarketOverviewCard';
 import { EventMonitorCard } from '@/components/dashboard/EventMonitorCard';
@@ -9,8 +9,8 @@ import { StatusBar } from '@/components/StatusBar';
 import { Activity } from 'lucide-react';
 
 const Dashboard = () => {
-  const { state } = useLegacyAppContext();
-  const { analysisStatus, analysisResult } = state;
+  const { uiState, analysisStatus, analysisResult } = useAppContext();
+  const { selectedSector } = uiState;
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900 overflow-hidden">
@@ -22,7 +22,7 @@ const Dashboard = () => {
           <div className="bg-slate-900 text-slate-200">
             <NewsTicker
               news={analysisResult.sectorNews}
-              label={`${state.selectedSector} NEWS`}
+              label={`${selectedSector} NEWS`}
             />
           </div>
           {/* Lower: Stock News */}

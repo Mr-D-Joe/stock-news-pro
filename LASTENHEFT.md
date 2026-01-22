@@ -164,39 +164,45 @@ Diese Komponente zeigt fundamentale Bewertungs- und Qualitätsmetriken im Stil v
 
 | ID | Anforderung | Priorität | Status |
 |----|-------------|-----------|--------|
-| F-DH-01 | **Internet-basierte Ticker-Auflösung** via API (Yahoo Finance, FMP) | MUSS | ❌ Offen |
+| F-DH-01 | **Internet-basierte Ticker-Auflösung** via API (Yahoo Finance primary) | MUSS | ❌ Offen |
 | F-DH-02 | **Tippfehler-Toleranz** via Levenshtein-Distanz (≤2 Zeichen) | MUSS | ✅ Implementiert |
 | F-DH-03 | **Firmennamen → Symbol** Mapping (z.B. "Alphabet" → GOOG) | MUSS | ❌ Offen |
+| F-DH-04 | **In-Flight De-duplication** (keine parallelen Requests für gleiche Query) | MUSS | ❌ Offen |
 
 > [!IMPORTANT]
-> Die Mock-Aliases (z.B. GOOGLE → ACME) dienen nur zu Testzwecken.
+> Die Mock-Aliases (z.B. GOOGLE → ACME) dienen NUR zu Testzwecken.
 > In Real Mode MUSS eine echte Ticker-Auflösung erfolgen!
 
 #### 2.5.2 Ticker Resolution Cache
 
+##### Cache-Typen (Zwei separate Caches)
+
+| ID | Cache | Beschreibung | TTL |
+|----|-------|--------------|-----|
+| F-DH-10 | **name_to_symbol** | Normalisierte Eingabe → Symbol | 30 Tage |
+| F-DH-11 | **symbol_to_name** | Symbol → Kanonischer Firmenname | 90 Tage |
+
+##### Cache-Spezifikation
+
 | ID | Anforderung | Spezifikation |
 |----|-------------|---------------|
-| F-DH-10 | **Cache-Typ** | Persistenter Key-Value Store |
-| F-DH-11 | **Cache-Größe** | 1000 Einträge pro Feld (symbol, sector) |
-| F-DH-12 | **Eviction-Policy** | FIFO (First-In-First-Out) |
-| F-DH-13 | **Cache-Key** | Normalisierte Eingabe (uppercase, trimmed) |
-| F-DH-14 | **Cache-Value** | `{ symbol: string, sector: string, name: string, resolvedAt: ISO8601 }` |
-| F-DH-15 | **Cache-Clearing** | Manuell via UI oder bei App-Update |
+| F-DH-12 | **Cache-Größe** | 1000 Einträge pro Cache |
+| F-DH-13 | **Eviction-Policy** | FIFO (First-In-First-Out) |
+| F-DH-14 | **Persistence** | Tauri Filesystem (primary), localStorage (warm-start only) |
+| F-DH-15 | **Negative Caching** | NOT_FOUND Ergebnisse für 24h cachen |
 
-##### Cache-Struktur (pseudocode)
+##### Cache-Entry Struktur
 
 ```typescript
 interface TickerCacheEntry {
-  symbol: string;        // z.B. "GOOG"
-  sector: string;        // z.B. "Technology"
-  name: string;          // z.B. "Alphabet Inc."
-  resolvedAt: string;    // ISO8601 Timestamp
-}
-
-interface TickerCache {
-  entries: Map<string, TickerCacheEntry>;  // Key = normalized input
-  maxSize: 1000;
-  evictionPolicy: 'FIFO';
+  query_normalized: string;   // "ALPHABET"
+  symbol: string;             // "GOOG"
+  name: string;               // "Alphabet Inc."
+  sector: string;             // "Technology"
+  confidence: number;         // 0.0 - 1.0
+  source: 'FMP' | 'Yahoo';    // Provider
+  timestamp: string;          // ISO8601
+  expiresAt: string;          // ISO8601
 }
 ```
 
@@ -207,21 +213,106 @@ User Input: "alphabet"
      ↓
 [Normalize] → "ALPHABET"
      ↓
-[Cache Lookup] ───→ Hit? → Return cached result
-     ↓ Miss
-[API Resolution] → Yahoo/FMP → "GOOG", "Technology", "Alphabet Inc."
+[Cache Lookup] ───→ Hit + Valid? → Return cached result
+     ↓ Miss or Expired
+[In-Flight Check] ───→ Pending? → Wait for existing request
+     ↓ No pending
+[Rate Limit Check] ───→ Exceeded? → Return RATE_LIMIT error
+     ↓ OK
+[API Resolution] → Yahoo → "GOOG", "Technology", "Alphabet Inc."
      ↓
-[Cache Write] → Store result, evict oldest if full
+[Cache Write] → Store result, evict oldest if full (FIFO)
      ↓
 Return result
 ```
 
-#### 2.5.3 Mock vs Real Mode Unterscheidung
+#### 2.5.3 Rate Limit & Backoff Policy
 
-| Modus | Ticker-Auflösung | Cache |
-|-------|------------------|-------|
-| **DEV_MODE=true** | Lokale Alias-Map | In-Memory, nicht persistent |
-| **DEV_MODE=false** | Internet-API (Yahoo/FMP) | Persistent (localStorage/Tauri) |
+| ID | Anforderung | Spezifikation |
+|----|-------------|---------------|
+| F-DH-20 | **Rate Limiter Typ** | Token Bucket (per Provider) |
+| F-DH-21 | **Yahoo Limit** | 5 requests/second, 500/day |
+| F-DH-22 | **FMP Limit** | 250 requests/day (Free Tier) |
+| F-DH-23 | **Hard-Stop** | Bei Limit erreicht → RATE_LIMIT Error, kein Retry |
+| F-DH-24 | **Backoff** | Exponential mit Jitter, max 5 Retries, max 60s |
+| F-DH-25 | **In-Flight De-dupe** | Gleiche normalisierte Query → nur 1 Request |
+
+##### Backoff-Strategie
+
+```
+Retry 1: 1s + random(0-500ms)
+Retry 2: 2s + random(0-500ms)
+Retry 3: 4s + random(0-500ms)
+Retry 4: 8s + random(0-500ms)
+Retry 5: 16s + random(0-500ms)
+→ Nach 5 Retries: PROVIDER_DOWN Error
+```
+
+> [!CAUTION]
+> Retry-Storms sind verboten. Hard-Stop bei Rate Limit.
+
+#### 2.5.4 Error Semantics & UI Signals
+
+| Error Code | Beschreibung | UI Behavior |
+|------------|--------------|-------------|
+| `NOT_FOUND` | Ticker/Firma nicht gefunden | "Kein Ergebnis für [input]" + Vorschläge |
+| `RATE_LIMIT` | API-Limit erreicht | "Bitte später versuchen" + Cache-Only Mode |
+| `PROVIDER_DOWN` | Provider nicht erreichbar | "Service nicht verfügbar" + Cache verwenden |
+| `LOW_CONFIDENCE` | Confidence < 0.85 | Kandidatenliste anzeigen, User-Bestätigung |
+| `AMBIGUOUS` | Mehrere gleich gute Matches | Dropdown zur Auswahl |
+
+##### Error-Handling Regeln (DESIGN.md L343-346)
+
+| Regel | Anforderung |
+|-------|-------------|
+| Explizit | Errors MÜSSEN explizit sein |
+| Typed | Errors MÜSSEN typed sein |
+| Visible | Errors MÜSSEN user-sichtbar sein wenn relevant |
+| No Swallow | Errors DÜRFEN NICHT silent verschluckt werden |
+
+> [!WARNING]
+> Fallback DARF NIEMALS Symbol erfinden. Bei Unsicherheit: User fragen!
+
+#### 2.5.5 Provider Strategy & Switching Rules
+
+##### Provider Hierarchie
+
+| Priority | Provider | Typ | Status |
+|----------|----------|-----|--------|
+| 1 | **Yahoo Finance** | Primary | ❌ Zu implementieren |
+| 2 | **FMP** | Optional Premium | ❌ Später (wenn Free Tier viabel) |
+
+##### Switching Logic
+
+```
+[Request] 
+     ↓
+[Yahoo Available?] ───→ Yes → Use Yahoo
+     ↓ No (RATE_LIMIT / DOWN)
+[Cache Available?] ───→ Yes → Return Cache (stale)
+     ↓ No
+[FMP Enabled & Key?] ───→ Yes → Try FMP
+     ↓ No
+Return PROVIDER_DOWN Error
+```
+
+##### Provider Interface (per DESIGN.md L273)
+
+```typescript
+interface TickerProvider {
+  name: 'Yahoo' | 'FMP';
+  search(query: string): Promise<ProviderResult>;
+  isAvailable(): boolean;
+  getRemainingQuota(): number;
+}
+```
+
+#### 2.5.6 Mock vs Real Mode Unterscheidung
+
+| Modus | Ticker-Auflösung | Cache | Rate Limit |
+|-------|------------------|-------|------------|
+| **DEV_MODE=true** | Lokale Alias-Map | In-Memory | Kein Limit |
+| **DEV_MODE=false** | Yahoo API (+ FMP optional) | Tauri FS | Enforced |
 
 ---
 

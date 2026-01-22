@@ -1,5 +1,38 @@
 import type { Stock, NewsItem, Report, Essay, AnalysisResult } from '../types';
 
+// ==================== Helper Functions ====================
+
+/**
+ * Calculate Levenshtein distance between two strings
+ * Used for fuzzy typo matching (e.g., "ROUCHE" → "ROCHE")
+ */
+function levenshteinDistance(a: string, b: string): number {
+    const matrix: number[][] = [];
+
+    for (let i = 0; i <= b.length; i++) {
+        matrix[i] = [i];
+    }
+    for (let j = 0; j <= a.length; j++) {
+        matrix[0][j] = j;
+    }
+
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+            if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1, // substitution
+                    matrix[i][j - 1] + 1,     // insertion
+                    matrix[i - 1][j] + 1      // deletion
+                );
+            }
+        }
+    }
+
+    return matrix[b.length][a.length];
+}
+
 // Mock Data Storage
 const STOCKS: Stock[] = [
     { symbol: "ACME", name: "ACME Corp", sector: "Industrials", price: 154.20, change: 2.5, history: Array.from({ length: 4000 }, (_, i) => 100 + i * 0.05 + Math.random() * 20) },
@@ -213,6 +246,23 @@ export const MockApiService = {
                 symbol: resolvedSymbol,
                 sector: stock ? stock.sector : "General",
                 confidence: 0.85
+            };
+        }
+
+        // 3. Fuzzy typo tolerance (simple Levenshtein-like)
+        // Check if input is within 1-2 character edits of a known alias
+        const fuzzyMatch = Object.keys(ALIASES).find(key => {
+            const distance = levenshteinDistance(up, key);
+            return distance <= 2; // Allow up to 2 typos
+        });
+        if (fuzzyMatch) {
+            const resolvedSymbol = ALIASES[fuzzyMatch];
+            const stock = STOCKS.find(s => s.symbol === resolvedSymbol);
+            console.log(`[Fuzzy Match] ${query} → ${fuzzyMatch} → ${resolvedSymbol}`);
+            return {
+                symbol: resolvedSymbol,
+                sector: stock ? stock.sector : "General",
+                confidence: 0.75
             };
         }
 
