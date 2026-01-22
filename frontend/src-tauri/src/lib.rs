@@ -40,7 +40,7 @@ pub fn run() {
             // Auto-start backend on app launch
             log::info!("Starting backend server...");
             let state = app.state::<BackendState>();
-            match start_backend_internal(&state) {
+            match state.start() {
                 Ok(msg) => log::info!("{}", msg),
                 Err(e) => log::error!("Failed to start backend: {}", e),
             }
@@ -53,7 +53,7 @@ pub fn run() {
             if let tauri::WindowEvent::CloseRequested { .. } = event {
                 log::info!("Window closing, stopping backend...");
                 let state = window.state::<BackendState>();
-                if let Err(e) = stop_backend_internal(&state) {
+                if let Err(e) = state.stop() {
                     log::error!("Failed to stop backend: {}", e);
                 }
             }
@@ -61,40 +61,4 @@ pub fn run() {
         
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-}
-
-/// Internal function to start backend (not a Tauri command)
-fn start_backend_internal(state: &BackendState) -> Result<String, String> {
-    use std::process::Command;
-    
-    let mut backend = state.0.lock().map_err(|e| e.to_string())?;
-    
-    if backend.is_some() {
-        return Ok("Backend already running".to_string());
-    }
-    
-    let python_cmd = if cfg!(target_os = "windows") { "python" } else { "python3" };
-    
-    let child = Command::new(python_cmd)
-        .args(["-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "8000"])
-        .current_dir("../../ai_service")  // From src-tauri/ -> project_root/ai_service
-        .spawn()
-        .map_err(|e| format!("Failed to start backend: {}", e))?;
-    
-    let pid = child.id();
-    *backend = Some(child);
-    
-    Ok(format!("Backend started with PID: {}", pid))
-}
-
-/// Internal function to stop backend (not a Tauri command)
-fn stop_backend_internal(state: &BackendState) -> Result<String, String> {
-    let mut backend = state.0.lock().map_err(|e| e.to_string())?;
-    
-    if let Some(mut child) = backend.take() {
-        child.kill().map_err(|e| format!("Failed to kill backend: {}", e))?;
-        Ok("Backend stopped".to_string())
-    } else {
-        Ok("Backend was not running".to_string())
-    }
 }
