@@ -34,7 +34,7 @@ pub fn start_backend(state: State<BackendState>) -> Result<String, String> {
     // The working directory should be the ai_service folder
     let child = Command::new(python_cmd)
         .args(["-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "8000"])
-        .current_dir("../ai_service")  // Relative to src-tauri
+        .current_dir("../../ai_service")  // From src-tauri/ -> project_root/ai_service
         .spawn()
         .map_err(|e| format!("Failed to start backend: {}", e))?;
     

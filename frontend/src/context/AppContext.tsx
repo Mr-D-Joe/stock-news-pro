@@ -137,12 +137,42 @@ export const useLegacyAppContext = () => {
             const resolved = ctx.resolveLanguage(input);
             ctx.setSelectedLanguage(resolved);
         },
-        // Legacy stubs - these accept args but warn about deprecation
-        runAnalysis: async (_tickerOverride?: string) => {
-            console.warn('[DEPRECATED] Use useRunAnalysisMutation() hook instead');
+        // Real implementations for backward compatibility
+        runAnalysis: async (tickerOverride?: string) => {
+            const ticker = tickerOverride || ctx.uiState.selectedStock;
+            const sector = ctx.uiState.selectedSector;
+            const language = ctx.uiState.selectedLanguage;
+            
+            if (!ticker) return;
+            
+            ctx.setAnalysisStatus('loading');
+            try {
+                const result = await ApiService.runAnalysis(ticker, sector, language);
+                ctx.setAnalysisResult(result);
+                ctx.setAnalysisStatus('success');
+            } catch (error) {
+                console.error('Analysis failed:', error);
+                ctx.setAnalysisStatus('error');
+            }
         },
-        resolveStockInput: async (_input: string): Promise<string | null> => {
-            console.warn('[DEPRECATED] Use useStockSearch() hook instead');
+        resolveStockInput: async (input: string): Promise<string | null> => {
+            if (!input) return null;
+            try {
+                const result = await ApiService.searchStock(input);
+                if (result) {
+                    const confidence = 'confidence' in result ? (result as any).confidence : 1.0;
+                    if (confidence > 0.8) {
+                        console.log(`[Smart Resolve] ${input} -> ${result.symbol}`);
+                        ctx.setSelectedStock(result.symbol);
+                        if (result.sector) {
+                            ctx.setSelectedSector(result.sector);
+                        }
+                        return result.symbol;
+                    }
+                }
+            } catch (e) {
+                console.error('Stock resolution failed:', e);
+            }
             return null;
         },
     };

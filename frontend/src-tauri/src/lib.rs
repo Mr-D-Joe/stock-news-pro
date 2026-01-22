@@ -77,7 +77,7 @@ fn start_backend_internal(state: &BackendState) -> Result<String, String> {
     
     let child = Command::new(python_cmd)
         .args(["-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "8000"])
-        .current_dir("../ai_service")
+        .current_dir("../../ai_service")  // From src-tauri/ -> project_root/ai_service
         .spawn()
         .map_err(|e| format!("Failed to start backend: {}", e))?;
     
