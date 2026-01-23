@@ -423,11 +423,25 @@ JavaFX code MUST NOT be reintroduced.
 
 ---
 
-# DOCUMENTATION GOVERNANCE
+## DOCUMENTATION GOVERNANCE
 
 DESIGN.md is law.  
 SYSTEM_REPORT.md is audit.  
 README.md is orientation.
+
+No rule duplication allowed.  
+No contradictions allowed.
+
+## REQUIREMENTS ENGINEERING RULE
+
+All requirements MUST be specified as atomic, singular requirements; each requirement MUST describe exactly one independently verifiable behavior or property and MUST NOT bundle multiple constraints.
+
+## Conflict Resolution Rule
+
+If any requirement in LASTENHEFT.md conflicts with DESIGN.md, DESIGN.md SHALL always prevail.  
+The requirement MUST be adapted to comply with DESIGN.md.  
+
+Architectural and governance rules defined in DESIGN.md MUST NOT be overridden by requirements.
 
 No rule duplication allowed.  
 No contradictions allowed.
