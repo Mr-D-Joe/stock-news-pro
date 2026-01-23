@@ -432,9 +432,7 @@ README.md is orientation.
 No rule duplication allowed.  
 No contradictions allowed.
 
-## REQUIREMENTS ENGINEERING RULE
-
-All requirements MUST be specified as atomic, singular requirements; each requirement MUST describe exactly one independently verifiable behavior or property and MUST NOT bundle multiple constraints.
+---
 
 ## Conflict Resolution Rule
 
