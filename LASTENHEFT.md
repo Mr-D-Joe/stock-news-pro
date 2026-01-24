@@ -9,6 +9,31 @@ Status: Draft
 
 | Version | Datum       | Abschnitt | Änderungstyp | Beschreibung |
 |--------:|------------|-----------|--------------|--------------|
+| 1.1 | 2026-01-22 | 6.4 | Anforderungsauflösung | Auflösung der Sammelanforderung F-DH-04 in atomare Anforderungen zur In-Flight De-Duplizierung |
+| 1.1 | 2026-01-22 | 6.3 | Anforderungsauflösung | Auflösung der Sammelanforderung F-DH-03 in atomare Anforderungen zum Name/Symbol Mapping |
+| 1.1 | 2026-01-22 | 6.2 | Anforderungsauflösung | Auflösung der Sammelanforderung F-DH-02 in atomare Anforderungen zur fehlertoleranten Auflösung |
+| 1.1 | 2026-01-22 | 6.1 | Anforderungsauflösung | Auflösung der Sammelanforderung F-DH-01 in atomare Anforderungen zur internetbasierten Ticker-Auflösung |
+| 1.1 | 2026-01-22 | 5.5 | Anforderungsauflösung | Auflösung der Sammelanforderung F-AG-05 in atomare Anforderungen zum Token-Usage Tracking |
+| 1.1 | 2026-01-22 | 5.4 | Anforderungsauflösung | Auflösung der Sammelanforderung F-AG-04 in atomare Anforderungen zum Cache Pre-Check |
+| 1.1 | 2026-01-22 | 5.3 | Anforderungsauflösung | Auflösung der Sammelanforderung F-AG-03 in atomare Anforderungen zur AI Provider Priorität |
+| 1.1 | 2026-01-22 | 5.2 | Anforderungsauflösung | Auflösung der Sammelanforderung F-AG-02 in atomare Anforderungen zur API-Startup Warnung |
+| 1.1 | 2026-01-22 | 5.1 | Anforderungsauflösung | Auflösung der Sammelanforderung F-AG-01 in atomare Anforderungen zum DEV_MODE |
+| 1.1 | 2026-01-22 | 4.4 | Anforderungsauflösung | Auflösung der Sammelanforderung F-TA-04 in atomare Anforderungen zum Typed IPC Service Layer |
+| 1.1 | 2026-01-22 | 4.3 | Anforderungsauflösung | Auflösung der Sammelanforderung F-TA-03 in atomare Anforderungen zum Backend-Stopp |
+| 1.1 | 2026-01-22 | 4.2 | Anforderungsauflösung | Auflösung der Sammelanforderung F-TA-02 in atomare Anforderungen zum Backend-Start |
+| 1.1 | 2026-01-22 | 4.1 | Anforderungsauflösung | Auflösung der Sammelanforderung F-TA-01 in atomare Anforderungen zur native App |
+| 1.1 | 2026-01-22 | 3.5 | Anforderungsauflösung | Auflösung der Sammelanforderung F-BE-05 in atomare Anforderungen zur KI-Analyse |
+| 1.1 | 2026-01-22 | 3.4 | Anforderungsauflösung | Auflösung der Sammelanforderung F-BE-04 in atomare Anforderungen zur Nachrichtenaggregation |
+| 1.1 | 2026-01-22 | 3.3 | Anforderungsauflösung | Auflösung der Sammelanforderung F-BE-03 in atomare Anforderungen zu historischen Preisdaten |
+| 1.1 | 2026-01-22 | 3.2 | Anforderungsauflösung | Auflösung der Sammelanforderung F-BE-02 in atomare Anforderungen zum Fundamentaldaten-Abruf |
+| 1.1 | 2026-01-22 | 3.1 | Anforderungsauflösung | Auflösung der Sammelanforderung F-BE-01 in atomare Anforderungen zur Ticker-Auflösung |
+| 1.1 | 2026-01-22 | 2.11 | Anforderungsauflösung | Auflösung der Sammelanforderung F-UI-11 in atomare Anforderungen zum Volumen-Chart |
+| 1.1 | 2026-01-22 | 2.10 | Anforderungsauflösung | Auflösung der Sammelanforderung F-UI-10 in atomare Anforderungen zur Analyse-Scope-Steuerung |
+| 1.1 | 2026-01-22 | 2.9 | Anforderungsauflösung | Auflösung der Sammelanforderung F-UI-09 in atomare Anforderungen zur KI-Essay-Ausgabe |
+| 1.1 | 2026-01-22 | 2.8 | Anforderungsauflösung | Auflösung der Sammelanforderung F-UI-08 in atomare Anforderungen zum Preis-Chart |
+| 1.1 | 2026-01-22 | 2.7 | Anforderungsauflösung | Auflösung der Sammelanforderung F-UI-07 in atomare Anforderungen zur Executive Summary Card |
+| 1.1 | 2026-01-22 | 2.6 | Anforderungsauflösung | Auflösung der Sammelanforderung F-UI-06 in atomare Anforderungen zum News-Ticker |
+| 1.1 | 2026-01-22 | 2.5 | Anforderungsauflösung | Auflösung der Sammelanforderung F-UI-05 in atomare Anforderungen zur Zeitraumauswahl |
 | 1.1 | 2026-01-22 | 2.4 | Anforderungsauflösung | Auflösung der Sammelanforderung F-UI-04 in atomare Anforderungen zur Sprachumschaltung |
 | 1.1 | 2026-01-22 | 2.4 | Anforderungserweiterung | Einführung atomarer UI-Anforderungen für Sprachwahl, Kontextführung und Sprachwechsel |
 | 1.1 | 2026-01-22 | 2.4 | Präzisierung | Sprachliche Präzisierung und Vereinzelung der UI-REQ-LANG-Anforderungen gemäß RE-BASE- und RE-CTX-Regeln |
@@ -47,6 +72,82 @@ Status: Draft
 | F-UI-04 | UI-REQ-LANG-05 |
 | F-UI-04 | UI-REQ-LANG-06 |
 | F-UI-04 | UI-REQ-LANG-07 |
+
+### Auflösung der ursprünglichen Anforderung F-UI-05
+
+| Ursprüngliche Requirement-ID | Neue Requirement-ID |
+|-----------------------------|---------------------|
+| F-UI-05 | UI-REQ-PERIOD-01 |
+| F-UI-05 | UI-REQ-PERIOD-02 |
+| F-UI-05 | UI-REQ-PERIOD-03 |
+| F-UI-05 | UI-REQ-PERIOD-04 |
+| F-UI-05 | UI-REQ-PERIOD-05 |
+| F-UI-05 | UI-REQ-PERIOD-06 |
+| F-UI-05 | UI-REQ-PERIOD-07 |
+
+### Auflösung der ursprünglichen Anforderung F-UI-06
+
+| Ursprüngliche Requirement-ID | Neue Requirement-ID |
+|-----------------------------|---------------------|
+| F-UI-06 | UI-REQ-TICKER-01 |
+| F-UI-06 | UI-REQ-TICKER-02 |
+| F-UI-06 | UI-REQ-TICKER-03 |
+| F-UI-06 | UI-REQ-TICKER-04 |
+| F-UI-06 | UI-REQ-TICKER-05 |
+
+### Auflösung der ursprünglichen Anforderung F-UI-07
+
+| Ursprüngliche Requirement-ID | Neue Requirement-ID |
+|-----------------------------|---------------------|
+| F-UI-07 | UI-REQ-SUMMARY-01 |
+| F-UI-07 | UI-REQ-SUMMARY-02 |
+| F-UI-07 | UI-REQ-SUMMARY-03 |
+| F-UI-07 | UI-REQ-SUMMARY-04 |
+| F-UI-07 | UI-REQ-SUMMARY-05 |
+
+### Auflösung der ursprünglichen Anforderung F-UI-08
+
+| Ursprüngliche Requirement-ID | Neue Requirement-ID |
+|-----------------------------|---------------------|
+| F-UI-08 | UI-REQ-PCHART-01 |
+| F-UI-08 | UI-REQ-PCHART-02 |
+| F-UI-08 | UI-REQ-PCHART-03 |
+| F-UI-08 | UI-REQ-PCHART-04 |
+| F-UI-08 | UI-REQ-PCHART-05 |
+| F-UI-08 | UI-REQ-PCHART-06 |
+| F-UI-08 | UI-REQ-PCHART-07 |
+| F-UI-08 | UI-REQ-PCHART-08 |
+
+### Auflösung der ursprünglichen Anforderung F-UI-09
+
+| Ursprüngliche Requirement-ID | Neue Requirement-ID |
+|-----------------------------|---------------------|
+| F-UI-09 | UI-REQ-ESSAY-01 |
+| F-UI-09 | UI-REQ-ESSAY-02 |
+| F-UI-09 | UI-REQ-ESSAY-03 |
+| F-UI-09 | UI-REQ-ESSAY-04 |
+| F-UI-09 | UI-REQ-ESSAY-05 |
+
+### Auflösung der ursprünglichen Anforderung F-UI-10
+
+| Ursprüngliche Requirement-ID | Neue Requirement-ID |
+|-----------------------------|---------------------|
+| F-UI-10 | UI-REQ-SCOPE-01 |
+| F-UI-10 | UI-REQ-SCOPE-02 |
+| F-UI-10 | UI-REQ-SCOPE-03 |
+| F-UI-10 | UI-REQ-SCOPE-04 |
+| F-UI-10 | UI-REQ-SCOPE-05 |
+
+### Auflösung der ursprünglichen Anforderung F-UI-11
+
+| Ursprüngliche Requirement-ID | Neue Requirement-ID |
+|-----------------------------|---------------------|
+| F-UI-11 | UI-REQ-VCHART-01 |
+| F-UI-11 | UI-REQ-VCHART-02 |
+| F-UI-11 | UI-REQ-VCHART-03 |
+| F-UI-11 | UI-REQ-VCHART-04 |
+| F-UI-11 | UI-REQ-VCHART-05 |
+| F-UI-11 | UI-REQ-VCHART-06 |
 
 ### Auflösung der ursprünglichen Anforderung F-UI-03
 
@@ -106,7 +207,132 @@ Status: Draft
 | F-UI-01 | UI-REQ-STATE-05 |
 | F-UI-01 | UI-REQ-LINK-01 |
 | F-UI-01 | UI-REQ-LINK-02 |
-| F-UI-01 | UI-REQ-LINK-03 |
+| F-UI-11 | UI-REQ-VCHART-06 |
+
+### Auflösung der ursprünglichen Anforderung F-BE-01
+
+| Ursprüngliche Requirement-ID | Neue Requirement-ID |
+|-----------------------------|---------------------|
+| F-BE-01 | BE-REQ-RESOLUTION-01 |
+| F-BE-01 | BE-REQ-RESOLUTION-02 |
+| F-BE-01 | BE-REQ-RESOLUTION-03 |
+| F-BE-01 | BE-REQ-RESOLUTION-04 |
+
+### Auflösung der ursprünglichen Anforderung F-TA-01
+
+| Ursprüngliche Requirement-ID | Neue Requirement-ID |
+|-----------------------------|---------------------|
+| F-TA-01 | TA-REQ-NATIVE-01 |
+
+### Auflösung der ursprünglichen Anforderung F-TA-02
+
+| Ursprüngliche Requirement-ID | Neue Requirement-ID |
+|-----------------------------|---------------------|
+| F-TA-02 | TA-REQ-START-01 |
+| F-TA-02 | TA-REQ-START-02 |
+
+### Auflösung der ursprünglichen Anforderung F-TA-03
+
+| Ursprüngliche Requirement-ID | Neue Requirement-ID |
+|-----------------------------|---------------------|
+| F-TA-03 | TA-REQ-STOP-01 |
+
+### Auflösung der ursprünglichen Anforderung F-TA-04
+
+| Ursprüngliche Requirement-ID | Neue Requirement-ID |
+|-----------------------------|---------------------|
+| F-TA-04 | TA-REQ-IPC-01 |
+| F-TA-04 | TA-REQ-IPC-02 |
+
+### Auflösung der ursprünglichen Anforderung F-AG-01
+
+| Ursprüngliche Requirement-ID | Neue Requirement-ID |
+|-----------------------------|---------------------|
+| F-AG-01 | AG-REQ-DEVMODE-01 |
+
+### Auflösung der ursprünglichen Anforderung F-AG-02
+
+| Ursprüngliche Requirement-ID | Neue Requirement-ID |
+|-----------------------------|---------------------|
+| F-AG-02 | AG-REQ-WARN-01 |
+
+### Auflösung der ursprünglichen Anforderung F-AG-03
+
+| Ursprüngliche Requirement-ID | Neue Requirement-ID |
+|-----------------------------|---------------------|
+| F-AG-03 | AG-REQ-PRIORITY-01 |
+
+### Auflösung der ursprünglichen Anforderung F-AG-04
+
+| Ursprüngliche Requirement-ID | Neue Requirement-ID |
+|-----------------------------|---------------------|
+| F-AG-04 | AG-REQ-CACHE-01 |
+
+### Auflösung der ursprünglichen Anforderung F-AG-05
+
+| Ursprüngliche Requirement-ID | Neue Requirement-ID |
+|-----------------------------|---------------------|
+| F-AG-05 | AG-REQ-TOKEN-01 |
+
+### Auflösung der ursprünglichen Anforderung F-DH-01
+
+| Ursprüngliche Requirement-ID | Neue Requirement-ID |
+|-----------------------------|---------------------|
+| F-DH-01 | DH-REQ-REAL-01 |
+
+### Auflösung der ursprünglichen Anforderung F-DH-02
+
+| Ursprüngliche Requirement-ID | Neue Requirement-ID |
+|-----------------------------|---------------------|
+| F-DH-02 | DH-REQ-FUZZY-01 |
+
+### Auflösung der ursprünglichen Anforderung F-DH-03
+
+| Ursprüngliche Requirement-ID | Neue Requirement-ID |
+|-----------------------------|---------------------|
+| F-DH-03 | DH-REQ-MAPPING-01 |
+
+### Auflösung der ursprünglichen Anforderung F-DH-04
+
+| Ursprüngliche Requirement-ID | Neue Requirement-ID |
+|-----------------------------|---------------------|
+| F-DH-04 | DH-REQ-DEDUP-01 |
+
+### Auflösung der ursprünglichen Anforderung F-BE-02
+
+| Ursprüngliche Requirement-ID | Neue Requirement-ID |
+|-----------------------------|---------------------|
+| F-BE-02 | BE-REQ-FUNDAMENTAL-01 |
+| F-BE-02 | BE-REQ-FUNDAMENTAL-02 |
+| F-BE-02 | BE-REQ-FUNDAMENTAL-03 |
+| F-BE-02 | BE-REQ-FUNDAMENTAL-04 |
+
+### Auflösung der ursprünglichen Anforderung F-BE-03
+
+| Ursprüngliche Requirement-ID | Neue Requirement-ID |
+|-----------------------------|---------------------|
+| F-BE-03 | BE-REQ-HISTORY-01 |
+| F-BE-03 | BE-REQ-HISTORY-02 |
+| F-BE-03 | BE-REQ-HISTORY-03 |
+
+### Auflösung der ursprünglichen Anforderung F-BE-04
+
+| Ursprüngliche Requirement-ID | Neue Requirement-ID |
+|-----------------------------|---------------------|
+| F-BE-04 | BE-REQ-NEWS-01 |
+| F-BE-04 | BE-REQ-NEWS-02 |
+| F-BE-04 | BE-REQ-NEWS-03 |
+| F-BE-04 | BE-REQ-NEWS-04 |
+
+### Auflösung der ursprünglichen Anforderung F-BE-05
+
+| Ursprüngliche Requirement-ID | Neue Requirement-ID |
+|-----------------------------|---------------------|
+| F-BE-05 | BE-REQ-AI-01 |
+| F-BE-05 | BE-REQ-AI-02 |
+| F-BE-05 | BE-REQ-AI-03 |
+| F-BE-05 | BE-REQ-AI-04 |
+| F-BE-05 | BE-REQ-AI-05 |
 
 ## Arbeitsübersicht – Identifizierte Sammelanforderungen (nicht normativ)
 
@@ -118,36 +344,36 @@ Status: Draft
 | ~~F-UI-02~~ | ~~Ticker-Eingabe mit Fehlertoleranz (aufgelöst)~~ |
 | ~~F-UI-03~~ | ~~Sektor-Auswahl (aufgelöst)~~ |
 || ~~F-UI-04~~ | ~~Sprachumschaltung (aufgelöst)~~ |
-| F-UI-05 | Zeitraumauswahl |
-| F-UI-06 | Nachrichtenanzeige |
-| F-UI-07 | Executive Summary |
-| F-UI-08 | Preis-Chart |
-| F-UI-09 | KI-Analyseausgabe |
-| F-UI-10 | Analyse-Scope |
-| F-UI-11 | Volumen-Chart |
+| ~~F-UI-05~~ | ~~Zeitraumauswahl (aufgelöst)~~ |
+| ~~F-UI-06~~ | ~~Nachrichtenanzeige (aufgelöst)~~ |
+| ~~F-UI-07~~ | ~~Executive Summary (aufgelöst)~~ |
+| ~~F-UI-08~~ | ~~Preis-Chart (aufgelöst)~~ |
+| ~~F-UI-09~~ | ~~KI-Analyseausgabe (aufgelöst)~~ |
+| ~~F-UI-10~~ | ~~Analyse-Scope (aufgelöst)~~ |
+| ~~F-UI-11~~ | ~~Volumen-Chart (aufgelöst)~~ |
 
 ### Backend (AI Service)
 
 | Referenz | Kurzbeschreibung |
 |--------|------------------|
-| F-BE-01 | Ticker-Auflösung |
-| F-BE-02 | Fundamentaldaten |
-| F-BE-03 | Historische Preisdaten |
-| F-BE-04 | Nachrichtenaggregation |
-| F-BE-05 | KI-Analyse & Bericht |
+| ~~F-BE-01~~ | ~~Ticker-Auflösung (aufgelöst)~~ |
+| ~~F-BE-02~~ | ~~Fundamentaldaten (aufgelöst)~~ |
+| ~~F-BE-03~~ | ~~Historische Preisdaten (aufgelöst)~~ |
+| ~~F-BE-04~~ | ~~Nachrichtenaggregation (aufgelöst)~~ |
+| ~~F-BE-05~~ | ~~KI-Analyse & Bericht (aufgelöst)~~ |
 
 ### Desktop / Governance / Data Handling
 
 | Referenz | Kurzbeschreibung |
 |--------|------------------|
-| F-TA-01 | Native Desktop-App |
-| F-TA-02 | Backend-Prozesssteuerung |
-| F-AG-01 | DEV_MODE |
-| F-AG-02 | Provider-Priorisierung |
-| F-DH-01 | Internetbasierte Ticker-Auflösung |
-| F-DH-02 | Fehlertolerante Auflösung |
-| F-DH-03 | Name → Symbol |
-| F-DH-04 | In-Flight De-Duplizierung |
+| ~~F-TA-01~~ | ~~Native Desktop-App (aufgelöst)~~ |
+| ~~F-TA-02~~ | ~~Backend-Prozesssteuerung (aufgelöst)~~ |
+| ~~F-AG-01~~ | ~~DEV_MODE (aufgelöst)~~ |
+| ~~F-AG-02~~ | ~~Provider-Priorisierung (aufgelöst)~~ |
+| ~~F-DH-01~~ | ~~Internetbasierte Ticker-Auflösung (aufgelöst)~~ |
+| ~~F-DH-02~~ | ~~Fehlertolerante Auflösung (aufgelöst)~~ |
+| ~~F-DH-03~~ | ~~Name → Symbol (aufgelöst)~~ |
+| ~~F-DH-04~~ | ~~In-Flight De-Duplizierung (aufgelöst)~~ |
 
 ## 1. Projektübersicht
 
@@ -502,5 +728,333 @@ Die Benutzeroberfläche unterstützt den Wechsel der aktuell gesetzten Sprache d
 Die Benutzeroberfläche unterstützt einen gültigen Zustand, in dem der Kontextwert `language` gesetzt ist.
 
 
+
+## 2.5 Zeitraumauswahl (F-UI-05)
+
+#### 2.5.1 UI-REQ-PERIOD-01 — Bereitstellung einer Interaktionsmöglichkeit zur Zeitraumauswahl
+
+Die Benutzeroberfläche stellt eine Interaktionsmöglichkeit bereit, über die Nutzer den Zeitraum für die historische Datenanzeige auswählen können.
+
+#### 2.5.2 UI-REQ-PERIOD-02 — Kontextwert für den Analysezeitraum
+
+Die Benutzeroberfläche führt einen Kontextwert `time_range`, der den aktuell ausgewählten Analysezeitraum repräsentiert.
+
+#### 2.5.3 UI-REQ-PERIOD-03 — Unterstützung definierter Zeitintervalle
+
+Die Benutzeroberfläche unterstützt die Auswahl definierter Zeitintervalle (z. B. 24H, 7D, 1M, 3M, 6M, 1Y, 3Y, 5Y, 10Y, ALL).
+
+#### 2.5.4 UI-REQ-PERIOD-04 — Setzen des Zeitraumkontexts bei Auswahl
+
+Bei Auswahl eines Zeitintervalls setzt die Benutzeroberfläche den Kontextwert `time_range` auf das ausgewählte Intervall.
+
+#### 2.5.5 UI-REQ-PERIOD-05 — Visuelle Markierung des aktiven Zeitintervalls
+
+Die Benutzeroberfläche kennzeichnet das aktuell aktive Zeitintervall visuell innerhalb der Interaktionsmöglichkeit.
+
+#### 2.5.6 UI-REQ-PERIOD-06 — Unterstützung eines Standardzeitraums
+
+Die Benutzeroberfläche initialisiert den Kontextwert `time_range` mit einem definierten Standardzeitraum (z. B. 1Y).
+
+#### 2.5.7 UI-REQ-PERIOD-07 — Wechsel des Analysezeitraums
+
+Die Benutzeroberfläche unterstützt den Wechsel des aktuellen Zeitraums durch erneute Auswahl eines Intervalls.
+
+## 2.6 Nachrichten-Anzeige (F-UI-06)
+
+#### 2.6.1 UI-REQ-TICKER-01 — Bereitstellung eines visuellen Elements zur Nachrichtenanzeige
+
+Das System stellt ein visuelles Element bereit, das Nachrichten als Ticker oder Liste darstellt.
+
+#### 2.6.2 UI-REQ-TICKER-02 — Trennung von Branchen- und Unternehmensnachrichten
+
+Das System ermöglicht die separate Darstellung von sektorbezogenen Nachrichten und unternehmensbezogenen Nachrichten.
+
+#### 2.6.3 UI-REQ-TICKER-03 — Darstellung von Nachrichtentiteln
+
+Das Element zeigt mindestens den Titel der jeweiligen Nachricht an.
+
+#### 2.6.4 UI-REQ-TICKER-04 — Kennzeichnung der Nachrichtenquelle
+
+Das Element zeigt für jede Nachricht die zugehörige Quelle an.
+
+#### 2.6.5 UI-REQ-TICKER-05 — Anzeige der Nachrichtenaktualität
+
+Das Element zeigt für jede Nachricht den Erstellungs- oder Fetch-Zeitpunkt an.
+
+## 2.7 Executive Summary Card (F-UI-07)
+
+#### 2.7.1 UI-REQ-SUMMARY-01 — Bereitstellung einer Zusammenfassungskomponente
+
+Das System stellt eine Komponente bereit, die eine prägnante Zusammenfassung der Analyseergebnisse anzeigt.
+
+#### 2.7.2 UI-REQ-SUMMARY-02 — Anzeige des generierten Zusammenfassungstextes
+
+Die Komponente stellt den durch die KI generierten Text der Zusammenfassung dar.
+
+#### 2.7.3 UI-REQ-SUMMARY-03 — Visuelle Kennzeichnung als KI-Generiert
+
+Die Zusammenfassung muss explizit als durch KI generiertes Analyseergebnis gekennzeichnet sein.
+
+#### 2.7.4 UI-REQ-SUMMARY-04 — Anzeige des Generierungszeitpunkts
+
+Die Komponente zeigt den Zeitpunkt der Generierung der Zusammenfassung an.
+
+#### 2.7.5 UI-REQ-SUMMARY-05 — Darstellung wesentlicher Kennzahlen
+
+Die Komponente ermöglicht die integrierte Darstellung wesentlicher Kennzahlen des Analyseobjekts.
+
+## 2.8 Preis-Chart (F-UI-08)
+
+#### 2.8.1 UI-REQ-PCHART-01 — Bereitstellung eines Charts zur Preisdarstellung
+
+Das System stellt ein grafisches Element zur Visualisierung historischer Preisdaten bereit.
+
+#### 2.8.2 UI-REQ-PCHART-02 — Darstellung von zeitbasierten Preisdaten
+
+Das Element bildet historische Preise auf einer Zeitachse ab.
+
+#### 2.8.3 UI-REQ-PCHART-03 — Anzeige von Detailwerten bei Interaktion
+
+Das Element zeigt bei Nutzerinteraktion (z. B. Hover) den konkreten Preis und das Datum eines Datenpunktes an.
+
+#### 2.8.4 UI-REQ-PCHART-04 — Automatische Skalierung der Preisachse
+
+Die Skalierung der Preisachse passt sich automatisch dem Wertebereich der dargestellten Daten an.
+
+#### 2.8.5 UI-REQ-PCHART-05 — Kennzeichnung des Zeitintervalls
+
+Der grafische Behälter kennzeichnet den aktuell dargestellten Zeitraum visuell.
+
+#### 2.8.6 UI-REQ-PCHART-06 — Synchronisation mit Zeitraumkontext
+
+Die Darstellung im Preis-Chart erfolgt konsistent zum Kontextwert `time_range`.
+
+#### 2.8.7 UI-REQ-PCHART-07 — Behandlung fehlender Datenpunkte
+
+Bei fehlenden historischen Datenpunkten muss das grafische Element eine konsistente Linie oder eine explizite Lücke darstellen.
+
+#### 2.8.8 UI-REQ-PCHART-08 — Responsive Anpassung der Chartgröße
+
+Das grafische Element passt seine Größe dynamisch an den verfügbaren Platz im Dashboard-Container an.
+
+## 2.9 AI-Essay Ausgabe (F-UI-09)
+
+#### 2.9.1 UI-REQ-ESSAY-01 — Bereitstellung einer Komponente für ausführliche KI-Analysen
+
+Das System stellt eine Komponente zur Anzeige detaillierter, essayistischer KI-Analysen bereit.
+
+#### 2.9.2 UI-REQ-ESSAY-02 — Unterstützung formatierter Textausgabe
+
+Die Komponente unterstützt die strukturierte Darstellung von Text (z. B. Absätze, Überschriften).
+
+#### 2.9.3 UI-REQ-ESSAY-03 — Anzeige des KI-generierten Essay-Textes
+
+Die Komponente stellt den durch die KI erzeugten ausführlichen Analysetext dar.
+
+#### 2.9.4 UI-REQ-ESSAY-04 — Explizite Kennzeichnung als KI-Produkt
+
+Das Analyse-Essay muss eindeutig als automatisiert generiertes Produkt gekennzeichnet sein.
+
+#### 2.9.5 UI-REQ-ESSAY-05 — Scrollbare Inhaltsdarstellung
+
+Die Komponente ermöglicht das Lesen umfangreicher Texte durch Bereitstellung einer Scroll-Funktionalität.
+
+## 2.10 Analyse-Scope Steuerung (F-UI-10)
+
+#### 2.10.1 UI-REQ-SCOPE-01 — Bereitstellung einer Auswahlmöglichkeit für den Analyse-Scope
+
+Das System stellt eine Interaktionsmöglichkeit bereit, über die Nutzer den Umfang der Analyse definieren können.
+
+#### 2.10.2 UI-REQ-SCOPE-02 — Kontextwert für den Analyseumfang
+
+Die Benutzeroberfläche führt einen Kontextwert `analysis_scope`, der den aktuellen Untersuchungsbereich (z. B. Stock, Sector, Market, Combined) repräsentiert.
+
+#### 2.10.3 UI-REQ-SCOPE-03 — Steuerung der Analyseauslösung durch den Scope
+
+Der Analyseprozess wertet `analysis_scope` aus, um die relevanten Datenquellen und KI-Prompts zu bestimmen.
+
+#### 2.10.4 UI-REQ-SCOPE-04 — Visuelle Rückmeldung des gesetzten Scopes
+
+Die Benutzeroberfläche zeigt den aktuell aktiven Analyse-Scope innerhalb der Interaktionsmöglichkeit an.
+
+#### 2.10.5 UI-REQ-SCOPE-05 — Wechsel des Analyseumfangs
+
+Die Benutzeroberfläche unterstützt den Wechsel des aktiven Scopes durch Auswahl einer anderen Option.
+
+## 2.11 Volumen-Chart (F-UI-11)
+
+#### 2.11.1 UI-REQ-VCHART-01 — Bereitstellung eines Charts zur Volumendarstellung
+
+Das System stellt ein grafisches Element zur Visualisierung des Handelsvolumens bereit.
+
+#### 2.11.2 UI-REQ-VCHART-02 — Darstellung stündlicher Volumendaten der letzten 48 Stunden
+
+Das grafische Element stellt das Handelsvolumen in stündlicher Granularität für einen Zeitraum von 48 Stunden dar.
+
+#### 2.11.3 UI-REQ-VCHART-03 — Anzeige von Volumenwerten bei Interaktion
+
+Das Element zeigt bei Nutzerinteraktion (z. B. Hover) das konkrete Volumen und den Zeitpunkt an.
+
+#### 2.11.4 UI-REQ-VCHART-04 — Darstellung als Balken- oder Flächendiagramm
+
+Das Volumen wird bevorzugt als Balkendiagramm (Bar Chart) dargestellt.
+
+#### 2.11.5 UI-REQ-VCHART-05 — Konsistenz zum Analyseobjekt Aktie
+
+Der Volumen-Chart zeigt die Daten des im Kontextwert `selected_stock` gesetzten Analyseobjekts an.
+
+#### 2.11.6 UI-REQ-VCHART-06 — Vertikale Anordnung zum Preis-Chart
+
+Der Volumen-Chart wird unterhalb des Preis-Charts angeordnet, um einen direkten visuellen Vergleich zu ermöglichen.
+
+## 3. Backend (AI Service)
+
+Alle Backend-Anforderungen beschreiben die Verhaltensweisen des KI-Dienstes und seiner Schnittstellen.
+
+#### 3.1 BE-REQ-RESOLUTION-01 — Bereitstellung einer Schnittstelle zur Ticker-Auflösung
+
+Das Backend muss eine programmtechnische Schnittstelle bereitstellen, die eine Texteingabe (Name oder Symbol) in ein eindeutiges Börsensymbol auflöst.
+
+#### 3.1 BE-REQ-RESOLUTION-02 — Unterstützung von Fuzzy-Matching bei der Auflösung
+
+Die Auflösungsschnittstelle muss Tippfehler tolerieren und bei unscharfen Eingaben passende Kandidaten zurückgeben.
+
+#### 3.1 BE-REQ-RESOLUTION-03 — Rückgabe strukturierter Metadaten bei Auflösung
+
+Bei erfolgreicher Auflösung muss die Schnittstelle Symbol, Unternehmensname und Sektor zurückgeben.
+
+#### 3.1 BE-REQ-RESOLUTION-04 — Fehlerbehandlung bei unbekannten Analyseobjekten
+
+Wenn eine Eingabe nicht aufgelöst werden kann, muss die Schnittstelle einen definierten Fehlerzustand zurückgeben.
+
+#### 3.2 BE-REQ-FUNDAMENTAL-01 — Bereitstellung einer Schnittstelle für Fundamentaldaten
+
+Das Backend muss eine Schnittstelle bereitstellen, die für ein gegebenes Symbol fundamentale Kennzahlen liefert.
+
+#### 3.2 BE-REQ-FUNDAMENTAL-02 — Lieferung von Bewertungskennzahlen
+
+Die Schnittstelle muss mindestens P/E Ratio und PEG Ratio für das Analyseobjekt zurückgeben.
+
+#### 3.2 BE-REQ-FUNDAMENTAL-03 — Lieferung von Qualitätskennzahlen
+
+Die Schnittstelle muss mindestens ROE und Debt-to-Equity Ratio für das Analyseobjekt zurückgeben.
+
+#### 3.2 BE-REQ-FUNDAMENTAL-04 — Lieferung von Analysten-Ratings
+
+Die Schnittstelle muss Analysten-Kursziele (Mean, High, Low) und die aktuelle Empfehlung zurückgeben.
+
+#### 3.3 BE-REQ-HISTORY-01 — Bereitstellung einer Schnittstelle für historische Preise
+
+Das Backend muss eine Schnittstelle bereitstellen, die historische Preisdaten für ein gegebenes Symbol und einen definierten Zeitraum liefert.
+
+#### 3.3 BE-REQ-HISTORY-02 — Lieferung von Zeit-Preis-Paaren
+
+Die Historien-Schnittstelle muss eine Liste von Paaren aus Zeitstempel und Schlusskurs zurückgeben.
+
+#### 3.3 BE-REQ-HISTORY-03 — Unterstützung variabler Zeiträume
+
+Die Schnittstelle muss Datenabfragen für unterschiedliche konfiguriurable Zeitperioden ermöglichen.
+
+#### 3.4 BE-REQ-NEWS-01 — Aggregation von Nachrichtenquellen
+
+Das Backend muss Nachrichten aus konfigurierten externen Quellen (z. B. RSS-Feeds, News-APIs) aggregieren.
+
+#### 3.4 BE-REQ-NEWS-02 — Filterung von Nachrichten nach Sektor
+
+Das Backend muss die Aggregation und Filterung von Nachrichten basierend auf Branchensektoren unterstützen.
+
+#### 3.4 BE-REQ-NEWS-03 — Filterung von Nachrichten nach Unternehmen
+
+Das Backend muss die Aggregation und Filterung von Nachrichten basierend auf spezifischen Aktiensymbolen unterstützen.
+
+#### 3.4 BE-REQ-NEWS-04 — Normalisierung von Nachrichtenmetadaten
+
+Aggregierte Nachrichten müssen in einer einheitlichen Struktur (Titel, Quelle, Zeitstempel, Link) bereitgestellt werden.
+
+#### 3.5 BE-REQ-AI-01 — Generierung von Analyse-Zusammenfassungen
+
+Das Backend muss unter Nutzung von KI-Modellen automatisierte Zusammenfassungen (Executive Summaries) erzeugen.
+
+#### 3.5 BE-REQ-AI-02 — Generierung ausführlicher Analyse-Berichte
+
+Das Backend muss unter Nutzung von KI-Modellen detaillierte Analyse-Essays zu Unternehmen und Sektoren erzeugen.
+
+#### 3.5 BE-REQ-AI-03 — Berücksichtigung von Kontextvariablen in KI-Prompts
+
+Die KI-Generierung muss Sektor, Stock und Zeitrahmen als Parameter in die Prompt-Erstellung einbeziehen.
+
+#### 3.5 BE-REQ-AI-04 — Unterstützung mehrsprachiger KI-Ausgaben
+
+Das Backend muss die Ausgabe der KI-generierten Texte in den angeforderten Sprachen (z. B. Deutsch, Englisch) ermöglichen.
+
+#### 3.5 BE-REQ-AI-05 — Signierung der KI-Antworten mit Metadaten
+
+KI-Antworten müssen Metadaten über Generierungszeitpunkt und das verwendete Modell enthalten.
+
+## 4. Desktop-Integration (Tauri)
+
+#### 4.1 TA-REQ-NATIVE-01 — Bereitstellung einer nativen Desktop-Anwendung
+
+Das System muss als native Desktop-Anwendung für macOS und Windows ausführbar sein.
+
+#### 4.2 TA-REQ-START-01 — Automatischer Start des Backend-Prozesses
+
+Das System muss den Backend-Prozess (KI-Dienst) bei jedem Start der Desktop-Anwendung automatisch initialisieren.
+
+#### 4.2 TA-REQ-START-02 — Überprüfung der Backend-Verfügbarkeit nach Systemstart
+
+Die Desktop-Anwendung muss nach dem Start prüfen, ob der Backend-Prozess erfolgreich initialisiert wurde und über IPC erreichbar ist.
+
+#### 4.3 TA-REQ-STOP-01 — Automatischer Stopp des Backend-Prozesses
+
+Das System muss den Backend-Prozess beim ordnungsgemäßen Beenden der Desktop-Anwendung automatisch terminieren.
+
+#### 4.4 TA-REQ-IPC-01 — Bereitstellung einer typisierten IPC-Schnittstelle
+
+Die Kommunikation zwischen Frontend und Backend muss über eine strikt typisierte Inter-Process Communication (IPC) erfolgen.
+
+#### 4.4 TA-REQ-IPC-02 — Abbildung von Systemfehlern über IPC
+
+Fehler im Backend-Prozess oder in der IPC-Schicht müssen als typisierte Fehlermeldungen an das Frontend übermittelt werden.
+
+## 5. API-Governance
+
+#### 5.1 AG-REQ-DEVMODE-01 — Bereitstellung eines DEV_MODE Standards
+
+Das System muss standardmäßig im `DEV_MODE=True` (Mock-Modus) starten, um unkontrollierte externe API-Aufrufe zu verhindern.
+
+#### 5.2 AG-REQ-WARN-01 — Warnung bei Aktivierung der Real-API
+
+Das System muss beim Start explizit warnen, wenn der Modus für echte externe API-Aufrufe aktiviert ist.
+
+#### 5.3 AG-REQ-PRIORITY-01 — Konfigurierbare KI-Provider-Hierarchie
+
+Das System muss eine Priorisierung der KI-Provider (z. B. OpenAI vor Gemini) unterstützen.
+
+#### 5.4 AG-REQ-CACHE-01 — Durchführung eines Cache Pre-Checks
+
+Das System muss vor jedem KI-Aufruf prüfen, ob für die aktuelle Parameterkombination bereits ein valides Analyseergebnis im Cache vorliegt.
+
+#### 5.5 AG-REQ-TOKEN-01 — Protokollierung des Token-Verbrauchs
+
+Das System muss den Token-Verbrauch für jeden KI-Aufruf erfassen und protokollieren.
+
+## 6. Datenverarbeitung (Data Handling)
+
+#### 6.1 DH-REQ-REAL-01 — Durchführung internetbasierter Ticker-Auflösung
+
+Im Real-Modus muss das System eine internetbasierte API (z. B. Yahoo Finance) zur Ticker-Auflösung nutzen.
+
+#### 6.2 DH-REQ-FUZZY-01 — Implementierung fehlertoleranter Namensauflösung
+
+Das System muss Abweichungen in der Schreibweise von Firmennamen bei der Ticker-Auflösung rechnerisch bewerten und tolerieren.
+
+#### 6.3 DH-REQ-MAPPING-01 — Unterstützung von Name-zu-Symbol Mapping
+
+Das System muss die Auflösung von Klartext-Firmennamen in kanonische Börsensymbole ermöglichen.
+
+#### 6.4 DH-REQ-DEDUP-01 — Vermeidung paralleler identischer Anfragen
+
+Das System muss sicherstellen, dass zeitgleiche identische Auflösungsanfragen de-dupliziert werden und nur eine externe Anfrage ausgelöst wird.
 
 Ende des Lastenhefts
