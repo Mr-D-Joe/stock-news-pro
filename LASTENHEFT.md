@@ -1,7 +1,7 @@
 # LASTENHEFT — Stock News Pro
 ## Requirements Specification Document
 
-Version: 1.1  
+Version: 1.2  
 Datum: 2026-01-24  
 Status: Draft  
 
@@ -9,6 +9,13 @@ Status: Draft
 
 | Version | Datum       | Abschnitt | Änderungstyp | Beschreibung |
 |--------:|------------|-----------|--------------|--------------|
+| 1.2 | 2026-01-24 | 1.5 | Strategie-Erweiterung | Einführung spezialisierter Dokumentationsartefakte (TECHNICAL_SPEC, STYLEGUIDE, PROMPTS) zur Schließung von Spezifikationslücken |
+| 1.1 | 2026-01-24 | 1.7 | Governance-Erweiterung | Einführung eines eigenständigen Governance-Abschnitts zur normativen Wirkung, Interpretation und Autorität von Anforderungen |
+| 1.1 | 2026-01-24 | 1.7 | Regelpräzisierung | Festlegung der normativen Gültigkeit expliziter, formulierter Anforderungen und freigegebener Lastenheft-Versionen |
+| 1.1 | 2026-01-24 | 1.7 | Architekturabgleich | Verankerung der verbindlichen Autorität von DESIGN.md für alle Anforderungen des Lastenhefts |
+| 1.1 | 2026-01-24 | 1.6 | Governance-Erweiterung | Einführung eines verbindlichen Änderungs- und Erweiterungsprozesses für externe Änderungswünsche |
+| 1.1 | 2026-01-24 | 1.6 | Prozesspräzisierung | Festlegung der verpflichtenden Ableitung externer Anweisungen in atomare, regelkonforme Anforderungen |
+| 1.1 | 2026-01-24 | 1.6 | Governance-Absicherung | Definition der Freigabe-, Dokumentations- und Versionierungspflicht vor jeder Implementierung |
 | 1.1 | 2026-01-24 | Gesamt | Konsolidierung | Bereinigung von Inkonsistenzen in Änderungshistorie, ID-Zuordnung und Arbeitsübersicht gemäß RE-STRUCT und RE-TRACE |
 | 1.1 | 2026-01-24 | 2.5–2.11 | Regelkonformität | Vereinheitlichung der UI-Formulierungen auf „Benutzeroberfläche“ sowie explizite Trennung von UI- und Backend-Verantwortung gemäß DESIGN.md |
 | 1.1 | 2026-01-24 | 3.1–6.4 | Regelkonformität | Korrektur fehlerhafter Abschnittsnummerierungen (z. B. mehrfach „3.1“) in Backend-, Tauri-, Governance- und Data-Handling-Anforderungen gemäß RE-STRUCT-02 |
@@ -500,6 +507,101 @@ Für jede umgesetzte Version des Systems wird ein SYSTEM_REPORT.md gemäß der i
 #### 1.5.2 DOC-ART-02 — README
 
 Für das Projekt wird eine README.md geführt, die Zweck, Einstieg und grundlegende Nutzung des Systems beschreibt.
+
+#### 1.5.3 DOC-ART-03 — Technical Specification
+
+Das Projekt führt eine TECHNICAL_SPEC.md zur Dokumentation implementierungsspezifischer Details, Fallback-Listen und technischer Parameter.
+
+#### 1.5.4 DOC-ART-04 — Styleguide
+
+Das Projekt führt eine STYLEGUIDE.md zur normativen Definition von visuellen Standards, UX-Mustern und Design-Tokens.
+
+#### 1.5.5 DOC-ART-05 — Prompt Library
+
+Das Projekt führt eine PROMPTS.md zur Versionierung und Dokumentation aller im System verwendeten KI-System-Prompts.
+
+## 1.6 Änderungs- und Erweiterungsprozess
+
+Dieser Abschnitt definiert verbindliche Anforderungen für Änderungen und Erweiterungen des Systems, die aus externen Anweisungen oder Änderungswünschen hervorgehen.
+
+Begriffspräzisierung (informativ):
+- Eine „externe Anweisung“ bezeichnet einen Änderungswunsch, der nicht bereits als Requirement im Lastenheft vorliegt.
+- Eine „Freigabe“ bezeichnet die ausdrückliche Bestätigung durch den Nutzer.
+
+### 1.6.1 RE-GOV-02 — Anforderungsbasierte Systemänderung
+
+Alle Änderungen, Erweiterungen oder Korrekturen des Systems müssen auf einer expliziten Anforderung in diesem Lastenheft basieren.
+
+### 1.6.2 RE-GOV-03 — Ableitung von Anforderungen aus externen Änderungswünschen
+
+Extern formulierte Änderungswünsche müssen vor einer Implementierung in eine oder mehrere atomare Anforderungen dieses Lastenhefts überführt werden.
+
+### 1.6.3 RE-GOV-04 — Einhaltung der formalen Anforderungsregeln
+
+Neu abgeleitete oder geänderte Anforderungen müssen den formalen Regeln gemäß Abschnitt 1.4 entsprechen.
+
+### 1.6.4 RE-GOV-05 — Architekturkonformität von Änderungen
+
+Alle neu abgeleiteten oder geänderten Anforderungen müssen mit den Vorgaben von DESIGN.md konform sein.
+
+### 1.6.5 RE-GOV-06 — Abstimmungspflicht für Anforderungsänderungen
+
+Jede Änderung am Lastenheft muss vor einer Implementierung dem Nutzer zur Freigabe vorgelegt werden.
+
+### 1.6.6 RE-GOV-07 — Dokumentation freigegebener Änderungen
+
+Freigegebene Änderungen am Lastenheft müssen in der Änderungshistorie dokumentiert werden.
+
+### 1.6.7 RE-GOV-08 — Versionierung von Anforderungsänderungen
+
+Jede dokumentierte Änderung am Lastenheft muss einer Version und einem Datum zugeordnet sein.
+
+### 1.6.8 RE-GOV-09 — Rückführbarkeit von Änderungen
+
+Jede Anforderungsänderung muss eindeutig auf die betroffenen Abschnitte und Requirement-IDs verweisen.
+
+### 1.6.9 RE-GOV-10 — Implementierungsgrundlage
+
+Eine Implementierung muss auf freigegebenen Anforderungen dieses Lastenhefts basieren.
+
+## 1.7 Governance der Interpretation und normativen Autorität
+
+Dieser Abschnitt definiert verbindliche Anforderungen
+zur normativen Wirkung, Auslegung und Autorität
+der Anforderungen dieses Lastenhefts.
+
+### 1.7.1 RE-GOV-11 — Normative Wirkung formulierter Anforderungen
+
+Normative Wirkung für System und Implementierung
+besitzen Anforderungen,
+die explizit und vollständig in diesem Lastenheft formuliert sind.
+
+### 1.7.2 RE-GOV-12 — Normative Form von Anforderungen
+
+Normative Anforderungen
+müssen als formale Requirements
+mit eindeutiger Anforderungs-ID vorliegen.
+
+### 1.7.3 RE-GOV-13 — Semantische Selbstständigkeit von Anforderungen
+
+Jede Anforderung definiert ihre fachliche Bedeutung
+durch ihren eigenen Text.
+
+### 1.7.4 RE-GOV-14 — Autorität der Architekturvorgaben
+
+Die in DESIGN.md definierten Architektur-
+und Governance-Vorgaben
+sind für alle Anforderungen dieses Lastenhefts verbindlich.
+
+### 1.7.5 RE-GOV-15 — Präzisierung unklarer Anforderungen
+
+Anforderungen mit unklarer oder mehrdeutiger Bedeutung
+müssen vor einer Ableitung oder Implementierung präzisiert werden.
+
+### 1.7.6 RE-GOV-16 — Normative Wirkung freigegebener Versionen
+
+Normative Gültigkeit besitzen
+die vom Nutzer freigegebenen Versionen des Lastenhefts.
 
 ## 2. Funktionale Anforderungen
 

@@ -44,9 +44,12 @@ No other document may introduce binding rules.
 ## DOCUMENT PRIORITY ORDER
 
 1. DESIGN.md — binding law  
-2. SYSTEM_REPORT.md — descriptive audit only  
-3. README.md — informational only  
-4. Code comments — non-authoritative  
+2. LASTENHEFT.md — functional specification  
+3. TECHNICAL_SPEC.md — implementation-level normative specs
+4. STYLEGUIDE.md — implementation-level normative specs
+5. PROMPTS.md — implementation-level normative specs
+6. SYSTEM_REPORT.md — descriptive audit only  
+7. README.md — informational only  
 
 ---
 
@@ -426,6 +429,10 @@ JavaFX code MUST NOT be reintroduced.
 ## DOCUMENTATION GOVERNANCE
 
 DESIGN.md is law.  
+LASTENHEFT.md is the functional source of truth.
+TECHNICAL_SPEC.md is normative for implementation details.
+STYLEGUIDE.md is normative for implementation details.
+PROMPTS.md is normative for implementation details.
 SYSTEM_REPORT.md is audit.  
 README.md is orientation.
 
