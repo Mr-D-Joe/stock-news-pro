@@ -8,14 +8,16 @@ Architektur-, Governance-, LLM- und Systemverhaltensregeln werden ausschließlic
 Im Konfliktfall besitzt DESIGN.md Vorrang.
 
 
-Version: 1.3  
-Datum: 2026-01-27  
+Version: 1.5  
+Datum: 2026-01-28  
 Status: Draft 
 
 ## Änderungshistorie
 
 | Version | Datum       | Abschnitt | Änderungstyp | Beschreibung |
 |--------:|------------|-----------|--------------|--------------|
+| 1.5 | 2026-01-28 | 2.13, 3.7 | Erweiterung | Einführung der Sparkline-Anforderungen (UI-REQ-SPARK-01 bis -04, BE-REQ-SPARK-01 bis -02) für kompakte Trend-Visualisierungen |
+| 1.4 | 2026-01-28 | 2.12, 3.6 | Erweiterung | Einführung der Sektor-Heatmap-Anforderungen (UI-REQ-HEATMAP-01 bis -09, BE-REQ-SECTOR-01 bis -04) für interaktive Treemap-Visualisierung der Marktsektoren |
 | 1.3 | 2026-01-27 | 7 | Erweiterung | Einführung eines Kapitels „Nicht-funktionale Anforderungen“ mit atomaren, benutzerorientierten Qualitätsanforderungen (NFR-REQ-01 bis NFR-REQ-07) gemäß DESIGN.md |
 | 1.3 | 2026-01-27 | 3.5.5 | Terminologie-Präzisierung | Präzisierung der Verantwortlichkeit für KI-Metadaten von „Backend“ auf „System“ zur Konsistenz mit Orchestrierungsarchitektur gemäß DESIGN.md |
 | 1.3 | 2026-01-27 | 2.1, 2.2, 2.6–2.11 | Terminologie-Konsistenz | Vereinheitlichung der UI-Anforderungen: Ersetzung von „Das System …“ durch „Die Benutzeroberfläche …“ in UI-Requirements sowie Korrektur von Zustands-Terminologie in 2.2 zur klaren Trennung von UI- und Backend-Verantwortung gemäß DESIGN.md. |
@@ -799,6 +801,62 @@ Der Volumen-Chart zeigt die Daten des im Kontextwert `selected_stock` gesetzten 
 
 Der Volumen-Chart wird unterhalb des Preis-Charts angeordnet, um einen direkten visuellen Vergleich zu ermöglichen.
 
+### 2.12 Sektor-Heatmap (F-UI-12)
+
+#### 2.12.1 UI-REQ-HEATMAP-01 — Bereitstellung einer Treemap-Komponente für Sektorübersicht
+
+Die Benutzeroberfläche stellt eine grafische Treemap-Komponente bereit, die eine hierarchische Übersicht aller Marktsektoren visualisiert.
+
+#### 2.12.2 UI-REQ-HEATMAP-02 — Größencodierung nach Marktkapitalisierung
+
+Die Treemap-Komponente stellt die relative Größe jeder Sektorkachel proportional zur aggregierten Marktkapitalisierung des Sektors dar.
+
+#### 2.12.3 UI-REQ-HEATMAP-03 — Farbcodierung nach Performance
+
+Die Treemap-Komponente zeigt die Performance jedes Sektors durch Farbcodierung an (grün für positive, rot für negative Veränderung).
+
+#### 2.12.4 UI-REQ-HEATMAP-04 — Intensität der Farbcodierung nach Performancegrad
+
+Die Intensität der Farbcodierung (Sättigung) variiert proportional zum Ausmaß der Performanceveränderung.
+
+#### 2.12.5 UI-REQ-HEATMAP-05 — Anzeige von Sektor-Details bei Interaktion
+
+Die Treemap-Komponente zeigt bei Nutzerinteraktion (z. B. Hover) den Sektornamen und die prozentuale Veränderung an.
+
+#### 2.12.6 UI-REQ-HEATMAP-06 — Navigation zu Sektordetails bei Klick
+
+Bei Klick auf eine Sektorkachel setzt die Benutzeroberfläche den Kontextwert `selected_sector` auf den ausgewählten Sektor.
+
+#### 2.12.7 UI-REQ-HEATMAP-07 — Darstellung von Top-Aktien innerhalb einer Sektorkachel
+
+Die Treemap-Komponente kann innerhalb jeder Sektorkachel die Top-Aktien des Sektors als verschachtelte Unterkacheln darstellen.
+
+#### 2.12.8 UI-REQ-HEATMAP-08 — Synchronisation mit Zeitraumkontext
+
+Die Performanceberechnung der Heatmap erfolgt konsistent zum Kontextwert `time_range`.
+
+#### 2.12.9 UI-REQ-HEATMAP-09 — Responsive Anpassung der Heatmap-Größe
+
+Die Treemap-Komponente passt ihre Größe dynamisch an den verfügbaren Platz im Dashboard-Container an.
+
+### 2.13 Sparklines — Kompakte Trend-Visualisierung
+
+#### 2.13.1 UI-REQ-SPARK-01 — Bereitstellung einer Sparkline-Komponente
+
+Die Benutzeroberfläche muss eine hochoptimierte Sparkline-Komponente (Mini-Chart) zur Visualisierung von Preistrends bereitstellen.
+
+#### 2.13.2 UI-REQ-SPARK-02 — Farbindikation nach Preistrend
+
+Die Sparkline-Komponente muss den Preistrend farblich kennzeichnen (z. B. Grün für positive Kursentwicklung, Rot für negative Kursentwicklung).
+
+#### 2.13.3 UI-REQ-SPARK-03 — Integration in Watchlists und Suchergebnisse
+
+Die Sparkline-Komponente muss in Listenansichten (Watchlists) und Suchergebnissen zur schnellen Trend-Erfassung integriert sein.
+
+#### 2.13.4 UI-REQ-SPARK-04 — Fixierte Skalierung zur Vergleichbarkeit
+
+Die Sparkline-Komponente muss die Kursdaten so skalieren, dass Trends zwischen verschiedenen Sparklines in derselben Ansicht visuell vergleichbar sind.
+
 ## 3. Backend (AI Service)
 
 Alle Backend-Anforderungen beschreiben die Verhaltensweisen des KI-Dienstes und seiner Schnittstellen.
@@ -882,6 +940,34 @@ Das Backend muss die Ausgabe der KI-generierten Texte in den angeforderten Sprac
 #### 3.5.5 BE-REQ-AI-05 — Signierung der KI-Antworten mit Metadaten
 
 Das System muss KI-Antworten mit Metadaten über Generierungszeitpunkt und verwendetes Modell versehen.
+
+### 3.6 Sektor-Performance-Daten (F-BE-06)
+
+#### 3.6.1 BE-REQ-SECTOR-01 — Bereitstellung einer Schnittstelle für Sektor-Performance
+
+Das Backend muss eine Schnittstelle bereitstellen, die aggregierte Performance-Daten für alle Marktsektoren liefert.
+
+#### 3.6.2 BE-REQ-SECTOR-02 — Lieferung von Sektor-Kennzahlen
+
+Die Schnittstelle muss für jeden Sektor die prozentuale Veränderung und die aggregierte Marktkapitalisierung zurückgeben.
+
+#### 3.6.3 BE-REQ-SECTOR-03 — Lieferung von Top-Aktien pro Sektor
+
+Die Schnittstelle muss für jeden Sektor eine Liste der Top-Aktien (nach Marktkapitalisierung) mit deren individueller Performance liefern.
+
+#### 3.6.4 BE-REQ-SECTOR-04 — Unterstützung variabler Zeiträume für Sektor-Performance
+
+Die Schnittstelle muss Sektor-Performance-Daten für unterschiedliche konfigurierbare Zeitperioden (z. B. 1D, 1W, 1M, 1Y) bereitstellen.
+
+### 3.7 Sparkline-Daten-Service
+
+#### 3.7.1 BE-REQ-SPARK-01 — Bereitstellung kompakter Zeitreihendaten
+
+Das System muss optimierte, kompakte Zeitreihendaten (z. B. aggregierte Schlusskurse) speziell für die Sparkline-Visualisierung bereitstellen.
+
+#### 3.7.2 BE-REQ-SPARK-02 — Unterstützung zeitraumabhängiger Sparkline-Daten
+
+Das System muss die Sparkline-Daten in Abhängigkeit vom gewählten Zeitraum (z. B. 1D, 1W, 1M) liefern.
 
 ## 4. Desktop-Integration (Tauri)
 

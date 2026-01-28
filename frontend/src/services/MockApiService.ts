@@ -1,4 +1,4 @@
-import type { Stock, NewsItem, Report, Essay, AnalysisResult } from '../types';
+import type { Stock, NewsItem, Report, Essay, AnalysisResult, SectorPerformance, SparklineResponse } from '../types';
 
 // ==================== Helper Functions ====================
 
@@ -204,6 +204,53 @@ const ALL_NEWS: NewsItem[] = [
     { title: "Semiconductor Shortage Eases", sector: "Technology", source: "TechCrunch", timestamp: "07:45 AM" },
 ];
 
+const SECTOR_PERFORMANCE: SectorPerformance[] = [
+    {
+        id: "Technology",
+        name: "Technology",
+        performance: 1.25,
+        market_cap: 15600000000000,
+        top_stocks: [
+            { symbol: "AAPL", name: "Apple Inc.", performance: 1.10, market_cap: 3400000000000 },
+            { symbol: "MSFT", name: "Microsoft", performance: 0.85, market_cap: 3100000000000 },
+            { symbol: "NVDA", name: "NVIDIA", performance: 2.40, market_cap: 2800000000000 }
+        ]
+    },
+    {
+        id: "Healthcare",
+        name: "Healthcare",
+        performance: -0.45,
+        market_cap: 8400000000000,
+        top_stocks: [
+            { symbol: "LLY", name: "Eli Lilly", performance: -0.20, market_cap: 850000000000 },
+            { symbol: "UNH", name: "UnitedHealth", performance: -0.60, market_cap: 520000000000 },
+            { symbol: "JNJ", name: "J&J", performance: 0.15, market_cap: 380000000000 }
+        ]
+    },
+    {
+        id: "Financials",
+        name: "Financials",
+        performance: 0.35,
+        market_cap: 9200000000000,
+        top_stocks: [
+            { symbol: "JPM", name: "JPMorgan", performance: 0.45, market_cap: 580000000000 },
+            { symbol: "V", name: "Visa", performance: 0.20, market_cap: 540000000000 },
+            { symbol: "MA", name: "Mastercard", performance: 0.30, market_cap: 420000000000 }
+        ]
+    },
+    {
+        id: "Energy",
+        name: "Energy",
+        performance: -1.10,
+        market_cap: 3800000000000,
+        top_stocks: [
+            { symbol: "XOM", name: "ExxonMobil", performance: -1.25, market_cap: 480000000000 },
+            { symbol: "CVX", name: "Chevron", performance: -0.95, market_cap: 290000000000 },
+            { symbol: "TTE", name: "TotalEnergies", performance: -1.40, market_cap: 160000000000 }
+        ]
+    }
+];
+
 export const MockApiService = {
     getStocks: async (): Promise<Stock[]> => {
         return new Promise(resolve => setTimeout(() => resolve(STOCKS), 100));
@@ -357,6 +404,44 @@ export const MockApiService = {
                 };
                 resolve(result);
             }, 1000);
+        });
+    },
+
+    getSectorPerformance: async (period: string = '1d'): Promise<SectorPerformance[]> => {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                // Return a modified version of SECTOR_PERFORMANCE based on period for realism
+                const multiplier = period === '1y' ? 15 : period === '1m' ? 3 : period === '1w' ? 1.5 : 1;
+                resolve(SECTOR_PERFORMANCE.map(s => ({
+                    ...s,
+                    performance: s.performance * multiplier,
+                    top_stocks: s.top_stocks.map(ts => ({
+                        ...ts,
+                        performance: ts.performance * multiplier
+                    }))
+                })));
+            }, 300);
+        });
+    },
+
+    getSparklineData: async (ticker: string, period: string = '1w'): Promise<SparklineResponse> => {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                // Generate random walk data for sparkline
+                const points = 24;
+                const data = [100];
+                for (let i = 1; i < points; i++) {
+                    const prev = data[i - 1];
+                    const change = (Math.random() - 0.5) * 4;
+                    data.push(Number((prev + change).toFixed(2)));
+                }
+                resolve({
+                    ticker: ticker.toUpperCase(),
+                    period,
+                    data,
+                    source: 'browser.mock'
+                });
+            }, 150);
         });
     }
 };

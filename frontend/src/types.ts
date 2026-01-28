@@ -110,4 +110,26 @@ export interface EventMonitorCardProps {
     sectorNews: string[];
 }
 
+export interface SectorStock {
+    symbol: string;
+    name: string;
+    performance: number;
+    market_cap: number;
+}
+
+export interface SectorPerformance {
+    id: string;
+    name: string;
+    performance: number;
+    market_cap: number;
+    top_stocks: SectorStock[];
+}
+
+export interface SparklineResponse {
+    ticker: string;
+    period: string;
+    data: number[];
+    source: string;
+}
+
 

@@ -30,8 +30,8 @@ impl BackendState {
         
         // Start uvicorn server
         let child = Command::new(python_cmd)
-            .args(["-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "8000"])
-            .current_dir("../../ai_service")
+            .args(["-m", "uvicorn", "ai_service.main:app", "--host", "127.0.0.1", "--port", "8000"])
+            .current_dir("../../")
             .spawn()
             .map_err(|e| format!("Failed to start backend: {}", e))?;
         

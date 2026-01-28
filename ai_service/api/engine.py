@@ -145,6 +145,22 @@ class AnalysisRequest(BaseModel):
     language: str = "German"
 
 
+class SectorStock(BaseModel):
+    """Subset of stock data for sector visualization."""
+    symbol: str
+    name: str
+    performance: float
+    market_cap: int
+
+
+class SectorPerformance(BaseModel):
+    """Aggregated performance data for a market sector."""
+    id: str
+    name: str
+    performance: float
+    market_cap: int
+    top_stocks: list[SectorStock]
+
 
 class AnalysisMetadata(BaseModel):
     """Metadata about the analysis process."""
@@ -162,6 +178,14 @@ class AnalysisResponse(BaseModel):
     key_findings: list[str]
     generated_at: datetime
     metadata: Optional[AnalysisMetadata] = None
+
+
+class SparklineResponse(BaseModel):
+    """Compact time-series data for sparkline visualization."""
+    ticker: str
+    period: str
+    data: list[float]
+    source: str
 
 
 
@@ -508,4 +532,59 @@ async def fetch_news(request: FetchRequest):
     except Exception as e:
         logger.error(f"Fetch failed: {e}")
         raise HTTPException(status_code=500, detail=f"Fetch failed: {e}")
+
+
+@router.get("/sectors/performance", response_model=list[SectorPerformance])
+async def get_sectors(
+    period: str = Query("1d", description="Time period for performance (1d, 1w, 1m, 1y)")
+):
+    """
+    Get market sector performance.
+    
+    Implements BE-REQ-SECTOR-01 to BE-REQ-SECTOR-04.
+    In DEV_MODE, returns rich mock data.
+    """
+    from ai_service.config import Settings
+    from ai_service.mock.mock_data import get_mock_sector_performance
+    
+    settings = Settings()
+    
+    if settings.dev_mode:
+        data = get_mock_sector_performance(period)
+        return [SectorPerformance(**s) for s in data]
+    
+    # In Real mode, this would fetch from a real provider (e.g. FMP)
+    # For now, return mock even in real mode but with a warning in logs
+    return [SectorPerformance(**s) for s in data]
+
+
+@router.get("/stocks/{ticker}/sparkline", response_model=SparklineResponse)
+async def get_sparkline(
+    ticker: str,
+    period: str = Query("1w", description="Time period (1d, 1w, 1m)")
+):
+    """
+    Get compact sparkline data for a ticker.
+    
+    Implements BE-REQ-SPARK-01 and BE-REQ-SPARK-02.
+    """
+    from ai_service.config import Settings
+    from ai_service.mock.mock_data import get_mock_sparkline_data
+    
+    settings = Settings()
+    
+    # Unified source identification
+    source = "mock" if settings.dev_mode else "real-fallback-mock"
+    
+    if not settings.dev_mode:
+        logger.warning(f"Real sparkline data for {ticker} not available - falling back to mock")
+    
+    data = get_mock_sparkline_data(ticker, period)
+    
+    return SparklineResponse(
+        ticker=ticker.upper(),
+        period=period,
+        data=data,
+        source=source
+    )
 

@@ -5,7 +5,7 @@
  * Used when VITE_USE_REAL_API=true
  */
 
-import type { Stock, NewsItem, Report, AnalysisResult, ChartPoint } from '../types';
+import type { Stock, NewsItem, Report, AnalysisResult, ChartPoint, SectorPerformance, SparklineResponse } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
@@ -224,6 +224,34 @@ export const RealApiService = {
             'fr': 'French', 'französisch': 'French', 'french': 'French',
         };
         return map[lower] || input.charAt(0).toUpperCase() + input.slice(1);
+    },
+
+    /**
+     * Get market sector performance
+     */
+    getSectorPerformance: async (period: string = '1d'): Promise<SectorPerformance[]> => {
+        try {
+            return await fetchJSON<SectorPerformance[]>(
+                `/api/engine/sectors/performance?period=${period}`
+            );
+        } catch (error) {
+            console.error('RealApiService.getSectorPerformance error:', error);
+            return [];
+        }
+    },
+
+    /**
+     * Get compact sparkline data for a ticker
+     */
+    getSparklineData: async (ticker: string, period: string = '1w'): Promise<SparklineResponse> => {
+        try {
+            return await fetchJSON<SparklineResponse>(
+                `/api/engine/stocks/${ticker}/sparkline?period=${period}`
+            );
+        } catch (error) {
+            console.error('RealApiService.getSparklineData error:', error);
+            return { ticker, period, data: [], source: 'error' };
+        }
     },
 
     /**

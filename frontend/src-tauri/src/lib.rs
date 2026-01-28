@@ -37,6 +37,8 @@ pub fn run() {
                 )?;
             }
             
+            app.handle().plugin(tauri_plugin_shell::init())?;
+            
             // Auto-start backend on app launch
             log::info!("Starting backend server...");
             let state = app.state::<BackendState>();

@@ -1,8 +1,8 @@
 # TECHNICAL_SPEC — Stock News Pro
 ## Implementation-Level Specification
 
-Version: 1.1  
-Datum: 2026-01-24  
+Version: 1.2  
+Datum: 2026-01-28  
 Status: Active
 
 ---
@@ -56,6 +56,26 @@ Die 1Y-Ansicht im Chart-Slicing Hook aggregiert Daten auf Basis von 252 Handelst
 #### 2.2.2 TECH-SPEC-CHART-02 — Granularität für 24H-Ansicht
 
 Die 24H-Ansicht im Chart-Slicing Hook präsentiert Daten in einer Granularität von 15-Minuten-Intervallen.
+
+### 2.3 Sparkline & Mini-Charts
+
+#### 2.3.1 TECH-SPEC-SPARK-01 — SVG Path Rendering
+
+Die Sparkline-Komponente berechnet einen SVG-Pfad auf Basis von normalisierten Datenpunkten. Die Skalierung erfolgt über eine lineare Abbildung (Linear Mapping) des Wertebereichs [min, max] auf die Viewbox-Koordinaten.
+
+#### 2.3.2 TECH-SPEC-SPARK-02 — Trend-Indikation Logik
+
+Die Trendfarbe wird durch den Vergleich des ersten und letzten Datenpunktes der Sparkline bestimmt. Differenzen > 0 werden als `text-emerald-500` (Emerald-Sättigung 500) gerendert.
+
+### 2.4 Heatmap Treemap Logic
+
+#### 2.4.1 TECH-SPEC-HEATMAP-01 — Recharts Treemap Integration
+
+Die Heatmap nutzt die `Treemap`-Komponente von Recharts. Die Hierarchie wird über das `data`-Attribut abgebildet, wobei die Sektoren als Root-Knoten und Aktien als Blatt-Knoten fungieren.
+
+#### 2.4.2 TECH-SPEC-HEATMAP-02 — Performance Color Mapping
+
+Die Hintergrundfarbe der Sektorkacheln wird über eine HSL-basierte Sättigungsfunktion gesteuert. Positive Performance (Sektor) führt zu grünen Farbtönen, negative zu roten. Der Sättigungsgrad entspricht dem Betrag der Performance im Intervall [0%, 5%].
 
 ---
 

@@ -1,3 +1,5 @@
+import React from 'react';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { TopBar } from '@/components/TopBar';
 import { MarketOverviewCard } from '@/components/dashboard/MarketOverviewCard';
@@ -8,8 +10,26 @@ import { EssayCard } from '@/components/dashboard/EssayCard';
 import { StatusBar } from '@/components/StatusBar';
 import { Activity } from 'lucide-react';
 
+import { HeatmapCard } from '@/components/dashboard/HeatmapCard';
+import { WatchlistCard } from '@/components/dashboard/WatchlistCard';
+import { BackendService } from '@/services/BackendService';
+
 const Dashboard = () => {
   const { uiState, analysisStatus, analysisResult } = useAppContext();
+  const [backendReady, setBackendReady] = React.useState<boolean>(false);
+
+  // Initialize Backend on Mount
+  React.useEffect(() => {
+    const initBackend = async () => {
+      const healthy = await BackendService.init();
+      setBackendReady(healthy);
+      if (!healthy) {
+        // In DEV_MODE we might just log warning, or show error if critical
+        console.warn("Backend unavailable - proceeding in potential Mock-Only mode manually?");
+      }
+    };
+    initBackend();
+  }, []);
   const { selectedSector } = uiState;
 
   return (
@@ -44,15 +64,40 @@ const Dashboard = () => {
 
           {/* IDLE STATE */}
           {analysisStatus === 'idle' && !analysisResult && (
-            <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-6 fade-in duration-700">
-              <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                <Activity className="h-10 w-10 text-blue-500" />
+            <div className="max-w-6xl mx-auto space-y-12 py-8 animate-in fade-in duration-1000">
+              <div className="text-center space-y-4">
+                <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight sm:text-4xl">
+                  Market Pulse Overview
+                </h2>
+                <p className="text-slate-500 max-w-2xl mx-auto text-lg">
+                  Select a sector or search for a ticker to begin deep AI analysis.
+                  Size represents Market Cap, color represents daily performance.
+                </p>
               </div>
-              <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Financial Intelligence Dashboard</h2>
-              <p className="text-slate-500 max-w-lg text-lg leading-relaxed">
-                Enter a symbol (e.g. <strong>GOOG</strong>) or Sector. <br />
-                Use the controls above to define Scope and Timeframe.
-              </p>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                <div className="lg:col-span-8 relative group">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-2xl blur opacity-15 group-hover:opacity-25 transition duration-1000"></div>
+                  <HeatmapCard />
+                </div>
+                <div className="lg:col-span-4 h-full">
+                  <WatchlistCard />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8">
+                {[
+                  { title: 'Global Coverage', desc: 'Analyzing 50,000+ tickers across all major exchanges.', icon: <Activity className="h-5 w-5 text-blue-500" /> },
+                  { title: 'AI-First Insights', desc: 'Gemini 2.0 synthesized reporting with citation tracking.', icon: <Activity className="h-5 w-5 text-emerald-500" /> },
+                  { title: 'Real-time Flow', desc: 'Low-latency C++ backend with Python AI refinement.', icon: <Activity className="h-5 w-5 text-purple-500" /> }
+                ].map((feat, i) => (
+                  <div key={i} className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="mb-3">{feat.icon}</div>
+                    <h4 className="font-bold text-slate-800 mb-1">{feat.title}</h4>
+                    <p className="text-sm text-slate-500 leading-relaxed">{feat.desc}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
@@ -102,8 +147,14 @@ const Dashboard = () => {
       </main>
 
       <StatusBar
-        statusMessage={analysisStatus === 'loading' ? "Processing Real-Time Data Stream..." : "System Operational • All Services Connected"}
-        versionInfo="v3.1.0-STRICT"
+        statusMessage={
+          !backendReady
+            ? "System Alert • Backend Unavailable (Mock Mode)"
+            : analysisStatus === 'loading'
+              ? "Processing Real-Time Data Stream..."
+              : "System Operational • Backend Connected"
+        }
+        versionInfo="v1.5.0-desktop"
       />
     </div>
   );
@@ -112,7 +163,9 @@ const Dashboard = () => {
 function App() {
   return (
     <AppProvider>
-      <Dashboard />
+      <ErrorBoundary>
+        <Dashboard />
+      </ErrorBoundary>
     </AppProvider>
   );
 }

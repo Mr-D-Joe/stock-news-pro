@@ -8,7 +8,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ApiService } from '../services/ApiService';
-import type { AnalysisResult, Stock } from '../types';
+import type { AnalysisResult, Stock, SectorPerformance, SparklineResponse } from '../types';
 
 // ==================== Query Keys ====================
 export const queryKeys = {
@@ -16,6 +16,8 @@ export const queryKeys = {
         ['analysis', ticker.toUpperCase(), sector.toUpperCase(), language.toUpperCase()] as const,
     stockSearch: (query: string) => ['stock', 'search', query.toLowerCase()] as const,
     stocks: () => ['stocks'] as const,
+    sectors: (period: string) => ['sectors', 'performance', period.toLowerCase()] as const,
+    sparkline: (ticker: string, period: string) => ['sparkline', ticker.toUpperCase(), period.toLowerCase()] as const,
 };
 
 // ==================== useAnalysis Hook ====================
@@ -102,9 +104,32 @@ export function useRunAnalysisMutation() {
     });
 }
 
+export function useSectorPerformance(period: string = '1d') {
+    return useQuery({
+        queryKey: queryKeys.sectors(period),
+        queryFn: async (): Promise<SectorPerformance[]> => {
+            return ApiService.getSectorPerformance(period);
+        },
+        staleTime: 5 * 60 * 1000, // 5 min
+    });
+}
+
+export function useSparklineData(ticker: string, period: string = '1w') {
+    return useQuery({
+        queryKey: queryKeys.sparkline(ticker, period),
+        queryFn: async (): Promise<SparklineResponse> => {
+            return ApiService.getSparklineData(ticker, period);
+        },
+        enabled: !!ticker,
+        staleTime: 5 * 60 * 1000, // 5 min
+    });
+}
+
 export default {
     useAnalysis,
     useStockSearch,
     useStocks,
+    useSectorPerformance,
+    useSparklineData,
     useRunAnalysisMutation,
 };

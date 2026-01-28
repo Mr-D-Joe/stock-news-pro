@@ -215,6 +215,180 @@ def get_mock_deep_web(ticker: str) -> List[Dict[str, Any]]:
     return deep_web_data.get(ticker, [])
 
 # =============================================================================
+# MOCK SECTORS DATA
+# =============================================================================
+
+MOCK_SECTORS: Dict[str, Dict[str, Any]] = {
+    "Technology": {
+        "name": "Technology",
+        "market_cap": 15600000000000,
+        "performance_1d": 1.25,
+        "performance_1w": 3.40,
+        "performance_1m": -1.20,
+        "performance_1y": 28.50,
+        "top_stocks": [
+            {"symbol": "AAPL", "name": "Apple Inc.", "performance": 1.10, "market_cap": 3400000000000},
+            {"symbol": "MSFT", "name": "Microsoft", "performance": 0.85, "market_cap": 3100000000000},
+            {"symbol": "NVDA", "name": "NVIDIA", "performance": 2.40, "market_cap": 2800000000000},
+            {"symbol": "ACME", "name": "ACME Corp", "performance": 1.50, "market_cap": 12500000000}
+        ]
+    },
+    "Healthcare": {
+        "name": "Healthcare",
+        "market_cap": 8400000000000,
+        "performance_1d": -0.45,
+        "performance_1w": 1.10,
+        "performance_1m": 2.30,
+        "performance_1y": 12.40,
+        "top_stocks": [
+            {"symbol": "LLY", "name": "Eli Lilly", "performance": -0.20, "market_cap": 850000000000},
+            {"symbol": "UNH", "name": "UnitedHealth", "performance": -0.60, "market_cap": 520000000000},
+            {"symbol": "JNJ", "name": "J&J", "performance": 0.15, "market_cap": 380000000000},
+            {"symbol": "BGNX", "name": "BioGenX", "performance": -1.20, "market_cap": 3200000000}
+        ]
+    },
+    "Financials": {
+        "name": "Financials",
+        "market_cap": 9200000000000,
+        "performance_1d": 0.35,
+        "performance_1w": -0.80,
+        "performance_1m": 4.10,
+        "performance_1y": 18.20,
+        "top_stocks": [
+            {"symbol": "JPM", "name": "JPMorgan", "performance": 0.45, "market_cap": 580000000000},
+            {"symbol": "V", "name": "Visa", "performance": 0.20, "market_cap": 540000000000},
+            {"symbol": "MA", "name": "Mastercard", "performance": 0.30, "market_cap": 420000000000},
+            {"symbol": "FINX", "name": "FinanceX", "performance": 0.75, "market_cap": 15200000000}
+        ]
+    },
+    "Energy": {
+        "name": "Energy",
+        "market_cap": 3800000000000,
+        "performance_1d": -1.10,
+        "performance_1w": -2.40,
+        "performance_1m": -5.20,
+        "performance_1y": -8.40,
+        "top_stocks": [
+            {"symbol": "XOM", "name": "ExxonMobil", "performance": -1.25, "market_cap": 480000000000},
+            {"symbol": "CVX", "name": "Chevron", "performance": -0.95, "market_cap": 290000000000},
+            {"symbol": "TTE", "name": "TotalEnergies", "performance": -1.40, "market_cap": 160000000000},
+            {"symbol": "NOVA", "name": "NovaCraft", "performance": 2.10, "market_cap": 8700000000}
+        ]
+    },
+    "Consumer Discretionary": {
+        "name": "Consumer Discretionary",
+        "market_cap": 7500000000000,
+        "performance_1d": 0.85,
+        "performance_1w": 2.10,
+        "performance_1m": 1.50,
+        "performance_1y": 22.10,
+        "top_stocks": [
+            {"symbol": "AMZN", "name": "Amazon", "performance": 1.05, "market_cap": 1900000000000},
+            {"symbol": "TSLA", "name": "Tesla", "performance": -0.40, "market_cap": 850000000000},
+            {"symbol": "HD", "name": "Home Depot", "performance": 0.65, "market_cap": 340000000000}
+        ]
+    },
+    "Communication Services": {
+        "name": "Communication Services",
+        "market_cap": 6200000000000,
+        "performance_1d": 1.45,
+        "performance_1w": 1.20,
+        "performance_1m": -0.40,
+        "performance_1y": 32.40,
+        "top_stocks": [
+            {"symbol": "GOOGL", "name": "Alphabet", "performance": 1.80, "market_cap": 2100000000000},
+            {"symbol": "META", "name": "Meta", "performance": 2.10, "market_cap": 1200000000000},
+            {"symbol": "NFLX", "name": "Netflix", "performance": 0.95, "market_cap": 280000000000}
+        ]
+    },
+    "Industrials": {
+        "name": "Industrials",
+        "market_cap": 5400000000000,
+        "performance_1d": -0.25,
+        "performance_1w": 0.45,
+        "performance_1m": 1.80,
+        "performance_1y": 14.50,
+        "top_stocks": [
+            {"symbol": "GE", "name": "GE Aerospace", "performance": 0.35, "market_cap": 180000000000},
+            {"symbol": "CAT", "name": "Caterpillar", "performance": -0.55, "market_cap": 160000000000},
+            {"symbol": "HON", "name": "Honeywell", "performance": -0.10, "market_cap": 130000000000}
+        ]
+    },
+    "Consumer Staples": {
+        "name": "Consumer Staples",
+        "market_cap": 4200000000000,
+        "performance_1d": 0.15,
+        "performance_1w": 0.65,
+        "performance_1m": 0.90,
+        "performance_1y": 6.80,
+        "top_stocks": [
+            {"symbol": "PG", "name": "P&G", "performance": 0.25, "market_cap": 380000000000},
+            {"symbol": "KO", "name": "Coca-Cola", "performance": -0.10, "market_cap": 260000000000},
+            {"symbol": "PEP", "name": "PepsiCo", "performance": 0.40, "market_cap": 240000000000}
+        ]
+    },
+    "Utilities": {
+        "name": "Utilities",
+        "market_cap": 1800000000000,
+        "performance_1d": -0.85,
+        "performance_1w": -1.20,
+        "performance_1m": -2.40,
+        "performance_1y": -4.20,
+        "top_stocks": [
+            {"symbol": "NEE", "name": "NextEra Energy", "performance": -1.10, "market_cap": 150000000000},
+            {"symbol": "DUK", "name": "Duke Energy", "performance": -0.65, "market_cap": 75000000000},
+            {"symbol": "SO", "name": "Southern Co", "performance": -0.50, "market_cap": 82000000000}
+        ]
+    },
+    "Real Estate": {
+        "name": "Real Estate",
+        "market_cap": 1400000000000,
+        "performance_1d": -1.40,
+        "performance_1w": -3.10,
+        "performance_1m": -4.80,
+        "performance_1y": -12.50,
+        "top_stocks": [
+            {"symbol": "PLD", "name": "Prologis", "performance": -1.20, "market_cap": 110000000000},
+            {"symbol": "AMT", "name": "American Tower", "performance": -1.80, "market_cap": 95000000000},
+            {"symbol": "EQIX", "name": "Equinix", "performance": -0.90, "market_cap": 82000000000}
+        ]
+    },
+    "Materials": {
+        "name": "Materials",
+        "market_cap": 2800000000000,
+        "performance_1d": 0.45,
+        "performance_1w": 0.90,
+        "performance_1m": 1.20,
+        "performance_1y": 8.40,
+        "top_stocks": [
+            {"symbol": "LIN", "name": "Linde", "performance": 0.60, "market_cap": 220000000000},
+            {"symbol": "SHW", "name": "Sherwin-Williams", "performance": 0.25, "market_cap": 85000000000},
+            {"symbol": "FCX", "name": "Freeport-McMoRan", "performance": 1.10, "market_cap": 72000000000}
+        ]
+    }
+}
+
+def get_mock_sector_performance(period: str = "1d") -> List[Dict[str, Any]]:
+    """Return mock sector performance data for a given period.
+    
+    Supports periods: 1d, 1w, 1m, 1y
+    Implements BE-REQ-SECTOR-01, BE-REQ-SECTOR-02, BE-REQ-SECTOR-03, BE-REQ-SECTOR-04
+    """
+    perf_key = f"performance_{period.lower()}"
+    sectors = []
+    
+    for sector_id, data in MOCK_SECTORS.items():
+        sectors.append({
+            "id": sector_id,
+            "name": data["name"],
+            "market_cap": data["market_cap"],
+            "performance": data.get(perf_key, data["performance_1d"]),
+            "top_stocks": data["top_stocks"]
+        })
+    
+    return sectors
+
+# =============================================================================
 # MOCK PRICE HISTORY
 # =============================================================================
 
@@ -323,6 +497,34 @@ def get_mock_price_data(ticker: str, period: str = "1y") -> Dict[str, Any]:
         "last_price": prices[-1]["close"] if prices else 0,
         "source": "mock"
     }
+
+def get_mock_sparkline_data(ticker: str, period: str = "1w") -> List[float]:
+    """Generate compact sparkline data points.
+    
+    Implements BE-REQ-SPARK-01 and BE-REQ-SPARK-02.
+    Returns a list of approx 20-30 data points.
+    """
+    base_prices = {"ACME": 142.50, "BGNX": 78.30, "NOVA": 75.40, "FINX": 62.80}
+    base_price = base_prices.get(ticker.upper(), 100.0)
+    
+    # Adjust volatility based on ticker
+    vol = 0.02
+    if ticker.upper() == "BGNX": vol = 0.05
+    if ticker.upper() == "ACME": vol = 0.015
+    
+    random.seed(hash(ticker + period + "spark"))
+    
+    # 24 points for a clean mini-chart
+    points = 24
+    current_price = base_price * (1 + random.gauss(0, 0.05)) # Start with slight offset
+    
+    spark_data = [round(current_price, 2)]
+    for _ in range(points - 1):
+        change = random.gauss(0, vol)
+        current_price *= (1 + change)
+        spark_data.append(round(current_price, 2))
+        
+    return spark_data
 
 
 # =============================================================================
