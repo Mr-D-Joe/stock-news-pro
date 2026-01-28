@@ -1,5 +1,6 @@
 import React from 'react';
 import { Sparkles } from 'lucide-react';
+import { MarkdownRenderer } from '../MarkdownRenderer';
 import type { Metric } from '../../types';
 
 interface SummarizerCardProps {
@@ -20,9 +21,9 @@ export const SummarizerCard: React.FC<SummarizerCardProps> = ({ summary, metrics
                 <div className="text-[10px] text-gray-400 font-mono">MODEL: GEMINI-PRO</div>
             </div>
 
-            <p className="text-sm text-gray-700 leading-relaxed font-normal">
-                {summary}
-            </p>
+            <div className="text-sm">
+                <MarkdownRenderer content={summary} variant="compact" />
+            </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
                 {metrics.map((m, i) => (

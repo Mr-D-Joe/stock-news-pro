@@ -9,10 +9,7 @@ import { NewsTicker } from '@/components/dashboard/NewsTicker';
 import { SummarizerCard } from '@/components/dashboard/SummarizerCard';
 import { EssayCard } from '@/components/dashboard/EssayCard';
 import { StatusBar } from '@/components/StatusBar';
-import { Activity } from 'lucide-react';
 
-import { HeatmapCard } from '@/components/dashboard/HeatmapCard';
-import { WatchlistCard } from '@/components/dashboard/WatchlistCard';
 import { BackendService } from '@/services/BackendService';
 
 const Dashboard = () => {

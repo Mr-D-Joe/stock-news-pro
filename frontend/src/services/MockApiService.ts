@@ -326,7 +326,7 @@ export const MockApiService = {
         return "English"; // Default
     },
 
-    runAnalysis: async (ticker: string, sector: string, language: string = "English"): Promise<AnalysisResult> => {
+    runAnalysis: async (ticker: string, _sector: string, language: string = "English"): Promise<AnalysisResult> => {
         return new Promise(resolve => {
             setTimeout(() => {
                 // Find stock or fallback to ACME

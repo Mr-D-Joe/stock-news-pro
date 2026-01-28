@@ -8,7 +8,6 @@
  */
 
 import React, { useState } from 'react';
-import React, { useState } from 'react';
 import { Globe, Play, Loader2, Search, PieChart, FlaskConical, Radio } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { useRunAnalysisMutation } from '../hooks/useDataFetching';
