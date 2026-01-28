@@ -407,11 +407,32 @@ export const MockApiService = {
                     baseEssay.text = `## ${langPrefix} Analysis of ${stock.name}\n\n${baseEssay.text}`;
                 }
 
+                // Filter news
+                let stockNews = ALL_NEWS.filter(n => n.title.toUpperCase().includes(cleanTicker) || n.title.toUpperCase().includes(stock.name.toUpperCase()));
+                let sectorNews = ALL_NEWS.filter(n => n.sector === stock.sector || n.sector === "General");
+
+                // Translate news titles for German
+                if (language === "German") {
+                    const newsTranslations: Record<string, string> = {
+                        "ACME Signs Defense Contract": "ACME unterzeichnet Verteidigungsvertrag",
+                        "Breakthrough in AI Drug Discovery": "Durchbruch bei KI-gestützter Medikamentenentwicklung",
+                        "Mercedes Unveils New EQ Concept": "Mercedes präsentiert neues EQ-Konzept",
+                        "Tech Sector Rallies on Earnings": "Tech-Sektor steigt nach Quartalszahlen",
+                        "Novo Nordisk Supply Chain Update": "Novo Nordisk: Update zur Lieferkette",
+                        "Lilly's Zepbound Sales Beat Targets": "Lillys Zepbound-Verkäufe übertreffen Prognosen",
+                        "Roche Diagnostics receives FDA clearance": "Roche Diagnostics erhält FDA-Zulassung",
+                        "European Pharma Index Hits All-Time High": "Europäischer Pharma-Index erreicht Allzeithoch",
+                        "Global Markets Brace for Rate Hikes": "Weltmärkte bereiten sich auf Zinserhöhungen vor",
+                        "Semiconductor Shortage Eases": "Halbleitermangel entspannt sich"
+                    };
+                    stockNews = stockNews.map(n => ({ ...n, title: newsTranslations[n.title] || n.title }));
+                    sectorNews = sectorNews.map(n => ({ ...n, title: newsTranslations[n.title] || n.title }));
+                }
 
                 const result: AnalysisResult = {
                     report: { ...baseReport, generatedAt: new Date().toISOString() },
-                    stockNews: ALL_NEWS.filter(n => n.title.toUpperCase().includes(cleanTicker) || n.title.toUpperCase().includes(stock.name.toUpperCase())),
-                    sectorNews: ALL_NEWS.filter(n => n.sector === stock.sector || n.sector === "General"),
+                    stockNews,
+                    sectorNews,
                     essay: baseEssay.text,
                     chartData: stock.history.map((val: number, i: number) => {
                         // Generate relative dates from "Full History"
