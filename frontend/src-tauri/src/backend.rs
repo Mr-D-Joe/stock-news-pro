@@ -30,7 +30,7 @@ impl BackendState {
         
         // Start uvicorn server
         let child = Command::new(python_cmd)
-            .args(["-m", "uvicorn", "ai_service.main:app", "--host", "127.0.0.1", "--port", "8000"])
+            .args(["-m", "uvicorn", "ai_service.main:app", "--host", "127.0.0.1", "--port", "8200"])
             .current_dir("../../")
             .spawn()
             .map_err(|e| format!("Failed to start backend: {}", e))?;
@@ -78,7 +78,7 @@ pub fn backend_status(state: State<BackendState>) -> Result<bool, String> {
 #[tauri::command]
 pub async fn check_backend_health() -> Result<bool, String> {
     let client = reqwest::Client::new();
-    match client.get("http://127.0.0.1:8000/").send().await {
+    match client.get("http://127.0.0.1:8200/").send().await {
         Ok(resp) => Ok(resp.status().is_success()),
         Err(_) => Ok(false),
     }
