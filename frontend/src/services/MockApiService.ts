@@ -329,10 +329,25 @@ export const MockApiService = {
     runAnalysis: async (ticker: string, _sector: string, language: string = "English"): Promise<AnalysisResult> => {
         return new Promise(resolve => {
             setTimeout(() => {
-                // Find stock or fallback to ACME
+                // Find stock or create dynamic placeholder for unknown tickers
                 let cleanTicker = ticker.toUpperCase();
                 if (ALIASES[cleanTicker]) cleanTicker = ALIASES[cleanTicker];
-                const stock = STOCKS.find(s => s.symbol === cleanTicker) || STOCKS[0];
+
+                // Try to find existing stock, otherwise create dynamic placeholder
+                let stock = STOCKS.find(s => s.symbol === cleanTicker);
+
+                if (!stock) {
+                    // Create dynamic placeholder stock for unknown tickers
+                    const dynamicName = ticker.charAt(0).toUpperCase() + ticker.slice(1).toLowerCase();
+                    stock = {
+                        symbol: cleanTicker,
+                        name: `${dynamicName} Inc.`,
+                        sector: "Technology", // Default sector
+                        price: 100 + Math.random() * 200,
+                        change: (Math.random() - 0.5) * 10,
+                        history: Array.from({ length: 4000 }, (_, i) => 80 + i * 0.02 + Math.random() * 30)
+                    };
+                }
 
                 // --- Multilingual Mock Content Generation ---
                 let baseReport = REPORTS[cleanTicker] ? { ...REPORTS[cleanTicker] } : null;
@@ -342,13 +357,13 @@ export const MockApiService = {
                 if (!baseReport) {
                     baseReport = {
                         stock: cleanTicker,
-                        summary: `${cleanTicker} (${stock.name}) is a key player in the ${stock.sector} sector. Current market conditions show mixed signals.`,
-                        deepAnalysis: `## Market Position\n${stock.name} maintains a stable position in ${stock.sector}.\n\n## Financials\nRecent price action around $${stock.price} suggests consolidation.`,
-                        reviewData: { peRatio: 20.0, pegRatio: 1.5, roe: 15.0, debtToEquity: 1.0 },
-                        analystRatings: { mean: stock.price * 1.1, high: stock.price * 1.3, low: stock.price * 0.9, recommendation: "HOLD" },
-                        riskAssessment: { level: 'Medium', description: "Standard sector risks apply." },
-                        marketSentiment: { trend: 'Neutral', score: 50 },
-                        businessContext: `${stock.name} operates primarily in the ${stock.sector} industry.`,
+                        summary: `${stock.name} (${cleanTicker}) is a notable player in the ${stock.sector} sector. Current market conditions show mixed signals requiring careful analysis.`,
+                        deepAnalysis: `## Market Position\n${stock.name} maintains a competitive position in ${stock.sector}.\n\n## Financials\nRecent price action around $${stock.price.toFixed(2)} suggests consolidation phase.\n\n## Key Catalysts\nUpcoming earnings reports and sector developments will be critical drivers.`,
+                        reviewData: { peRatio: 18 + Math.random() * 10, pegRatio: 1.2 + Math.random(), roe: 12 + Math.random() * 10, debtToEquity: 0.5 + Math.random() },
+                        analystRatings: { mean: stock.price * 1.15, high: stock.price * 1.35, low: stock.price * 0.85, recommendation: "HOLD" },
+                        riskAssessment: { level: 'Medium', description: "Standard sector risks apply. Monitor market developments closely." },
+                        marketSentiment: { trend: 'Neutral', score: 45 + Math.floor(Math.random() * 20) },
+                        businessContext: `${stock.name} operates primarily in the ${stock.sector} industry, serving global markets with innovative solutions.`,
                         generatedAt: new Date().toISOString()
                     };
                 }
@@ -356,32 +371,42 @@ export const MockApiService = {
                 if (!baseEssay) {
                     baseEssay = {
                         stock: cleanTicker,
-                        text: `## Analysis of ${stock.name}\n\n### Sector Context\nThe ${stock.sector} sector is currently navigating macroeconomic headwinds. ${stock.name} is positioned to adapt to these changes.\n\n### Outlook\nInvestors should monitor upcoming earnings reports for ${cleanTicker} to gauge future performance.`
+                        text: `## Analysis of ${stock.name}\n\n### Sector Context\nThe ${stock.sector} sector is currently navigating macroeconomic headwinds. ${stock.name} is positioned to adapt to these changes.\n\n### Investment Thesis\nInvestors should consider the risk/reward profile carefully before initiating positions.\n\n### Outlook\nMonitor upcoming earnings reports for ${cleanTicker} to gauge future performance trajectory.`
                     };
                 }
 
-                // Simple German Translation Override for Demo
+                // --- Full German Translation Override ---
                 if (language === "German") {
                     if (cleanTicker === "ACME") {
                         baseReport.summary = "ACME bleibt ein starker Kauf aufgrund der Marktführerschaft und solider Finanzdaten.";
+                        baseReport.deepAnalysis = "## Strategische Position\nACME dominiert weiterhin den industriellen KI-Sektor mit 40% Marktanteil.\n\n## Operative Effizienz\nDie Margen haben sich durch Supply-Chain-Optimierung um 200 Basispunkte YoY verbessert.\n\n## Risikobewertung\nDer Wettbewerb durch Startups nimmt zu, aber ACMEs Burggraben bleibt breit.";
                         baseReport.riskAssessment = { level: 'Low', description: "Starke Bilanz und diversifizierte Einnahmen mindern zyklische Risiken." };
                         baseReport.marketSentiment = { trend: 'Bullish', score: 85 };
-                        baseEssay.text = "## ACMEs Marktdominanz\nACME hat sich als Standard für KI-Fertigung etabliert.\n\n### Zukunftsaussichten\nDie Expansion in Luft- und Raumfahrt bietet erhebliches Wachstumspotenzial.";
+                        baseReport.businessContext = "ACME Corporation ist ein führender Anbieter von KI-gestützten Fertigungslösungen. Die innovative Plattform des Unternehmens kombiniert maschinelles Lernen mit industrieller Automatisierung.";
+                        baseEssay.text = "## ACMEs Marktdominanz\nACME hat sich als Standard für KI-Fertigung etabliert. Ihre proprietären Algorithmen ermöglichen vorausschauende Wartung, die Kunden jährlich Millionen spart.\n\n### Zukunftsaussichten\nDie Expansion in Luft- und Raumfahrt bietet erhebliches Wachstumspotenzial. Der kürzliche Vertrag mit dem Verteidigungsministerium bestätigt ihre Sicherheitsprotokolle.";
                     } else if (cleanTicker === "MBG") {
-                        baseReport.summary = "Mercedes-Benz Group AG fokussiert sich auf Luxusautos. Die EV-Strategie variiert in der Geschwindigkeit.";
-                        baseReport.riskAssessment = { level: 'Medium', description: "Zyklische Autoindustrie und Ausführungsrisiken bei EVs." };
-                        baseEssay.text = "## Luxus Definiert\nMercedes setzt weiterhin den Standard für automobilen Luxus.\n\n### Der Chinesische Markt\nSchlüssel für zukünftiges Wachstum, aber mit starker lokaler Konkurrenz.";
+                        baseReport.summary = "Mercedes-Benz Group AG fokussiert sich auf Luxusautos. Die EV-Strategie variiert in der Umsetzungsgeschwindigkeit.";
+                        baseReport.deepAnalysis = "## Luxusstrategie\nDer Fokus auf Margen statt Volumen hat die Profitabilität verbessert.\n\n## EV-Transition\nLangsamere als erwartete Akzeptanz in Schlüsselmärkten birgt Lagerrisiken.";
+                        baseReport.riskAssessment = { level: 'Medium', description: "Zyklische Autoindustrie und Ausführungsrisiken bei der EV-Strategie." };
+                        baseReport.businessContext = "Die Mercedes-Benz Group AG ist eines der erfolgreichsten Automobilunternehmen der Welt.";
+                        baseEssay.text = "## Luxus Definiert\nMercedes setzt weiterhin den Standard für automobilen Luxus.\n\n### Der Chinesische Markt\nSchlüssel für zukünftiges Wachstum, aber mit starker lokaler Konkurrenz.\n\n### Ausblick\nDie Premium-Positionierung schützt vor Preiskämpfen im Massenmarkt.";
                     } else {
-                        // Generic Fallback for other stocks in German
-                        baseReport.summary = `(DE) ${baseReport.summary}`;
-                        baseEssay.text = `## (DE) Analyse für ${stock.name}\n\n${baseEssay.text}`;
+                        // Generic German Fallback for ALL unknown/other stocks
+                        baseReport.summary = `${stock.name} (${cleanTicker}) ist ein bedeutender Akteur im ${stock.sector}-Sektor. Aktuelle Marktbedingungen zeigen gemischte Signale.`;
+                        baseReport.deepAnalysis = `## Marktposition\n${stock.name} hält eine wettbewerbsfähige Position im ${stock.sector}-Sektor.\n\n## Finanzdaten\nDer aktuelle Kurs um $${stock.price.toFixed(2)} deutet auf eine Konsolidierungsphase hin.\n\n## Strategieausblick\nKommende Quartalszahlen werden entscheidend für die weitere Entwicklung sein.`;
+                        baseReport.riskAssessment = { level: baseReport.riskAssessment.level, description: "Branchen­typische Risiken. Marktentwicklungen genau beobachten." };
+                        baseReport.businessContext = `${stock.name} ist hauptsächlich in der ${stock.sector}-Branche tätig und bedient globale Märkte mit innovativen Lösungen.`;
+                        baseEssay.text = `## Analyse von ${stock.name}\n\n### Sektorkontext\nDer ${stock.sector}-Sektor navigiert derzeit durch makroökonomische Gegenwinde. ${stock.name} ist gut positioniert, sich an diese Veränderungen anzupassen.\n\n### Investitionsthese\nAnleger sollten das Risiko-Rendite-Profil sorgfältig prüfen.\n\n### Ausblick\nDie kommenden Quartalszahlen für ${cleanTicker} werden Aufschluss über die zukünftige Entwicklung geben.`;
                     }
                 } else if (language !== "English") {
                     // Universal Simulator for other languages (Turkish, French, etc.)
                     const langPrefix = `(${language.toUpperCase().substring(0, 2)})`;
                     baseReport.summary = `${langPrefix} ${baseReport.summary}`;
+                    baseReport.deepAnalysis = `## ${langPrefix} Detailed Analysis\n\n${baseReport.deepAnalysis}`;
+                    baseReport.businessContext = `${langPrefix} ${baseReport.businessContext}`;
                     baseEssay.text = `## ${langPrefix} Analysis of ${stock.name}\n\n${baseEssay.text}`;
                 }
+
 
                 const result: AnalysisResult = {
                     report: { ...baseReport, generatedAt: new Date().toISOString() },
