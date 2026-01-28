@@ -3,6 +3,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { TopBar } from '@/components/TopBar';
 import { MarketOverviewCard } from '@/components/dashboard/MarketOverviewCard';
+import { DashboardHero } from '@/components/dashboard/DashboardHero';
 import { EventMonitorCard } from '@/components/dashboard/EventMonitorCard';
 import { NewsTicker } from '@/components/dashboard/NewsTicker';
 import { SummarizerCard } from '@/components/dashboard/SummarizerCard';
@@ -62,43 +63,9 @@ const Dashboard = () => {
       <main className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
         <div className="max-w-[1800px] mx-auto min-h-full">
 
-          {/* IDLE STATE */}
+          {/* IDLE STATE - HERO VIEW */}
           {analysisStatus === 'idle' && !analysisResult && (
-            <div className="max-w-6xl mx-auto space-y-12 py-8 animate-in fade-in duration-1000">
-              <div className="text-center space-y-4">
-                <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight sm:text-4xl">
-                  Market Pulse Overview
-                </h2>
-                <p className="text-slate-500 max-w-2xl mx-auto text-lg">
-                  Select a sector or search for a ticker to begin deep AI analysis.
-                  Size represents Market Cap, color represents daily performance.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                <div className="lg:col-span-8 relative group">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-2xl blur opacity-15 group-hover:opacity-25 transition duration-1000"></div>
-                  <HeatmapCard />
-                </div>
-                <div className="lg:col-span-4 h-full">
-                  <WatchlistCard />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8">
-                {[
-                  { title: 'Global Coverage', desc: 'Analyzing 50,000+ tickers across all major exchanges.', icon: <Activity className="h-5 w-5 text-blue-500" /> },
-                  { title: 'AI-First Insights', desc: 'Gemini 2.0 synthesized reporting with citation tracking.', icon: <Activity className="h-5 w-5 text-emerald-500" /> },
-                  { title: 'Real-time Flow', desc: 'Low-latency C++ backend with Python AI refinement.', icon: <Activity className="h-5 w-5 text-purple-500" /> }
-                ].map((feat, i) => (
-                  <div key={i} className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="mb-3">{feat.icon}</div>
-                    <h4 className="font-bold text-slate-800 mb-1">{feat.title}</h4>
-                    <p className="text-sm text-slate-500 leading-relaxed">{feat.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <DashboardHero />
           )}
 
           {/* STRICT 2-COL LAYOUT */}

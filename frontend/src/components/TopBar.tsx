@@ -8,14 +8,14 @@
  */
 
 import React, { useState } from 'react';
-import { Globe, Play, Loader2, Search, Target, PieChart, FlaskConical, Radio } from 'lucide-react';
+import React, { useState } from 'react';
+import { Globe, Play, Loader2, Search, PieChart, FlaskConical, Radio } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { useRunAnalysisMutation } from '../hooks/useDataFetching';
 
 import { useTickerResolutionMutation, isResolutionSuccess } from '../hooks/useTickerResolution';
 import { isUsingRealApi } from '../services/ApiService';
 import { cn } from '@/lib/utils';
-import type { AnalysisScope } from '../types';
 
 export const TopBar: React.FC = () => {
     // UI State from Context (per DESIGN.md L119)
@@ -24,14 +24,13 @@ export const TopBar: React.FC = () => {
         setSelectedStock,
         setSelectedSector,
         setSelectedLanguage,
-        setScope,
         resolveLanguage,
         setAnalysisResult,
         setAnalysisStatus,
         analysisStatus,
     } = useAppContext();
 
-    const { selectedStock, selectedSector, selectedLanguage, selectedScope } = uiState;
+    const { selectedStock, selectedSector, selectedLanguage } = uiState;
 
     // Local state for input (before resolution)
     const [stockInput, setStockInput] = useState(selectedStock);
@@ -180,22 +179,6 @@ export const TopBar: React.FC = () => {
                     />
                 </div>
 
-                {/* Scope Select */}
-                <div className="relative w-[140px]">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                        <Target className="h-4 w-4" />
-                    </div>
-                    <select
-                        className="w-full pl-9 pr-2 py-2 rounded-lg bg-slate-50 border border-gray-200 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer"
-                        value={selectedScope}
-                        onChange={(e) => setScope(e.target.value as AnalysisScope)}
-                    >
-                        <option value="Stock">Stock Only</option>
-                        <option value="Sector">Sector Only</option>
-                        <option value="Market">Market Only</option>
-                        <option value="Combined">Combined</option>
-                    </select>
-                </div>
             </div>
 
             {/* ACTION AREA */}

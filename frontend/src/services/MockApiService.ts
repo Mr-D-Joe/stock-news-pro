@@ -322,10 +322,11 @@ export const MockApiService = {
         if (["de", "ger", "german", "deutsch"].some(x => lower.includes(x))) return "German";
         if (["en", "eng", "english", "englisch"].some(x => lower.includes(x))) return "English";
         if (["fr", "fra", "french", "französisch"].some(x => lower.includes(x))) return "French";
+        if (["tr", "tur", "turkish", "türkisch"].some(x => lower.includes(x))) return "Turkish";
         return "English"; // Default
     },
 
-    runAnalysis: async (ticker: string, language: string = "English"): Promise<AnalysisResult> => {
+    runAnalysis: async (ticker: string, sector: string, language: string = "English"): Promise<AnalysisResult> => {
         return new Promise(resolve => {
             setTimeout(() => {
                 // Find stock or fallback to ACME
@@ -370,7 +371,16 @@ export const MockApiService = {
                         baseReport.summary = "Mercedes-Benz Group AG fokussiert sich auf Luxusautos. Die EV-Strategie variiert in der Geschwindigkeit.";
                         baseReport.riskAssessment = { level: 'Medium', description: "Zyklische Autoindustrie und Ausführungsrisiken bei EVs." };
                         baseEssay.text = "## Luxus Definiert\nMercedes setzt weiterhin den Standard für automobilen Luxus.\n\n### Der Chinesische Markt\nSchlüssel für zukünftiges Wachstum, aber mit starker lokaler Konkurrenz.";
+                    } else {
+                        // Generic Fallback for other stocks in German
+                        baseReport.summary = `(DE) ${baseReport.summary}`;
+                        baseEssay.text = `## (DE) Analyse für ${stock.name}\n\n${baseEssay.text}`;
                     }
+                } else if (language !== "English") {
+                    // Universal Simulator for other languages (Turkish, French, etc.)
+                    const langPrefix = `(${language.toUpperCase().substring(0, 2)})`;
+                    baseReport.summary = `${langPrefix} ${baseReport.summary}`;
+                    baseEssay.text = `## ${langPrefix} Analysis of ${stock.name}\n\n${baseEssay.text}`;
                 }
 
                 const result: AnalysisResult = {

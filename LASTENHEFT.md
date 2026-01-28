@@ -8,14 +8,15 @@ Architektur-, Governance-, LLM- und Systemverhaltensregeln werden ausschließlic
 Im Konfliktfall besitzt DESIGN.md Vorrang.
 
 
-Version: 1.5  
-Datum: 2026-01-28  
-Status: Draft 
+Version: 1.6
+Datum: 2026-01-28
+Status: Draft
 
 ## Änderungshistorie
 
 | Version | Datum       | Abschnitt | Änderungstyp | Beschreibung |
 |--------:|------------|-----------|--------------|--------------|
+| 1.6 | 2026-01-28 | 2.10, 4.5 | Refactoring | Entfernung des Analyse-Scope-Selectors (UI-REQ-SCOPE-xx) zur Vereinfachung sowie Einführung der Port-Isolation (BE-REQ-PORT-01) und des Dashboard Heroes (UI-REQ-HERO-01). |
 | 1.5 | 2026-01-28 | 2.13, 3.7 | Erweiterung | Einführung der Sparkline-Anforderungen (UI-REQ-SPARK-01 bis -04, BE-REQ-SPARK-01 bis -02) für kompakte Trend-Visualisierungen |
 | 1.4 | 2026-01-28 | 2.12, 3.6 | Erweiterung | Einführung der Sektor-Heatmap-Anforderungen (UI-REQ-HEATMAP-01 bis -09, BE-REQ-SECTOR-01 bis -04) für interaktive Treemap-Visualisierung der Marktsektoren |
 | 1.3 | 2026-01-27 | 7 | Erweiterung | Einführung eines Kapitels „Nicht-funktionale Anforderungen“ mit atomaren, benutzerorientierten Qualitätsanforderungen (NFR-REQ-01 bis NFR-REQ-07) gemäß DESIGN.md |
@@ -161,6 +162,13 @@ Hinweis zur Sortierung: Tabellen sind von „neu nach alt“ sortiert (höhere u
 | Ursprüngliche Requirement-ID | Neue Requirement-ID |
 |-----------------------------|---------------------|
 | F-DH-04 | DH-REQ-DEDUP-01 |
+
+### Neue Anforderungen (v1.6)
+
+| Ursprüngliche ID | Neue Requirement-ID | Beschreibung |
+|------------------|---------------------|--------------|
+| - | BE-REQ-PORT-01 | Port-Isolation (8200) zur Vermeidung von Konflikten. |
+| - | UI-REQ-HERO-01 | Dashboard Hero View für besseren Einstieg. |
 
 ### Auflösung der ursprünglichen Anforderung F-DH-03
 
@@ -427,7 +435,13 @@ Der Dashboard-Container muss die dynamische Hinzufügung weiterer UI-Elemente zu
 
 #### 2.1.5 UI-REQ-DASH-05 — Inhaltsunabhängige Struktur
 
+#### 2.1.5 UI-REQ-DASH-05 — Inhaltsunabhängige Struktur
+
 Der Dashboard-Container muss unabhängig vom fachlichen Inhalt der enthaltenen UI-Elemente funktionieren.
+
+#### 2.1.6 UI-REQ-HERO-01 — Initialer Hero-Screen (Empty State)
+
+Die Benutzeroberfläche muss im initialen Zustand (keine aktive Analyse) einen "Hero-Screen" anzeigen, der eine klare Suchaufforderung und Schnellzugriffe (Trending Stocks) bietet, anstatt leerer Platzhalter.
 
 #### 2.1.6 UI-REQ-DASH-06 — Unterstützung heterogener UI-Elementtypen
 
@@ -449,9 +463,11 @@ Die Benutzeroberfläche muss einen Kontextwert selected_stock führen.
 
 Die Benutzeroberfläche muss einen Kontextwert selected_sector führen.
 
-#### 2.1.11 UI-REQ-CTX-03 — UI-Kontext: Analyse-Scope
+Die Benutzeroberfläche muss einen Kontextwert selected_sector führen.
 
-Die Benutzeroberfläche muss einen Kontextwert analysis_scope führen.
+#### 2.1.11 [ENTFERNT] UI-REQ-CTX-03 — UI-Kontext: Analyse-Scope
+
+(Anforderung entfernt mit v1.6 zugunsten einer impliziten "Combined"-Logik).
 
 #### 2.1.12 UI-REQ-CTX-04 — UI-Kontext: Sprache
 
@@ -505,9 +521,11 @@ Wenn selected_stock gesetzt wird und ein zugehöriger Sektor vorliegt, muss sele
 
 Wenn selected_stock gesetzt ist und selected_sector geändert wird, müssen beide Kontextwerte gültig bleiben.
 
-#### 2.1.25 UI-REQ-LINK-03 — Scope-Steuerung
+Wenn selected_stock gesetzt ist und selected_sector geändert wird, müssen beide Kontextwerte gültig bleiben.
 
-Die Benutzeroberfläche muss Analyseauslösung und Darstellung anhand von analysis_scope steuern.
+#### 2.1.25 [ENTFERNT] UI-REQ-LINK-03 — Scope-Steuerung
+
+(Anforderung entfernt mit v1.6).
 
 ### 2.2 Analyseobjekt-Auswahl Aktie (F-UI-02)
 
@@ -753,27 +771,9 @@ Das Analyse-Essay muss eindeutig als automatisiert generiertes Produkt gekennzei
 
 Die Komponente ermöglicht das Lesen umfangreicher Texte durch Bereitstellung einer Scroll-Funktionalität.
 
-### 2.10 Analyse-Scope Steuerung (F-UI-10)
+### 2.10 [ENTFERNT] Analyse-Scope Steuerung (F-UI-10)
 
-#### 2.10.1 UI-REQ-SCOPE-01 — Bereitstellung einer Auswahlmöglichkeit für den Analyse-Scope
-
-Die Benutzeroberfläche stellt eine Interaktionsmöglichkeit bereit, über die Nutzer den Umfang der Analyse definieren können.
-
-#### 2.10.2 UI-REQ-SCOPE-02 — Kontextwert für den Analyseumfang
-
-Die Benutzeroberfläche führt einen Kontextwert `analysis_scope`, der den aktuellen Untersuchungsbereich (z. B. Stock, Sector, Market, Combined) repräsentiert.
-
-#### 2.10.3 UI-REQ-SCOPE-03 — Steuerung der Analyseauslösung durch den Scope
-
-Der Analyseprozess wertet `analysis_scope` aus, um die relevanten Datenquellen und KI-Prompts zu bestimmen.
-
-#### 2.10.4 UI-REQ-SCOPE-04 — Visuelle Rückmeldung des gesetzten Scopes
-
-Die Benutzeroberfläche zeigt den aktuell aktiven Analyse-Scope innerhalb der Interaktionsmöglichkeit an.
-
-#### 2.10.5 UI-REQ-SCOPE-05 — Wechsel des Analyseumfangs
-
-Die Benutzeroberfläche unterstützt den Wechsel des aktiven Scopes durch Auswahl einer anderen Option.
+(Dieser Abschnitt wurde in Version 1.6 entfernt, da die Scope-Steuerung als unnötige Komplexität identifiziert wurde. Das System analysiert nun standardmäßig im maximalen Kontext).
 
 ### 2.11 Volumen-Chart (F-UI-11)
 
