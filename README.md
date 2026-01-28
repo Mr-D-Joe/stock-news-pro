@@ -3,7 +3,18 @@
 Stock News Pro is an enterprise-grade financial analysis platform focused on long-term maintainability, architectural clarity, and controlled AI integration.  
 The project is designed as a desktop-first application with strict governance to prevent code drift, uncontrolled AI behavior, and architectural erosion.
 
-The repository serves as a foundation for evolving a mock-driven prototype into a production-grade financial analytics system. 
+The repository serves as a foundation for evolving a mock-driven prototype into a production-grade financial analytics system.
+
+---
+
+> [!IMPORTANT]  
+> **SPECIFICATION GOVERNANCE: ACTIVE**  
+> This project is governed by strict compliance rules.  
+> 📜 **Constitution:** [`DESIGN.md`](./DESIGN.md)  
+> 📋 **Requirements:** [`LASTENHEFT.md`](./LASTENHEFT.md)  
+> 🤝 **Contributing:** [`CONTRIBUTING.md`](./CONTRIBUTING.md)  
+>
+> 🤖 **AI Agents:** You MUST read `CONTRIBUTING.md` before generating code.
 
 --- 
 
