@@ -1,32 +1,38 @@
 # LASTENHEFT — Stock News Pro
 ## Requirements Specification Document
 
-Version: 1.2  
-Datum: 2026-01-24  
-Status: Draft  
+⚠️ Dieses Dokument ist normativ für funktionale Anforderungen.
+
+Architektur-, Governance-, LLM- und Systemverhaltensregeln werden ausschließlich durch DESIGN.md definiert.
+
+Im Konfliktfall besitzt DESIGN.md Vorrang.
+
+
+Version: 1.3  
+Datum: 2026-01-27  
+Status: Draft 
 
 ## Änderungshistorie
 
 | Version | Datum       | Abschnitt | Änderungstyp | Beschreibung |
 |--------:|------------|-----------|--------------|--------------|
-| 1.2 | 2026-01-24 | 1.5 | Strategie-Erweiterung | Einführung spezialisierter Dokumentationsartefakte (TECHNICAL_SPEC, STYLEGUIDE, PROMPTS) zur Schließung von Spezifikationslücken |
-| 1.1 | 2026-01-24 | 1.7 | Governance-Erweiterung | Einführung eines eigenständigen Governance-Abschnitts zur normativen Wirkung, Interpretation und Autorität von Anforderungen |
-| 1.1 | 2026-01-24 | 1.7 | Regelpräzisierung | Festlegung der normativen Gültigkeit expliziter, formulierter Anforderungen und freigegebener Lastenheft-Versionen |
-| 1.1 | 2026-01-24 | 1.7 | Architekturabgleich | Verankerung der verbindlichen Autorität von DESIGN.md für alle Anforderungen des Lastenhefts |
-| 1.1 | 2026-01-24 | 1.6 | Governance-Erweiterung | Einführung eines verbindlichen Änderungs- und Erweiterungsprozesses für externe Änderungswünsche |
-| 1.1 | 2026-01-24 | 1.6 | Prozesspräzisierung | Festlegung der verpflichtenden Ableitung externer Anweisungen in atomare, regelkonforme Anforderungen |
-| 1.1 | 2026-01-24 | 1.6 | Governance-Absicherung | Definition der Freigabe-, Dokumentations- und Versionierungspflicht vor jeder Implementierung |
+| 1.3 | 2026-01-27 | 7 | Erweiterung | Einführung eines Kapitels „Nicht-funktionale Anforderungen“ mit atomaren, benutzerorientierten Qualitätsanforderungen (NFR-REQ-01 bis NFR-REQ-07) gemäß DESIGN.md |
+| 1.3 | 2026-01-27 | 3.5.5 | Terminologie-Präzisierung | Präzisierung der Verantwortlichkeit für KI-Metadaten von „Backend“ auf „System“ zur Konsistenz mit Orchestrierungsarchitektur gemäß DESIGN.md |
+| 1.3 | 2026-01-27 | 2.1, 2.2, 2.6–2.11 | Terminologie-Konsistenz | Vereinheitlichung der UI-Anforderungen: Ersetzung von „Das System …“ durch „Die Benutzeroberfläche …“ in UI-Requirements sowie Korrektur von Zustands-Terminologie in 2.2 zur klaren Trennung von UI- und Backend-Verantwortung gemäß DESIGN.md. |
+| 1.3 | 2026-01-27 | 2.1, 2.2 | Terminologie-Präzisierung | Trennung von Nutzerkontext (Kontextwert) und systemseitigem Laufzeitstatus (Systemzustand). Umstellung von analysis_status, error_state, data_origin, generated_flag, fetched_at und stock_resolution_status auf konsistente Zustands-Terminologie gemäß DESIGN.md. |
+| 1.3 | 2026-01-27 | 1.4–1.7 | Struktur-Refactoring | Entfernung der Meta-, Governance- und Spezifikationsabschnitte (1.4–1.7) aus dem Lastenheft. Normative Autorität dieser Inhalte wurde vollständig nach DESIGN.md verlagert. |
+| 1.3 | 2026-01-27 | Gesamt | Governance-Abgrenzung | Ab Version 1.3 enthält das Lastenheft ausschließlich funktionale Anforderungen. Governance-, Meta- und Spezifikationsregeln werden ausschließlich in DESIGN.md geführt. |
 | 1.1 | 2026-01-24 | Gesamt | Konsolidierung | Bereinigung von Inkonsistenzen in Änderungshistorie, ID-Zuordnung und Arbeitsübersicht gemäß RE-STRUCT und RE-TRACE |
 | 1.1 | 2026-01-24 | 2.5–2.11 | Regelkonformität | Vereinheitlichung der UI-Formulierungen auf „Benutzeroberfläche“ sowie explizite Trennung von UI- und Backend-Verantwortung gemäß DESIGN.md |
-| 1.1 | 2026-01-24 | 3.1–6.4 | Regelkonformität | Korrektur fehlerhafter Abschnittsnummerierungen (z. B. mehrfach „3.1“) in Backend-, Tauri-, Governance- und Data-Handling-Anforderungen gemäß RE-STRUCT-02 |
-| 1.1 | 2026-01-24 | Gesamt | Konsistenzprüfung | Vollständiger Abgleich aller funktionalen Anforderungen (2.x–6.x) mit DESIGN.md zur Sicherstellung von Architektur-, Governance- und Verantwortungs­trennung |
+| 1.1 | 2026-01-24 | 3.1–6.4 | Regelkonformität | Korrektur fehlerhafter Abschnittsnummerierungen (z. B. mehrfach „3.1“) in Backend-, Tauri- und Data-Handling-Anforderungen gemäß RE-STRUCT-02 |
+| 1.1 | 2026-01-24 | Gesamt | Konsistenzprüfung | Vollständiger Abgleich aller funktionalen Anforderungen (2.x–6.x) mit DESIGN.md zur Sicherstellung klarer Architektur- und Verantwortungs­trennung |
 | 1.1 | 2026-01-22 | 6.4 | Anforderungsauflösung | Auflösung der Sammelanforderung F-DH-04 in atomare Anforderungen zur In-Flight-De-Duplizierung |
 | 1.1 | 2026-01-22 | 6.3 | Anforderungsauflösung | Auflösung der Sammelanforderung F-DH-03 in atomare Anforderungen zum Name-zu-Symbol-Mapping |
 | 1.1 | 2026-01-22 | 6.2 | Anforderungsauflösung | Auflösung der Sammelanforderung F-DH-02 in atomare Anforderungen zur fehlertoleranten Auflösung |
 | 1.1 | 2026-01-22 | 6.1 | Anforderungsauflösung | Auflösung der Sammelanforderung F-DH-01 in atomare Anforderungen zur internetbasierten Ticker-Auflösung |
 | 1.1 | 2026-01-22 | 5.5 | Anforderungsauflösung | Auflösung der Sammelanforderung F-AG-05 in atomare Anforderungen zum Token-Usage-Tracking |
 | 1.1 | 2026-01-22 | 5.4 | Anforderungsauflösung | Auflösung der Sammelanforderung F-AG-04 in atomare Anforderungen zum Cache-Pre-Check |
-| 1.1 | 2026-01-22 | 5.3 | Anforderungsauflösung | Auflösung der Sammelanforderung F-AG-03 in atomare Anforderungen zur KI-Provider-Priorisierung |
+| 1.1 | 2026-01-22 | 5.3 | Anforderungsauflösung | Auflösung der Sammelanforderung F-AG-03 in atomare Anforderungen zur Provider-Priorisierung |
 | 1.1 | 2026-01-22 | 5.2 | Anforderungsauflösung | Auflösung der Sammelanforderung F-AG-02 in atomare Anforderungen zur API-Startup-Warnung |
 | 1.1 | 2026-01-22 | 5.1 | Anforderungsauflösung | Auflösung der Sammelanforderung F-AG-01 in atomare Anforderungen zum DEV_MODE |
 | 1.1 | 2026-01-22 | 4.4 | Anforderungsauflösung | Auflösung der Sammelanforderung F-TA-04 in atomare Anforderungen zum typisierten IPC-Service-Layer |
@@ -38,21 +44,10 @@ Status: Draft
 | 1.1 | 2026-01-22 | 3.3 | Anforderungsauflösung | Auflösung der Sammelanforderung F-BE-03 in atomare Anforderungen zu historischen Preisdaten |
 | 1.1 | 2026-01-22 | 3.2 | Anforderungsauflösung | Auflösung der Sammelanforderung F-BE-02 in atomare Anforderungen zum Fundamentaldaten-Abruf |
 | 1.1 | 2026-01-22 | 3.1 | Anforderungsauflösung | Auflösung der Sammelanforderung F-BE-01 in atomare Anforderungen zur Ticker-Auflösung |
-| 1.1 | 2026-01-22 | 2.11 | Anforderungsauflösung | Auflösung der Sammelanforderung F-UI-11 in atomare Anforderungen zum Volumen-Chart |
-| 1.1 | 2026-01-22 | 2.10 | Anforderungsauflösung | Auflösung der Sammelanforderung F-UI-10 in atomare Anforderungen zur Analyse-Scope-Steuerung |
-| 1.1 | 2026-01-22 | 2.9 | Anforderungsauflösung | Auflösung der Sammelanforderung F-UI-09 in atomare Anforderungen zur KI-Essay-Ausgabe |
-| 1.1 | 2026-01-22 | 2.8 | Anforderungsauflösung | Auflösung der Sammelanforderung F-UI-08 in atomare Anforderungen zum Preis-Chart |
-| 1.1 | 2026-01-22 | 2.7 | Anforderungsauflösung | Auflösung der Sammelanforderung F-UI-07 in atomare Anforderungen zur Executive-Summary-Komponente |
-| 1.1 | 2026-01-22 | 2.6 | Anforderungsauflösung | Auflösung der Sammelanforderung F-UI-06 in atomare Anforderungen zur Nachrichtenanzeige |
-| 1.1 | 2026-01-22 | 2.5 | Anforderungsauflösung | Auflösung der Sammelanforderung F-UI-05 in atomare Anforderungen zur Zeitraumauswahl |
-| 1.1 | 2026-01-22 | 2.4 | Anforderungsauflösung | Auflösung der Sammelanforderung F-UI-04 in atomare Anforderungen zur Sprachumschaltung |
-| 1.1 | 2026-01-22 | 2.4 | Präzisierung | Vereinzelung und sprachliche Präzisierung der UI-REQ-LANG-Anforderungen gemäß RE-BASE und RE-CTX |
-| 1.1 | 2026-01-22 | 2.3 | Anforderungsauflösung | Auflösung der Sammelanforderung F-UI-03 in atomare Anforderungen zur Sektorauswahl |
-| 1.1 | 2026-01-22 | 2.2 | Anforderungsauflösung | Auflösung der Sammelanforderung F-UI-02 in atomare Anforderungen zur Aktienauswahl |
-| 1.1 | 2026-01-22 | 2.1 | Anforderungsauflösung | Auflösung der Sammelanforderung F-UI-01 in atomare Dashboard-, Kontext-, Zustands- und Abhängigkeitsanforderungen |
 | 1.1 | 2026-01-22 | 2 | Struktur-Refactoring | Umstellung von tabellarischen Sammelanforderungen auf abschnittsbasierte atomare Einzelanforderungen |
 | 1.1 | 2026-01-22 | Gesamt | Governance-Anpassung | Entfernung von Implementierungsstatus und Systemzustand aus dem Lastenheft |
 | 1.0 | 2026-01-22 | Gesamt | Initialfassung | Erste Version des Lastenhefts mit tabellarischen Sammelanforderungen |
+
 
 ## ID-Zuordnung – Auflösung von Sammelanforderungen (nicht normativ)
 
@@ -403,205 +398,8 @@ Primäre Zielgruppen sind:
 
 Alle Anforderungen dieses Lastenhefts sind an den Bedürfnissen dieser Zielgruppen auszurichten.
 
-### 1.4 Formale Regeln zur Anforderungsspezifikation
-
-#### 1.4.1 RE-BASE-01 — Atomare Anforderung
-
-Jede Anforderung beschreibt genau eine fachliche oder technische Eigenschaft.
-
-#### 1.4.2 RE-BASE-02 — Eigenständige Verifizierbarkeit
-
-Jede Anforderung ist unabhängig prüfbar und eindeutig verifizierbar.
-
-#### 1.4.3 RE-BASE-03 — Eigener Anforderungsabschnitt
-
-Jede Anforderung ist als eigener Abschnitt formuliert.
-
-#### 1.4.4 RE-BASE-04 — Eindeutige Anforderungs-ID
-
-Jede Anforderung besitzt eine eindeutige Anforderungs-ID.
-
-#### 1.4.5 RE-STRUCT-01 — Abschnittsbasierte Strukturierung
-
-Anforderungen werden ausschließlich über Abschnittsnummerierung und Überschriften strukturiert.
-
-#### 1.4.6 RE-STRUCT-02 — Einheitliches Überschriftenformat
-
-Jede Anforderung verwendet das Überschriftenformat  
-<Abschnittsnummer> <Anforderungs-ID> — <Kurzbezeichnung>
-
-#### 1.4.7 RE-STRUCT-03 — Verzicht auf Trennzeichen zwischen Anforderungen
-
-Zwischen Anforderungen werden keine Trennlinien, dekorativen Markierungen oder Sonderzeichen verwendet.
-
-#### 1.4.8 RE-SCOPE-01 — Lösungsneutrale Formulierung
-
-Anforderungen sind lösungsneutral formuliert.
-
-#### 1.4.9 RE-TRACE-01 — Explizite Anforderungsauflösung
-
-Die Auflösung einer Anforderung in mehrere Anforderungen wird explizit dokumentiert.
-
-#### 1.4.10 RE-TRACE-02 — Eindeutige ID-Zuordnung bei Auflösung
-
-Jede aus einer Anforderungsauflösung hervorgehende Anforderung referenziert eindeutig die ursprüngliche Anforderungs-ID.
-
-#### 1.4.11 RE-TRACE-03 — Tabellarische ID-Zuordnung
-
-Die Zuordnung zwischen ursprünglicher Anforderungs-ID und neuen Anforderungs-IDs erfolgt tabellarisch.
-
-#### 1.4.12 RE-TRACE-04 — Platzierung der ID-Zuordnung
-
-Die tabellarische ID-Zuordnung ist Bestandteil der Änderungshistorie.
-
-#### 1.4.13 RE-GOV-01 — Architekturkonforme Anforderungserstellung
-
-Anforderungen werden gemäß den in DESIGN.md definierten architektonischen und governancebezogenen Vorgaben erstellt.
-
-#### 1.4.14 RE-CTX-01 — Klassifikation von Kontextanforderungen
-
-Kontextanforderungen werden entweder als generische Kontextanforderungen oder als spezialisierte Kontextanforderungen formuliert.
-
-#### 1.4.15 RE-CTX-02 — Definition generischer Kontextanforderungen
-
-Generische Kontextanforderungen beschreiben ausschließlich die Fähigkeit der Benutzeroberfläche, mehrere Kontextwerte gleichzeitig zu führen, zu synchronisieren oder konsistent zu halten.
-
-#### 1.4.16 RE-CTX-03 — Definition spezialisierter Kontextanforderungen
-
-Spezialisierte Kontextanforderungen beschreiben konkrete fachliche Kontextwerte mit expliziter Semantik, wie Analyseobjekte, Zustände oder Abhängigkeiten.
-
-#### 1.4.17 RE-STATE-01 — Klassifikation von Zustandsanforderungen
-
-Zustandsanforderungen werden entweder als generische Zustandsanforderungen oder als spezialisierte Zustandsanforderungen formuliert.
-
-#### 1.4.18 RE-STATE-02 — Definition generischer Zustandsanforderungen
-
-Generische Zustandsanforderungen beschreiben ausschließlich die Fähigkeit der Benutzeroberfläche, Zustände unabhängig von ihrer fachlichen Bedeutung zu führen, zu synchronisieren oder konsistent zu halten.
-
-#### 1.4.19 RE-STATE-03 — Definition spezialisierter Zustandsanforderungen
-
-Spezialisierte Zustandsanforderungen beschreiben konkrete fachliche Zustände mit expliziter Semantik, die den Zustand des Systems oder seiner Analyseergebnisse abbilden.
-
-#### 1.4.20 RE-LINK-01 — Klassifikation von Abhängigkeitsanforderungen
-
-Abhängigkeitsanforderungen werden entweder als generische Abhängigkeitsanforderungen oder als spezialisierte Abhängigkeitsanforderungen formuliert.
-
-#### 1.4.21 RE-LINK-02 — Definition generischer Abhängigkeitsanforderungen
-
-Generische Abhängigkeitsanforderungen beschreiben ausschließlich die Fähigkeit der Benutzeroberfläche, Beziehungen zwischen Kontext- oder Zustandswerten unabhängig von ihrer fachlichen Bedeutung zu führen, zu synchronisieren oder konsistent zu halten.
-
-#### 1.4.22 RE-LINK-03 — Definition spezialisierter Abhängigkeitsanforderungen
-
-Spezialisierte Abhängigkeitsanforderungen beschreiben konkrete fachliche Abhängigkeiten mit expliziter Semantik, die fachliche Abhängigkeiten zwischen Analyseobjekten, Kontextwerten oder Analyseergebnissen abbilden.
-
-#### 1.4.23 RE-LINK-04 — Explizite Formulierung fachlicher Abhängigkeiten
-
-Fachliche Abhängigkeiten werden ausschließlich durch spezialisierte Abhängigkeitsanforderungen mit expliziter Semantik beschrieben.
-
-### 1.5 Dokumentationsartefakte
-
-#### 1.5.1 DOC-ART-01 — System Report
-
-Für jede umgesetzte Version des Systems wird ein SYSTEM_REPORT.md gemäß der in DESIGN.md definierten Struktur erstellt.
-
-#### 1.5.2 DOC-ART-02 — README
-
-Für das Projekt wird eine README.md geführt, die Zweck, Einstieg und grundlegende Nutzung des Systems beschreibt.
-
-#### 1.5.3 DOC-ART-03 — Technical Specification
-
-Das Projekt führt eine TECHNICAL_SPEC.md zur Dokumentation implementierungsspezifischer Details, Fallback-Listen und technischer Parameter.
-
-#### 1.5.4 DOC-ART-04 — Styleguide
-
-Das Projekt führt eine STYLEGUIDE.md zur normativen Definition von visuellen Standards, UX-Mustern und Design-Tokens.
-
-#### 1.5.5 DOC-ART-05 — Prompt Library
-
-Das Projekt führt eine PROMPTS.md zur Versionierung und Dokumentation aller im System verwendeten KI-System-Prompts.
-
-## 1.6 Änderungs- und Erweiterungsprozess
-
-Dieser Abschnitt definiert verbindliche Anforderungen für Änderungen und Erweiterungen des Systems, die aus externen Anweisungen oder Änderungswünschen hervorgehen.
-
-Begriffspräzisierung (informativ):
-- Eine „externe Anweisung“ bezeichnet einen Änderungswunsch, der nicht bereits als Requirement im Lastenheft vorliegt.
-- Eine „Freigabe“ bezeichnet die ausdrückliche Bestätigung durch den Nutzer.
-
-### 1.6.1 RE-GOV-02 — Anforderungsbasierte Systemänderung
-
-Alle Änderungen, Erweiterungen oder Korrekturen des Systems müssen auf einer expliziten Anforderung in diesem Lastenheft basieren.
-
-### 1.6.2 RE-GOV-03 — Ableitung von Anforderungen aus externen Änderungswünschen
-
-Extern formulierte Änderungswünsche müssen vor einer Implementierung in eine oder mehrere atomare Anforderungen dieses Lastenhefts überführt werden.
-
-### 1.6.3 RE-GOV-04 — Einhaltung der formalen Anforderungsregeln
-
-Neu abgeleitete oder geänderte Anforderungen müssen den formalen Regeln gemäß Abschnitt 1.4 entsprechen.
-
-### 1.6.4 RE-GOV-05 — Architekturkonformität von Änderungen
-
-Alle neu abgeleiteten oder geänderten Anforderungen müssen mit den Vorgaben von DESIGN.md konform sein.
-
-### 1.6.5 RE-GOV-06 — Abstimmungspflicht für Anforderungsänderungen
-
-Jede Änderung am Lastenheft muss vor einer Implementierung dem Nutzer zur Freigabe vorgelegt werden.
-
-### 1.6.6 RE-GOV-07 — Dokumentation freigegebener Änderungen
-
-Freigegebene Änderungen am Lastenheft müssen in der Änderungshistorie dokumentiert werden.
-
-### 1.6.7 RE-GOV-08 — Versionierung von Anforderungsänderungen
-
-Jede dokumentierte Änderung am Lastenheft muss einer Version und einem Datum zugeordnet sein.
-
-### 1.6.8 RE-GOV-09 — Rückführbarkeit von Änderungen
-
-Jede Anforderungsänderung muss eindeutig auf die betroffenen Abschnitte und Requirement-IDs verweisen.
-
-### 1.6.9 RE-GOV-10 — Implementierungsgrundlage
-
-Eine Implementierung muss auf freigegebenen Anforderungen dieses Lastenhefts basieren.
-
-## 1.7 Governance der Interpretation und normativen Autorität
-
-Dieser Abschnitt definiert verbindliche Anforderungen
-zur normativen Wirkung, Auslegung und Autorität
-der Anforderungen dieses Lastenhefts.
-
-### 1.7.1 RE-GOV-11 — Normative Wirkung formulierter Anforderungen
-
-Normative Wirkung für System und Implementierung
-besitzen Anforderungen,
-die explizit und vollständig in diesem Lastenheft formuliert sind.
-
-### 1.7.2 RE-GOV-12 — Normative Form von Anforderungen
-
-Normative Anforderungen
-müssen als formale Requirements
-mit eindeutiger Anforderungs-ID vorliegen.
-
-### 1.7.3 RE-GOV-13 — Semantische Selbstständigkeit von Anforderungen
-
-Jede Anforderung definiert ihre fachliche Bedeutung
-durch ihren eigenen Text.
-
-### 1.7.4 RE-GOV-14 — Autorität der Architekturvorgaben
-
-Die in DESIGN.md definierten Architektur-
-und Governance-Vorgaben
-sind für alle Anforderungen dieses Lastenhefts verbindlich.
-
-### 1.7.5 RE-GOV-15 — Präzisierung unklarer Anforderungen
-
-Anforderungen mit unklarer oder mehrdeutiger Bedeutung
-müssen vor einer Ableitung oder Implementierung präzisiert werden.
-
-### 1.7.6 RE-GOV-16 — Normative Wirkung freigegebener Versionen
-
-Normative Gültigkeit besitzen
-die vom Nutzer freigegebenen Versionen des Lastenhefts.
+Hinweis: Die früheren Abschnitte 1.4–1.7 (Formale Spezifikationsregeln, Dokumentationsartefakte, Änderungsprozess und Governance) wurden mit Version 1.3 vollständig entfernt.  
+Die normative Definition dieser Inhalte erfolgt ausschließlich in DESIGN.md.
 
 ## 2. Funktionale Anforderungen
 
@@ -611,7 +409,7 @@ Die Benutzeroberfläche stellt die Interaktionsschicht zwischen Nutzer und Syste
 
 #### 2.1.1 UI-REQ-DASH-01 — Bereitstellung eines Dashboard-Containers
 
-Das System muss einen Dashboard-Container bereitstellen, der als primäre strukturelle Einheit der Benutzeroberfläche fungiert.
+Die Benutzeroberfläche muss einen Dashboard-Container bereitstellen, der als primäre strukturelle Einheit der Benutzeroberfläche fungiert.
 
 #### 2.1.2 UI-REQ-DASH-02 — Initialisierbarkeit des Dashboard-Containers
 
@@ -679,23 +477,23 @@ Die Benutzeroberfläche muss einen gültigen Zustand ohne gesetzten selected_sec
 
 #### 2.1.18 UI-REQ-STATE-01 — Analysezustand
 
-Die Benutzeroberfläche muss einen Kontextwert analysis_status führen.
+Die Benutzeroberfläche muss einen Systemzustand analysis_status führen.
 
 #### 2.1.19 UI-REQ-STATE-02 — Fehlerzustand
 
-Die Benutzeroberfläche muss einen Kontextwert error_state führen.
+Die Benutzeroberfläche muss einen Systemzustand error_state führen.
 
 #### 2.1.20 UI-REQ-STATE-03 — Datenherkunft
 
-Die Benutzeroberfläche muss einen Kontextwert data_origin führen.
+Die Benutzeroberfläche muss einen Systemzustand data_origin führen.
 
 #### 2.1.21 UI-REQ-STATE-04 — Generiert-Kennzeichnung
 
-Die Benutzeroberfläche muss einen Kontextwert generated_flag führen.
+Die Benutzeroberfläche muss einen Systemzustand generated_flag führen.
 
 #### 2.1.22 UI-REQ-STATE-05 — Aktualität
 
-Die Benutzeroberfläche muss einen Kontextwert fetched_at führen.
+Die Benutzeroberfläche muss einen Systemzustand fetched_at führen.
 
 #### 2.1.23 UI-REQ-LINK-01 — Abhängigkeit Aktie → Sektor
 
@@ -735,9 +533,9 @@ Die Benutzeroberfläche verarbeitet `stock_query` case-insensitive für die Aufl
 
 Die Benutzeroberfläche löst eine Auflösungsanfrage für `stock_query` ausschließlich über interne, definierte Schnittstellen aus.
 
-#### 2.2.7 UI-REQ-STOCKSEL-07 — Kontextwert für Auflösungsstatus
+#### 2.2.7 UI-REQ-STOCKSEL-07 — Systemzustand für Auflösungsstatus
 
-Die Benutzeroberfläche führt einen Kontextwert `stock_resolution_status`, der den aktuellen Status der Auflösung von `stock_query` repräsentiert.
+Die Benutzeroberfläche führt einen Systemzustand stock_resolution_status, der den aktuellen Status der Auflösung von stock_query repräsentiert.
 
 #### 2.2.8 UI-REQ-STOCKSEL-08 — Setzen des Analyseobjekts bei erfolgreicher Auflösung
 
@@ -753,79 +551,77 @@ Wenn ein Kandidat aus `stock_resolution_candidates` ausgewählt wird, setzt die 
 
 #### 2.2.11 UI-REQ-STOCKSEL-11 — Abbildung eines Auflösungsfehlers als Fehlerzustand
 
-Wenn die Auflösung von `stock_query` fehlschlägt, setzt die Benutzeroberfläche den Kontextwert `error_state` auf einen zur Auflösung gehörenden Fehlerzustand.
+Wenn die Auflösung von `stock_query` fehlschlägt, setzt die Benutzeroberfläche den Systemzustand `error_state` auf einen zur Auflösung gehörenden Fehlerzustand.
 
 #### 2.2.12 UI-REQ-STOCKSEL-12 — Rücksetzen der Aktienauswahl
 
 Die Benutzeroberfläche unterstützt eine Nutzeraktion, die `selected_stock` in den Zustand „nicht gesetzt“ überführt.
 
-## 2.3 Analyseobjekt-Auswahl Sektor (F-UI-03)
+### 2.3 Analyseobjekt-Auswahl Sektor (F-UI-03)
 
-### 2.3.1 UI-REQ-SECTORSEL-01 — Bereitstellung einer Interaktionsmöglichkeit zur Sektorauswahl
+#### 2.3.1 UI-REQ-SECTORSEL-01 — Bereitstellung einer Interaktionsmöglichkeit zur Sektorauswahl
 
 Die Benutzeroberfläche stellt eine Interaktionsmöglichkeit zur Auswahl eines Sektors bereit.
 
-### 2.3.2 UI-REQ-SECTORSEL-02 — Kontextwert für ausgewählten Sektor
+#### 2.3.2 UI-REQ-SECTORSEL-02 — Kontextwert für ausgewählten Sektor
 
 Die Benutzeroberfläche führt einen Kontextwert `selected_sector`, der den aktuell ausgewählten Sektor repräsentiert.
 
-### 2.3.3 UI-REQ-SECTORSEL-03 — Anzeige verfügbarer Sektoren
+#### 2.3.3 UI-REQ-SECTORSEL-03 — Anzeige verfügbarer Sektoren
 
 Die Benutzeroberfläche stellt eine Menge verfügbarer Sektoren zur Auswahl bereit.
 
-### 2.3.4 UI-REQ-SECTORSEL-04 — Auswahl eines einzelnen Sektors
+#### 2.3.4 UI-REQ-SECTORSEL-04 — Auswahl eines einzelnen Sektors
 
 Die Benutzeroberfläche unterstützt die Auswahl eines einzelnen Sektors aus der bereitgestellten Sektormenge.
 
-### 2.3.5 UI-REQ-SECTORSEL-05 — Setzen des Sektorkontexts bei Auswahl
+#### 2.3.5 UI-REQ-SECTORSEL-05 — Setzen des Sektorkontexts bei Auswahl
 
 Bei Auswahl eines Sektors setzt die Benutzeroberfläche den Kontextwert `selected_sector` auf den ausgewählten Sektor.
 
-### 2.3.6 UI-REQ-SECTORSEL-06 — Wechsel des ausgewählten Sektors
+#### 2.3.6 UI-REQ-SECTORSEL-06 — Wechsel des ausgewählten Sektors
 
 Die Benutzeroberfläche unterstützt den Wechsel des aktuell gesetzten Sektors durch erneute Auswahl.
 
-### 2.3.7 UI-REQ-SECTORSEL-07 — Kontextzustand ohne gesetzten Sektor
+#### 2.3.7 UI-REQ-SECTORSEL-07 — Kontextzustand ohne gesetzten Sektor
 
 Die Benutzeroberfläche unterstützt einen gültigen Zustand, in dem kein Sektor ausgewählt ist.
 
-### 2.3.8 UI-REQ-SECTORSEL-08 — Rücksetzen der Sektorauswahl
+#### 2.3.8 UI-REQ-SECTORSEL-08 — Rücksetzen der Sektorauswahl
 
 Die Benutzeroberfläche unterstützt eine Nutzeraktion, die den Kontextwert `selected_sector` in den Zustand „nicht gesetzt“ überführt.
 
-## 2.4 Sprachumschaltung (F-UI-04)
+### 2.4 Sprachumschaltung (F-UI-04)
 
-### 2.4.1 UI-REQ-LANG-01 — Bereitstellung einer Interaktionsmöglichkeit zur Sprachumschaltung
+#### 2.4.1 UI-REQ-LANG-01 — Bereitstellung einer Interaktionsmöglichkeit zur Sprachumschaltung
 
 Die Benutzeroberfläche stellt eine Interaktionsmöglichkeit bereit, über die Nutzer die Anzeigesprache auswählen können.
 
-### 2.4.2 UI-REQ-LANG-02 — Kontextwert für aktuelle Sprache
+#### 2.4.2 UI-REQ-LANG-02 — Kontextwert für aktuelle Sprache
 
 Die Benutzeroberfläche führt einen Kontextwert `language`, der die aktuell aktive Anzeigesprache repräsentiert.
 
-### 2.4.3 UI-REQ-LANG-03 — Bereitstellung verfügbarer Sprachen
+#### 2.4.3 UI-REQ-LANG-03 — Bereitstellung verfügbarer Sprachen
 
 Die Benutzeroberfläche stellt eine Menge verfügbarer Sprachen zur Auswahl bereit.
 
-### 2.4.4 UI-REQ-LANG-04 — Auswahl einer einzelnen Sprache
+#### 2.4.4 UI-REQ-LANG-04 — Auswahl einer einzelnen Sprache
 
 Die Benutzeroberfläche unterstützt die Auswahl genau einer Sprache aus der bereitgestellten Sprachmenge.
 
-### 2.4.5 UI-REQ-LANG-05 — Setzen des Sprachkontexts bei Auswahl
+#### 2.4.5 UI-REQ-LANG-05 — Setzen des Sprachkontexts bei Auswahl
 
 Bei Auswahl einer Sprache setzt die Benutzeroberfläche den Kontextwert `language` auf die ausgewählte Sprache.
 
-### 2.4.6 UI-REQ-LANG-06 — Wechsel der aktiven Sprache
+#### 2.4.6 UI-REQ-LANG-06 — Wechsel der aktiven Sprache
 
 Die Benutzeroberfläche unterstützt den Wechsel der aktuell gesetzten Sprache durch erneute Auswahl.
 
-### 2.4.7 UI-REQ-LANG-07 — Gültiger Kontextzustand der Sprache
+#### 2.4.7 UI-REQ-LANG-07 — Gültiger Kontextzustand der Sprache
 
 Die Benutzeroberfläche unterstützt einen gültigen Zustand, in dem der Kontextwert `language` gesetzt ist.
 
-
-
-## 2.5 Zeitraumauswahl (F-UI-05)
+### 2.5 Zeitraumauswahl (F-UI-05)
 
 #### 2.5.1 UI-REQ-PERIOD-01 — Bereitstellung einer Interaktionsmöglichkeit zur Zeitraumauswahl
 
@@ -855,37 +651,37 @@ Die Benutzeroberfläche initialisiert den Kontextwert `time_range` mit einem def
 
 Die Benutzeroberfläche unterstützt den Wechsel des aktuellen Zeitraums durch erneute Auswahl eines Intervalls.
 
-## 2.6 Nachrichten-Anzeige (F-UI-06)
+### 2.6 Nachrichten-Anzeige (F-UI-06)
 
 #### 2.6.1 UI-REQ-TICKER-01 — Bereitstellung eines visuellen Elements zur Nachrichtenanzeige
 
-Das System stellt ein visuelles Element bereit, das Nachrichten als Ticker oder Liste darstellt.
+Die Benutzeroberfläche stellt ein visuelles Element bereit, das Nachrichten als Ticker oder Liste darstellt.
 
 #### 2.6.2 UI-REQ-TICKER-02 — Trennung von Branchen- und Unternehmensnachrichten
 
-Das System ermöglicht die separate Darstellung von sektorbezogenen Nachrichten und unternehmensbezogenen Nachrichten.
+Die Benutzeroberfläche ermöglicht die separate Darstellung von sektorbezogenen Nachrichten und unternehmensbezogenen Nachrichten.
 
 #### 2.6.3 UI-REQ-TICKER-03 — Darstellung von Nachrichtentiteln
 
-Das Element zeigt mindestens den Titel der jeweiligen Nachricht an.
+Das visuelle Element zeigt mindestens den Titel der jeweiligen Nachricht an.
 
 #### 2.6.4 UI-REQ-TICKER-04 — Kennzeichnung der Nachrichtenquelle
 
-Das Element zeigt für jede Nachricht die zugehörige Quelle an.
+Das visuelle Element zeigt für jede Nachricht die zugehörige Quelle an.
 
 #### 2.6.5 UI-REQ-TICKER-05 — Anzeige der Nachrichtenaktualität
 
-Das Element zeigt für jede Nachricht den Erstellungs- oder Fetch-Zeitpunkt an.
+Das visuelle Element zeigt für jede Nachricht den Erstellungs- oder Fetch-Zeitpunkt an.
 
-## 2.7 Executive Summary Card (F-UI-07)
+### 2.7 Executive Summary Card (F-UI-07)
 
 #### 2.7.1 UI-REQ-SUMMARY-01 — Bereitstellung einer Zusammenfassungskomponente
 
-Das System stellt eine Komponente bereit, die eine prägnante Zusammenfassung der Analyseergebnisse anzeigt.
+Die Benutzeroberfläche stellt eine Komponente bereit, die eine prägnante Zusammenfassung der Analyseergebnisse anzeigt.
 
 #### 2.7.2 UI-REQ-SUMMARY-02 — Anzeige des generierten Zusammenfassungstextes
 
-Die Komponente stellt den durch die KI generierten Text der Zusammenfassung dar.
+Die Benutzeroberfläche stellt den durch die KI generierten Text der Zusammenfassung dar.
 
 #### 2.7.3 UI-REQ-SUMMARY-03 — Visuelle Kennzeichnung als KI-Generiert
 
@@ -893,17 +689,17 @@ Die Zusammenfassung muss explizit als durch KI generiertes Analyseergebnis geken
 
 #### 2.7.4 UI-REQ-SUMMARY-04 — Anzeige des Generierungszeitpunkts
 
-Die Komponente zeigt den Zeitpunkt der Generierung der Zusammenfassung an.
+Die Benutzeroberfläche zeigt den Zeitpunkt der Generierung der Zusammenfassung an.
 
 #### 2.7.5 UI-REQ-SUMMARY-05 — Darstellung wesentlicher Kennzahlen
 
-Die Komponente ermöglicht die integrierte Darstellung wesentlicher Kennzahlen des Analyseobjekts.
+Die Benutzeroberfläche ermöglicht die integrierte Darstellung wesentlicher Kennzahlen des Analyseobjekts.
 
-## 2.8 Preis-Chart (F-UI-08)
+### 2.8 Preis-Chart (F-UI-08)
 
 #### 2.8.1 UI-REQ-PCHART-01 — Bereitstellung eines Charts zur Preisdarstellung
 
-Das System stellt ein grafisches Element zur Visualisierung historischer Preisdaten bereit.
+Die Benutzeroberfläche stellt ein grafisches Element zur Visualisierung historischer Preisdaten bereit.
 
 #### 2.8.2 UI-REQ-PCHART-02 — Darstellung von zeitbasierten Preisdaten
 
@@ -933,11 +729,11 @@ Bei fehlenden historischen Datenpunkten muss das grafische Element eine konsiste
 
 Das grafische Element passt seine Größe dynamisch an den verfügbaren Platz im Dashboard-Container an.
 
-## 2.9 AI-Essay Ausgabe (F-UI-09)
+### 2.9 AI-Essay Ausgabe (F-UI-09)
 
 #### 2.9.1 UI-REQ-ESSAY-01 — Bereitstellung einer Komponente für ausführliche KI-Analysen
 
-Das System stellt eine Komponente zur Anzeige detaillierter, essayistischer KI-Analysen bereit.
+Die Benutzeroberfläche stellt eine Komponente zur Anzeige detaillierter, essayistischer KI-Analysen bereit.
 
 #### 2.9.2 UI-REQ-ESSAY-02 — Unterstützung formatierter Textausgabe
 
@@ -955,11 +751,11 @@ Das Analyse-Essay muss eindeutig als automatisiert generiertes Produkt gekennzei
 
 Die Komponente ermöglicht das Lesen umfangreicher Texte durch Bereitstellung einer Scroll-Funktionalität.
 
-## 2.10 Analyse-Scope Steuerung (F-UI-10)
+### 2.10 Analyse-Scope Steuerung (F-UI-10)
 
 #### 2.10.1 UI-REQ-SCOPE-01 — Bereitstellung einer Auswahlmöglichkeit für den Analyse-Scope
 
-Das System stellt eine Interaktionsmöglichkeit bereit, über die Nutzer den Umfang der Analyse definieren können.
+Die Benutzeroberfläche stellt eine Interaktionsmöglichkeit bereit, über die Nutzer den Umfang der Analyse definieren können.
 
 #### 2.10.2 UI-REQ-SCOPE-02 — Kontextwert für den Analyseumfang
 
@@ -977,11 +773,11 @@ Die Benutzeroberfläche zeigt den aktuell aktiven Analyse-Scope innerhalb der In
 
 Die Benutzeroberfläche unterstützt den Wechsel des aktiven Scopes durch Auswahl einer anderen Option.
 
-## 2.11 Volumen-Chart (F-UI-11)
+### 2.11 Volumen-Chart (F-UI-11)
 
 #### 2.11.1 UI-REQ-VCHART-01 — Bereitstellung eines Charts zur Volumendarstellung
 
-Das System stellt ein grafisches Element zur Visualisierung des Handelsvolumens bereit.
+Die Benutzeroberfläche stellt ein grafisches Element zur Visualisierung des Handelsvolumens bereit.
 
 #### 2.11.2 UI-REQ-VCHART-02 — Darstellung stündlicher Volumendaten der letzten 48 Stunden
 
@@ -1085,7 +881,7 @@ Das Backend muss die Ausgabe der KI-generierten Texte in den angeforderten Sprac
 
 #### 3.5.5 BE-REQ-AI-05 — Signierung der KI-Antworten mit Metadaten
 
-KI-Antworten müssen Metadaten über Generierungszeitpunkt und das verwendete Modell enthalten.
+Das System muss KI-Antworten mit Metadaten über Generierungszeitpunkt und verwendetes Modell versehen.
 
 ## 4. Desktop-Integration (Tauri)
 
@@ -1152,5 +948,35 @@ Das System muss die Auflösung von Klartext-Firmennamen in kanonische Börsensym
 #### 6.4 DH-REQ-DEDUP-01 — Vermeidung paralleler identischer Anfragen
 
 Das System muss sicherstellen, dass zeitgleiche identische Auflösungsanfragen de-dupliziert werden und nur eine externe Anfrage ausgelöst wird.
+
+## 7. Nicht-funktionale Anforderungen
+
+### 7.1 NFR-REQ-01 — Wahrnehmbare Reaktionsfähigkeit bei Cache-Treffern
+
+Wenn Analyseergebnisse bereits vorliegen, muss die Benutzeroberfläche diese innerhalb von 2 Sekunden anzeigen.
+
+### 7.2 NFR-REQ-02 — Explizite Ladeanzeige bei laufender Analyse
+
+Während einer laufenden Analyse muss die Benutzeroberfläche einen klar erkennbaren Ladezustand darstellen.
+
+### 7.3 NFR-REQ-03 — Explizite Fehlerrückmeldung
+
+Bei Analyse- oder Datenfehlern muss die Benutzeroberfläche einen verständlichen Fehlerhinweis anzeigen.
+
+### 7.4 NFR-REQ-04 — Wiederholbarkeit von Analyseaktionen
+
+Nach einem Fehler muss der Nutzer die Analyse erneut auslösen können, ohne die Anwendung neu starten zu müssen.
+
+### 7.5 NFR-REQ-05 — Sichtbare Datenherkunft
+
+Für Analyseergebnisse muss die Benutzeroberfläche den Systemzustand `data_origin` sichtbar anzeigen (z. B. „extern bezogen“ vs. „KI-generiert“).
+
+### 7.6 NFR-REQ-06 — Lesbarkeit umfangreicher Inhalte
+
+Längere Analyseausgaben müssen scrollbar und strukturiert darstellbar sein.
+
+### 7.7 NFR-REQ-07 — Zustandserhalt bei UI-Navigation
+
+Beim Wechsel zwischen UI-Bereichen müssen gesetzte Kontextwerte erhalten bleiben.
 
 Ende des Lastenhefts
