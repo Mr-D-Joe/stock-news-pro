@@ -23,6 +23,7 @@ All notable changes to this project are documented in this file.
 - **CI:** Typed OpenRouter message payloads (removed arg-type ignore).
 - **CI:** Validated DDG deep-web results (removed trust-cast).
 - **CI:** Replaced ticker resolution cast with validated TypeGuard.
+- **CI:** Fixed ReportData typing import in HTML reporter (ruff F821).
 
 ## [1.7.0] - 2026-01-29 - Phase A: Thematic Analysis
 ### Added

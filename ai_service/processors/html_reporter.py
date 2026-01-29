@@ -14,7 +14,8 @@ Matches the DeltaValue Investment Research template exactly:
 import os
 import json
 from datetime import datetime
-from typing import Dict, List
+
+from ai_service.models.contracts import ReportData, FundamentalsData, EventItem, NewsItem
 
 
 class HtmlReporter:
@@ -473,7 +474,7 @@ class HtmlReporter:
             f.write(html_content)
         return filepath
 
-    def _build_fundamentals_section(self, fundamentals: Dict, business_context: str = "") -> str:
+    def _build_fundamentals_section(self, fundamentals: FundamentalsData, business_context: str = "") -> str:
         """Build fundamentals section matching original template strictly."""
         # Use empty dict if None to ensure section is built with defaults
         fundamentals = fundamentals or {}
@@ -554,7 +555,7 @@ class HtmlReporter:
         </div>
         '''
 
-    def _build_impact_table(self, events: List[Dict]) -> str:
+    def _build_impact_table(self, events: list[EventItem]) -> str:
         """Build news impact analysis table matching original template."""
         if not events:
             return ""
@@ -613,7 +614,7 @@ class HtmlReporter:
         </div>
         '''
 
-    def _build_references(self, references: List[Dict]) -> str:
+    def _build_references(self, references: list[NewsItem]) -> str:
         """Build references section."""
         if not references:
             return ""
@@ -637,4 +638,3 @@ class HtmlReporter:
             {''.join(items)}
         </div>
         '''
-from ai_service.models.contracts import ReportData
