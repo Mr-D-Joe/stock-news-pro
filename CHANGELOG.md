@@ -15,6 +15,8 @@ All notable changes to this project are documented in this file.
 - **Persistence:** SQLite path moved to OS-appropriate app data directory.
 - **Docs:** Updated README, SYSTEM_REPORT, and TECHNICAL_SPEC for current architecture/tooling.
 - **CI:** Backend lint scope adjusted to avoid false failures; frontend lint fixes applied.
+- **CI:** Removed remaining frontend lint violations (typed guards, unused symbols, react-refresh export warning).
+- **CI:** Cleared backend ruff lint violations (imports, exceptions, typevars, prompt context).
 
 ## [1.7.0] - 2026-01-29 - Phase A: Thematic Analysis
 ### Added

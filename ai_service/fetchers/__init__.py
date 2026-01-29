@@ -8,7 +8,7 @@ Supports:
 
 import asyncio
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Optional
 from dataclasses import dataclass
 
@@ -155,8 +155,8 @@ class NewsFetcher:
             try:
                 general_news = await self._fetch_general_rss(ticker, company_name, feed_name, 5)
                 all_news.extend(general_news)
-            except:
-                pass
+            except Exception as e:
+                logger.debug(f"General RSS fetch failed ({feed_name}): {e}")
         
         # Remove duplicates based on title
         seen_titles = set()
@@ -255,8 +255,8 @@ class NewsFetcher:
                 if hasattr(entry, "published_parsed") and entry.published_parsed:
                     try:
                         published = datetime(*entry.published_parsed[:6])
-                    except:
-                        pass
+                    except Exception as e:
+                        logger.debug(f"Failed to parse RSS published date: {e}")
                 
                 # Clean title
                 title = entry.get("title", "No title")
@@ -298,8 +298,8 @@ class NewsFetcher:
                 if hasattr(entry, "published_parsed") and entry.published_parsed:
                     try:
                         published = datetime(*entry.published_parsed[:6])
-                    except:
-                        pass
+                    except Exception as e:
+                        logger.debug(f"Failed to parse RSS URL published date: {e}")
                 
                 # Clean title
                 title = entry.get("title", "No title")
@@ -375,4 +375,3 @@ def get_fetcher():
     if _fetcher is None:
         _fetcher = NewsFetcher()
     return _fetcher
-

@@ -1,7 +1,7 @@
 """Mock data for development mode - 4 fictional stocks with complete data."""
 
 from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 import random
 
 # =============================================================================
@@ -509,8 +509,10 @@ def get_mock_sparkline_data(ticker: str, period: str = "1w") -> List[float]:
     
     # Adjust volatility based on ticker
     vol = 0.02
-    if ticker.upper() == "BGNX": vol = 0.05
-    if ticker.upper() == "ACME": vol = 0.015
+    if ticker.upper() == "BGNX":
+        vol = 0.05
+    if ticker.upper() == "ACME":
+        vol = 0.015
     
     random.seed(hash(ticker + period + "spark"))
     

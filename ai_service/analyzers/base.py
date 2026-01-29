@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any
 
 from ai_service.models.article import AnalysisResult, ArticleCollection
 from ai_service.pipeline.base import PipelineContext, PipelineStep

@@ -1,6 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
-from typing import Optional
 
 class Settings(BaseSettings):
     """Application configuration with enhanced validation and fallback support."""

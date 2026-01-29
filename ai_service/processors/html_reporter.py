@@ -14,7 +14,7 @@ Matches the DeltaValue Investment Research template exactly:
 import os
 import json
 from datetime import datetime
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 
 
 class HtmlReporter:

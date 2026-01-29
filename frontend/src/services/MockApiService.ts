@@ -8,7 +8,6 @@ import type {
     ThemeResult,
     SectorPerformance,
     SparklineResponse,
-    ChartPoint,
     Transaction
 } from '../types';
 import { sanitizeText, buildSanitizationTrace } from './sanitization';

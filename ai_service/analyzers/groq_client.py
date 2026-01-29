@@ -151,7 +151,7 @@ class GroqClient(BaseAIClient):
                     continue
                 raise AIError(f"Groq request failed: {e}")
         
-        raise AIError(f"Groq max retries exceeded")
+        raise AIError("Groq max retries exceeded")
     
     def summarize_article(self, title: str, text: str, max_words: int = 100) -> str:
         """Summarize article."""

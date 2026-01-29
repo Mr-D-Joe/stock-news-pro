@@ -73,8 +73,9 @@ export function useStocks() {
         queryKey: queryKeys.stocks(),
         queryFn: async (): Promise<Stock[]> => {
             // Only MockApiService has getStocks
-            if ('getStocks' in ApiService) {
-                return (ApiService as any).getStocks();
+            const service = ApiService as { getStocks?: () => Promise<Stock[]> };
+            if (typeof service.getStocks === 'function') {
+                return service.getStocks();
             }
             return [];
         },

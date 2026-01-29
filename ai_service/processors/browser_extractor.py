@@ -1,9 +1,7 @@
 import logging
 import asyncio
-from typing import Optional, List
-import concurrent.futures
 
-from playwright.async_api import async_playwright, Page, Browser, BrowserContext
+from playwright.async_api import async_playwright, BrowserContext
 
 from ai_service.models.article import Article, ArticleCollection
 from ai_service.pipeline.base import PipelineStep, PipelineContext

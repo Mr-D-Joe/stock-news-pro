@@ -48,7 +48,7 @@ export const BackendService = {
     async checkHealth(): Promise<boolean> {
         try {
             return await invoke<boolean>('check_backend_health');
-        } catch (error) {
+        } catch {
             // If IPC fails, assume unhealthy
             return false;
         }

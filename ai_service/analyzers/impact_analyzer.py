@@ -4,12 +4,8 @@ from __future__ import annotations
 
 import logging
 import re
-from dataclasses import dataclass
-from datetime import datetime
-from enum import Enum
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
-from pydantic import BaseModel, Field, computed_field
 
 from ai_service.analyzers.base_client import BaseAIClient, AIError
 from ai_service.analyzers.provider_factory import ProviderFactory
@@ -21,6 +17,8 @@ from ai_service.models.price_data import PriceHistory
 
 logger = logging.getLogger(__name__)
 
+if TYPE_CHECKING:
+    from ai_service.pipeline.base import PipelineContext
 
 # Impact weights by category (1.0 = baseline, higher = more impact)
 CATEGORY_WEIGHTS: dict[NewsCategory, float] = {

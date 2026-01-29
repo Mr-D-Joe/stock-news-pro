@@ -2,11 +2,8 @@
 
 import pytest
 from fastapi.testclient import TestClient
-from datetime import datetime
-from unittest.mock import patch, MagicMock
 
 from ai_service.main import app
-from ai_service.api.engine import _news_cache, _analysis_cache
 
 
 @pytest.fixture

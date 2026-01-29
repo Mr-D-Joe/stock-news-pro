@@ -3,23 +3,18 @@
 Provides REST endpoints for the C++ Engine to interact with the AI Service.
 """
 
-from fastapi import APIRouter, HTTPException, Query, BackgroundTasks
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 from typing import Optional, Literal, List
 from datetime import datetime
 import logging
-import asyncio
-import logging
 
 from ai_service.analyzers.base_client import AIError
 from ai_service.analyzers.essay_generator import EssayGenerator
-from ai_service.analyzers.gemini_client import GeminiClient
 from ai_service.config import Settings
-from ai_service.fetchers import NewsFetcher
 from ai_service.models.article import (
     Article,
-    ArticleCollection,
-    AnalysisResult
+    ArticleCollection
 )
 
 logger = logging.getLogger(__name__)
@@ -359,8 +354,6 @@ async def request_analysis(request: AnalysisRequest):
     Engine calls this to get AI-generated insights.
     Uses caching with content hash to avoid redundant AI calls.
     """
-    from ai_service.models.article import Article, ArticleCollection
-    from ai_service.analyzers.essay_generator import EssayGenerator
     from ai_service.pipeline.base import PipelineContext, PipelineConfig
     
     # Build cache key
@@ -573,7 +566,6 @@ async def get_sectors(
     Implements BE-REQ-SECTOR-01 to BE-REQ-SECTOR-04.
     In DEV_MODE, returns rich mock data.
     """
-    from ai_service.config import Settings
     from ai_service.mock.mock_data import get_mock_sector_performance
     
     settings = Settings()
@@ -597,7 +589,6 @@ async def get_sparkline(
     
     Implements BE-REQ-SPARK-01 and BE-REQ-SPARK-02.
     """
-    from ai_service.config import Settings
     from ai_service.mock.mock_data import get_mock_sparkline_data
     
     settings = Settings()

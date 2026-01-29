@@ -1,8 +1,7 @@
 import pytest
-from unittest.mock import MagicMock, AsyncMock, patch
+from unittest.mock import AsyncMock, patch
 from ai_service.processors.browser_extractor import BrowserExtractor
 from ai_service.models.article import Article, ArticleCollection
-from ai_service.pipeline.base import PipelineContext, PipelineConfig
 
 @pytest.fixture
 def mock_playwright():

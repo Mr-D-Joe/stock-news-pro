@@ -1,24 +1,25 @@
-import os
 import logging
-from fastapi import FastAPI
-from pydantic import BaseModel
+import signal
+import sys
+from contextlib import asynccontextmanager
 from typing import Optional, Literal, List
 
-logger = logging.getLogger(__name__)
-from ai_service.analyzers.provider_factory import ProviderFactory
-from ai_service.analyzers.impact_analyzer import ImpactAnalyzer
-from ai_service.models.article import ArticleCollection, AnalysisResult
-from ai_service.models import Transaction
-from ai_service.processors.browser_extractor import BrowserExtractor
-from ai_service.analyzers.essay_generator import EssayGenerator
-from ai_service.pipeline.base import PipelineContext, PipelineConfig
-from ai_service.health import router as health_router
+from fastapi import FastAPI, Request, Depends, HTTPException
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+from sqlmodel import Session, select
+
 from ai_service.api.engine import router as engine_router, normalize_language
 from ai_service.config import Settings
-
-from ai_service.processors.ticker_resolver import TickerResolver
+from ai_service.database import get_session
 from ai_service.fetchers.historic_analyzer import HistoricAnalyzer
-from ai_service.processors.html_reporter import HtmlReporter
+from ai_service.health import router as health_router
+from ai_service.models import Transaction
+from ai_service.models.article import ArticleCollection, AnalysisResult
+from ai_service.pipeline.base import PipelineContext, PipelineConfig
+from ai_service.processors.browser_extractor import BrowserExtractor
+from ai_service.processors.ticker_resolver import TickerResolver
+from ai_service.analyzers.essay_generator import EssayGenerator
 
 
 class ApiError(BaseModel):
@@ -75,9 +76,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # --- RESILIENCE: Signal Handling ---
-import signal
-import sys
-import asyncio
 
 def handle_sigint(signum, frame):
     logger.warning("Received SIGINT (Ctrl+C). Forcing clean shutdown...")
@@ -85,10 +83,7 @@ def handle_sigint(signum, frame):
 
 signal.signal(signal.SIGINT, handle_sigint)
 
-signal.signal(signal.SIGINT, handle_sigint)
-
 # --- LIFECYCLE: Database & Resource Management ---
-from contextlib import asynccontextmanager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -103,11 +98,6 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Stock News AI Service", version="1.0.0", lifespan=lifespan)
 
 # --- RESILIENCE: Global Exception Handler ---
-from fastapi import Request, Depends, HTTPException
-from fastapi.responses import JSONResponse
-from sqlmodel import Session, select
-from ai_service.database import get_session
-
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     logger.error(f"Global Crash Handler caught: {exc}", exc_info=True)

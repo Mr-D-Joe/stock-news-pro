@@ -23,7 +23,6 @@ engine = create_engine(DATABASE_URL, connect_args=connect_args)
 
 def init_db():
     # Import models here to ensure they are registered with SQLModel.metadata
-    from ai_service.models import Transaction
     SQLModel.metadata.create_all(engine)
 
 def get_session():

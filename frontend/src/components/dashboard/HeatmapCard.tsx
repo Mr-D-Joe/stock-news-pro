@@ -147,7 +147,7 @@ export const HeatmapCard: React.FC = () => {
     const heatmapPeriod = timeframeToPeriod[uiState.selectedTimeframe] || '1d';
     const { data: sectors, isLoading, isError, error } = useSectorPerformance(heatmapPeriod);
 
-    const treemapData = useMemo(() => {
+    const treemapData = useMemo<HeatmapSectorNode[]>(() => {
         return (sectors || []).map((s: SectorPerformance) => ({
             ...s,
             children: (s.top_stocks || []).map((stock: SectorStock) => ({
@@ -215,12 +215,12 @@ export const HeatmapCard: React.FC = () => {
             <div className="h-[450px] w-full p-2 bg-slate-50/30">
                 <ResponsiveContainer width="100%" height="100%">
                     <Treemap
-                        data={(treemapData || []) as any}
+                        data={treemapData}
                         dataKey="market_cap"
                         nameKey="name"
                         stroke="#fff"
                         content={<CustomizedContent />}
-                        onClick={(node) => handleNodeClick(node)}
+                        onClick={(node) => handleNodeClick(node as HeatmapSectorNode | HeatmapStockNode)}
                     >
                         <Tooltip content={<HeatmapTooltip />} />
                     </Treemap>

@@ -62,8 +62,8 @@ class StockTwitsFetcher:
                 if created:
                     try:
                         published = datetime.strptime(created, "%Y-%m-%dT%H:%M:%SZ")
-                    except:
-                        pass
+                    except Exception as e:
+                        logger.debug(f"Failed to parse StockTwits date: {e}")
                 
                 # Extract sentiment
                 entities = msg.get("entities", {})

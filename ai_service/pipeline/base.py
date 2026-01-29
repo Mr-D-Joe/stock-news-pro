@@ -1,4 +1,4 @@
-from typing import TypeVar, Generic, List, Optional, Callable, Any
+from typing import TypeVar, Generic, List, Optional, Callable
 from pydantic import BaseModel
 
 class PipelineConfig(BaseModel):
@@ -13,11 +13,11 @@ class PipelineContext(BaseModel):
     
     model_config = {"arbitrary_types_allowed": True}
 
-I = TypeVar("I")
-O = TypeVar("O")
+InputT = TypeVar("InputT")
+OutputT = TypeVar("OutputT")
 
-class PipelineStep(Generic[I, O]):
+class PipelineStep(Generic[InputT, OutputT]):
     name: str = "step"
 
-    def process(self, input_data: I, context: PipelineContext) -> O:
+    def process(self, input_data: InputT, context: PipelineContext) -> OutputT:
         raise NotImplementedError

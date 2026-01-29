@@ -152,6 +152,10 @@ export class TickerCache {
         };
     }
 
+    getEntries(): Array<[string, TickerCacheEntry]> {
+        return Array.from(this.entries.entries());
+    }
+
     // ==================== Persistence ====================
 
     toJSON(): string {
@@ -260,7 +264,7 @@ if (typeof window !== 'undefined' && window.localStorage) {
     if (savedN2S) {
         const loaded = TickerCache.fromJSON(savedN2S, 'ticker_name_to_symbol', NAME_TO_SYMBOL_CACHE_CONFIG);
         // Transfer entries
-        for (const [key, entry] of (loaded as any).entries.entries()) {
+        for (const [key, entry] of loaded.getEntries()) {
             nameToSymbolCache.set(key, entry, entry.isNegative);
         }
     }
@@ -268,7 +272,7 @@ if (typeof window !== 'undefined' && window.localStorage) {
     const savedS2N = localStorage.getItem('ticker_symbol_to_name');
     if (savedS2N) {
         const loaded = TickerCache.fromJSON(savedS2N, 'ticker_symbol_to_name', SYMBOL_TO_NAME_CACHE_CONFIG);
-        for (const [key, entry] of (loaded as any).entries.entries()) {
+        for (const [key, entry] of loaded.getEntries()) {
             symbolToNameCache.set(key, entry, entry.isNegative);
         }
     }

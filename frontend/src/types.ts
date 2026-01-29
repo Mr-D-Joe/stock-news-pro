@@ -2,7 +2,7 @@ export interface TopBarProps {
     ticker: string;
     sector: string;
     language: string;
-    onAction: (action: string, payload?: any) => void;
+    onAction: (action: string, payload?: unknown) => void;
 }
 
 export interface Metric {
@@ -137,7 +137,6 @@ export interface AppState {
 }
 
 // Props Interfaces
-export interface TopBarProps { }
 export interface StatusBarProps {
     statusMessage: string;
     versionInfo: string;
@@ -170,4 +169,3 @@ export interface SparklineResponse {
     data: number[];
     source: string;
 }
-

@@ -39,7 +39,7 @@ def build_essay_prompt(
     stocks_str = ", ".join(focus_stocks) if focus_stocks else "various stocks"
     sectors_str = ", ".join(focus_sectors) if focus_sectors else "the market"
     
-    prompt = f"""You are a senior financial analyst at DeltaValue. Your task is to write a comprehensive investment research report for {stocks_str} based on {articles.count} recent articles and the provided fundamental data.
+    prompt = f"""You are a senior financial analyst at DeltaValue. Your task is to write a comprehensive investment research report for {stocks_str} (sectors: {sectors_str}) based on {articles.count} recent articles and the provided fundamental data.
 
 ## DeltaValue Methodology
 Your analysis must strictly follow the DeltaValue systematic approach:

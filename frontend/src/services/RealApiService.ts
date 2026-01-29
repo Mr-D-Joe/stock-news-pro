@@ -5,7 +5,7 @@
  * Used when VITE_USE_REAL_API=true
  */
 
-import type { Stock, NewsItem, Report, AnalysisResult, ChartPoint, SectorPerformance, SparklineResponse, Transaction, ThemeResult } from '../types';
+import type { Stock, NewsItem, Report, AnalysisResult, ChartPoint, SectorPerformance, SparklineResponse, ThemeResult } from '../types';
 import { sanitizeText, buildSanitizationTrace } from './sanitization';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
@@ -290,7 +290,7 @@ export const RealApiService = {
      */
     analyzeTheme: async (query: string): Promise<ThemeResult> => {
         try {
-            const result = await fetchEnvelope<any>('/v1/analyze/theme', {
+            const result = await fetchEnvelope<ThemeResult>('/v1/analyze/theme', {
                 method: 'POST',
                 body: JSON.stringify({ query }),
             });

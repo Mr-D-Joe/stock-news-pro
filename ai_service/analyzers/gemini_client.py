@@ -230,7 +230,7 @@ class GeminiClient(BaseAIClient):
                     
                     if should_wait_and_retry:
                         if max_retries == 1:
-                            logger.info(f"Rate limited and max_retries=1. Skipping wait and falling back immediately.")
+                            logger.info("Rate limited and max_retries=1. Skipping wait and falling back immediately.")
                             raise GeminiError(f"Rate limit exceeded (wait {wait_seconds}s)")
                             
                         logger.warning(f"Waiting {wait_seconds}s before retrying {use_model}...")
@@ -330,8 +330,8 @@ class GeminiClient(BaseAIClient):
                 now = datetime.now(timezone.utc)
                 delta = (dt - now).total_seconds()
                 return max(1, int(delta))
-            except:
-                pass
+            except Exception as e:
+                logger.debug(f"Failed to parse Retry-After header: {e}")
         
         # 2. Try to parse JSON details for google.rpc.RetryInfo
         try:
@@ -356,10 +356,9 @@ class GeminiClient(BaseAIClient):
                 
                 # Check for ErrorInfo metadata which sometimes contains quotas
                 if detail.get("@type") == "type.googleapis.com/google.rpc.ErrorInfo":
-                    metadata = detail.get("metadata", {})
-                    # Some internal APIs might pass hints here, though rare for Gemini
-        except:
-            pass
+                    logger.debug("Gemini ErrorInfo metadata: %s", detail.get("metadata", {}))
+        except Exception as e:
+            logger.debug(f"Failed to parse Gemini error details: {e}")
             
         return None
 

@@ -4,9 +4,6 @@ from unittest.mock import MagicMock, AsyncMock, patch
 from datetime import datetime
 
 from ai_service.models.article import Article, ArticleCollection
-from ai_service.pipeline.base import PipelineContext, PipelineConfig
-from ai_service.processors.browser_extractor import BrowserExtractor
-from ai_service.analyzers.essay_generator import EssayGenerator
 from ai_service.main import analyze_essay
 
 @pytest.mark.asyncio

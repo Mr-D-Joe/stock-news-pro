@@ -38,6 +38,7 @@ export const usePortfolio = () => {
     }, []);
 
     const deleteTransaction = useCallback(async (id: number) => {
+        void id;
         // Note: Delete method needs to be added to ApiService interface first if supported in Frontend Service
         // For now just local optimistic update or skip if implementation is pending in Frontend Service
         console.warn("Delete not yet fully implemented in Frontend Service interface");

@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import time
 import random
-from typing import Any, Optional, Callable
+from typing import Optional, Callable
 
 import requests
 

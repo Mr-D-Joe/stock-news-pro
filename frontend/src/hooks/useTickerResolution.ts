@@ -12,6 +12,7 @@ import { TickerResolutionService } from '../services/TickerResolutionService';
 import type {
     TickerResolutionRequest,
     TickerResolutionResult,
+    TickerResolutionErrorCode,
 } from '../types/tickerResolution';
 
 // ==================== Query Keys ====================
@@ -28,6 +29,14 @@ export interface UseTickerResolutionOptions {
     enabled?: boolean;
     skipCache?: boolean;
 }
+
+const getErrorCode = (error: unknown): TickerResolutionErrorCode | null => {
+    if (!error || typeof error !== 'object' || !('code' in error)) {
+        return null;
+    }
+    const code = (error as { code?: unknown }).code;
+    return typeof code === 'string' ? (code as TickerResolutionErrorCode) : null;
+};
 
 export function useTickerResolution(
     query: string,
@@ -46,11 +55,9 @@ export function useTickerResolution(
         gcTime: 30 * 60 * 1000,   // 30 minutes
         retry: (failureCount, error) => {
             // Don't retry on NOT_FOUND or INVALID_INPUT
-            if (error && typeof error === 'object' && 'code' in error) {
-                const code = (error as any).code;
-                if (code === 'NOT_FOUND' || code === 'INVALID_INPUT') {
-                    return false;
-                }
+            const code = getErrorCode(error);
+            if (code === 'NOT_FOUND' || code === 'INVALID_INPUT') {
+                return false;
             }
             return failureCount < 2;
         },

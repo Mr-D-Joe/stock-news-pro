@@ -1,13 +1,11 @@
 """Ticker and Sector resolver using AI for fuzzy matching."""
 
 import logging
-import os
-from typing import Optional, Dict, List
+from typing import Optional, Dict
 import json
 import re
 from pathlib import Path
 
-from ai_service.analyzers.gemini_client import GeminiClient
 from ai_service.config import Settings
 from ai_service.analyzers.provider_factory import ProviderFactory
 
@@ -314,5 +312,6 @@ Important:
         try:
             response = self.client.generate(prompt, temperature=0.0)
             return response.strip()
-        except:
+        except Exception as e:
+            logger.warning(f"AI sector mapping failed for '{query}': {e}")
             return query.capitalize()

@@ -4,11 +4,8 @@ import logging
 from typing import List, Dict, Optional, Any
 from datetime import datetime, timedelta
 import yfinance as yf
-import pandas as pd
 import json
-import re
 
-from ai_service.analyzers.gemini_client import GeminiClient
 from ai_service.config import Settings
 from ai_service.analyzers.provider_factory import ProviderFactory
 
@@ -31,8 +28,6 @@ class HistoricAnalyzer:
         """Fetch fundamental data (P/E, PEG, Analysts, etc.) with fallbacks."""
         import asyncio
         import os
-        import json
-        import time
         import requests
         from datetime import datetime
         
@@ -211,7 +206,6 @@ class HistoricAnalyzer:
 
     async def _fetch_yahoo_chart(self, ticker: str, period: str) -> Dict[str, Any]:
         """Direct Yahoo Finance Chart API call (more reliable than yfinance lib)."""
-        import requests
         
         period_map = {
             "10y": ("10y", "1wk"),
@@ -333,7 +327,7 @@ class HistoricAnalyzer:
         Returns:
             Dict mapping period -> price_data
         """
-        from datetime import datetime, timedelta
+        from datetime import datetime
         
         result = {}
         data = full_data.get("data", [])
