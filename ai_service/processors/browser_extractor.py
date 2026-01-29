@@ -51,7 +51,7 @@ class BrowserExtractor(PipelineStep[ArticleCollection, ArticleCollection]):
             await page.close()
 
     async def _process_async(self, input_data: ArticleCollection) -> ArticleCollection:
-        tasks = []
+        tasks: list[asyncio.Task[None]] = []
         # Calculate how many to process - maybe limit to top N to save time?
         # For now, process all defined in collection, but respect concurrency
         semaphore = asyncio.Semaphore(self.max_concurrent)
@@ -69,7 +69,7 @@ class BrowserExtractor(PipelineStep[ArticleCollection, ArticleCollection]):
         async def run_tasks(context: BrowserContext | None):
             tasks.clear()
             for article in input_data.articles:
-                tasks.append(sem_task(article, context))
+                tasks.append(asyncio.create_task(sem_task(article, context)))
             await asyncio.gather(*tasks)
 
         browser = None
