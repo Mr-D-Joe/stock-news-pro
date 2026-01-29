@@ -16,6 +16,7 @@ Status: Draft
 
 | Version | Datum       | Abschnitt | Änderungstyp | Beschreibung |
 |--------:|------------|-----------|--------------|--------------|
+| 1.9 | 2026-01-29 | 7 | Erweiterung | Einführung von NFRs für CI‑Reproduzierbarkeit und Test‑Determinismus (NFR-REQ-08/09). |
 | 1.8 | 2026-01-29 | 3.7, 4.6 | Erweiterung | Einführung der Portfolio-Persistenz (BE-REQ-PERSIST, BE-REQ-PORTFOLIO) für Phase B. |
 | 1.7 | 2026-01-29 | 2.12, 3.6 | Erweiterung | Einführung der Themen-Analyse (UI-REQ-THEMESEL, BE-REQ-THEME) für Schlagwortsuche (Phase A). |
 | 1.6 | 2026-01-28 | 2.10, 4.5 | Refactoring | Entfernung des Analyse-Scope-Selectors (UI-REQ-SCOPE-xx) zur Vereinfachung sowie Einführung der Port-Isolation (BE-REQ-PORT-01) und des Dashboard Heroes (UI-REQ-HERO-01). |
@@ -1053,6 +1054,20 @@ Die Kommunikation zwischen Frontend und Backend muss über eine strikt typisiert
 
 Fehler im Backend-Prozess oder in der IPC-Schicht müssen als typisierte Fehlermeldungen an das Frontend übermittelt werden.
 
+### 4.6 Datenpersistenz (Data Persistence)
+
+#### 4.6.1 BE-REQ-PERSIST-01 — SQLite-basierte Speicherung
+
+Das System verwendet eine SQLite-Datenbank zur lokalen Speicherung von persistenten Nutzerdaten, insbesondere Portfolio-Transaktionen.
+
+#### 4.6.2 BE-REQ-PERSIST-02 — Persistenter Speicherort
+
+Die Datenbankdatei wird in einem betriebssystemkonformen Anwendungsdatenverzeichnis abgelegt, um Datenverlust bei Anwendungsneustarts zu verhindern.
+
+#### 4.6.3 BE-REQ-PERSIST-03 — Automatische Initialisierung
+
+Das System prüft beim Start die Existenz der Datenbank und initialisiert bei Bedarf das Schema (Tabellen) automatisch.
+
 ## 5. API-Governance
 
 #### 5.1 AG-REQ-DEVMODE-01 — Bereitstellung eines DEV_MODE Standards
@@ -1123,18 +1138,10 @@ Längere Analyseausgaben müssen scrollbar und strukturiert darstellbar sein.
 
 Beim Wechsel zwischen UI-Bereichen müssen gesetzte Kontextwerte erhalten bleiben.
 
-### 4.6 Datenpersistenz (Data Persistence)
+### NFR-REQ-08 — CI‑Reproduzierbarkeit
+Die CI muss ohne manuelle Setup‑Schritte reproduzierbar laufen; alle Test‑Dependencies müssen in der CI installierbar sein.
 
-#### 4.6.1 BE-REQ-PERSIST-01 — SQLite-basierte Speicherung
-
-Das System verwendet eine SQLite-Datenbank zur lokalen Speicherung von persistenten Nutzerdaten, insbesondere Portfolio-Transaktionen.
-
-#### 4.6.2 BE-REQ-PERSIST-02 — Persistenter Speicherort
-
-Die Datenbankdatei wird in einem betriebssystemkonformen Anwendungsdatenverzeichnis abgelegt, um Datenverlust bei Anwendungsneustarts zu verhindern.
-
-#### 4.6.3 BE-REQ-PERSIST-03 — Automatische Initialisierung
-
-Das System prüft beim Start die Existenz der Datenbank und initialisiert bei Bedarf das Schema (Tabellen) automatisch.
+### NFR-REQ-09 — Test‑Determinismus
+Tests müssen deterministisch ohne externe Dienste/Binaries laufen oder als Integrationstests markiert und getrennt ausführbar sein.
 
 Ende des Lastenhefts

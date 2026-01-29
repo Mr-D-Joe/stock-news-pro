@@ -15,6 +15,7 @@ Dieses Dokument definiert die verbindlichen Regeln für Architektur, Governance 
 
 | Version | Datum       | Abschnitt | Änderungstyp | Beschreibung |
 |--------:|------------|-----------|--------------|--------------|
+| 1.4 | 2026-01-29 | Governance | Erweiterung | Einführung der CI-/Typing-/Test-Determinismus-Regeln (DES-GOV-49 bis DES-GOV-53). |
 | 1.3 | 2026-01-27 | Governance | Erweiterung | Übernahme der formalen Anforderungsregeln (Atomarisierung, Verifizierbarkeit, Struktur) als projektverbindliche Governance in DESIGN.md |
 | 1.3 | 2026-01-27 | Governance | Erweiterung | Übernahme des Änderungs- und Erweiterungsprozesses für externe Änderungswünsche als normative Governance in DESIGN.md |
 | 1.3 | 2026-01-27 | Governance | Erweiterung | Übernahme der Governance zur Interpretation und normativen Autorität als normative Governance in DESIGN.md |
@@ -206,7 +207,20 @@ Normative Gültigkeit besitzen die freigegebenen Versionen von DESIGN.md und LAS
 ### DES-GOV-48 — Pflege von CHANGELOG.md
 Jede funktionale Änderung, Fehlerbehebung oder Release-Erstellung wird in `CHANGELOG.md` dokumentiert.
 
----
+### DES-GOV-49 — CI-Toolchain-Vollständigkeit
+Alle in CI verwendeten Tools und Abhängigkeiten sind im Repository dokumentiert und in CI reproduzierbar installierbar.
+
+### DES-GOV-50 — Externe Binaries in Tests
+Tests dürfen keine externen Binaries voraussetzen, es sei denn die CI installiert sie explizit oder der Code bietet einen Mock/Fallback-Pfad.
+
+### DES-GOV-51 — Verbot von typing.Any ohne Ausnahme
+typing.Any ist verboten, außer es existiert eine dokumentierte Ausnahme mit Begründung und Scope.
+
+### DES-GOV-52 — Typing-Abhängigkeiten als Dev-Dependencies
+Alle für die Typprüfung notwendigen Stubs/Typing-Pakete sind in den Dev-Dependencies geführt.
+
+### DES-GOV-53 — Test-Determinismus und Isolation
+Tests laufen deterministisch ohne Netzwerk- oder Browser-Abhängigkeiten, es sei denn sie sind explizit als Integrationstests markiert und getrennt ausführbar.
 
 ## Architektur
 

@@ -30,6 +30,8 @@ All notable changes to this project are documented in this file.
 - **CI:** Added transaction model module to resolve ai_service.models import in tests.
 - **CI:** Added Playwright fallback in browser extractor to keep tests running when browsers are unavailable.
 - **CI:** Added explicit task typing in browser extractor to satisfy mypy.
+- **Docs:** Added local quality gates and typing/test determinism rules to CONTRIBUTING.md.
+- **Docs:** Updated ai_prompt_intro.md with CI dependency checks and deterministic test rules.
 
 ## [1.7.0] - 2026-01-29 - Phase A: Thematic Analysis
 ### Added

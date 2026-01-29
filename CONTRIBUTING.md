@@ -36,6 +36,7 @@ This project follows a strict strict directory layout to maintain separation of 
 2. **Update Documentation:**
    - **`CHANGELOG.md`**: Log your specific changes under "Unreleased" or current version. (Rule `DES-GOV-48`)
    - **`LASTENHEFT.md`**: Update requirements if functionality changes.
+   - **Dev-Dependencies:** Alle für Typprüfung/Test benötigten Stubs/Typing-Pakete müssen in `ai_service/requirements-dev.txt` dokumentiert sein.
 
 3. **Branching:**
    - Use descriptive names: `feat/new-chart`, `fix/ticker-resolution`, `docs/update-readme`.
@@ -55,7 +56,25 @@ If you are an AI agent working on this repo:
 3. **No Hallucinations:** If a file or function is not present, ask before creating it. Do not invent new architectural layers (e.g., "Redux") if they are not specified in `DESIGN.md`.
 4. **Mocking:** If adding a new data feature, implement it as a **Mock** first (see `DES-GOV-17`).
 5. **Remote Verification:** A project conclusion or task completion is only considered "clean" if `git push` has been successfully executed AND verified. Verification **MUST include both technical parity check** (git status/hash) **AND visual content confirmation** (via Browser/Server-View) to ensure files are actually present and correct on the remote. Local commits are insufficient.
+6. **Typing & CI:** Keine neuen `Any`-Typen ohne dokumentierte Ausnahme; benötigte Typing-Stubs gehören in `requirements-dev.txt`.
+7. **Test-Determinismus:** Keine Tests mit externen Binaries ohne CI-Install-Step oder Mock/Fallback.
 
-## 5. Release Process
+## 5. Local Quality Gates (Required)
+
+Vor jedem Commit müssen diese Checks lokal laufen:
+
+- Frontend:
+  - `cd frontend && npm run lint`
+  - `cd frontend && npm run typecheck`
+- Backend:
+  - `cd ai_service && ruff check .`
+  - `cd ai_service && mypy . --ignore-missing-imports`
+  - `cd ai_service && pytest -q`
+
+Hinweis:
+- Browser-abhängige Tests müssen entweder in CI explizit installierte Binaries nutzen (z. B. Playwright) oder als Integrationstests markiert und separat ausführbar sein.
+- `typing.Any` ist nur mit dokumentierter Ausnahme erlaubt (Reason + Scope).
+
+## 6. Release Process
 
 See `docs/RELEASE_CHECKLIST.md` for the exact steps to cut a new version.
