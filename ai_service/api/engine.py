@@ -106,7 +106,7 @@ class NewsItem(BaseModel):
     url: Optional[str] = None
     published: Optional[datetime] = None
     summary: Optional[str] = None
-    fetched_at: datetime = None  # When we fetched this news
+    fetched_at: Optional[datetime] = None  # When we fetched this news
     
     def __init__(self, **data):
         super().__init__(**data)
@@ -245,7 +245,7 @@ def _compute_news_hash(articles: list) -> str:
     return hashlib.md5(content.encode()).hexdigest()
 
 
-def _get_fresh_news(ticker: str = None, max_age_hours: int = 24) -> list[NewsItem]:
+def _get_fresh_news(ticker: Optional[str] = None, max_age_hours: int = 24) -> list[NewsItem]:
     """Get only fresh news items (within max_age_hours)."""
     from datetime import timedelta
     cutoff = datetime.now() - timedelta(hours=max_age_hours)

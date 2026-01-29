@@ -1,7 +1,8 @@
 """Ticker and Sector resolver using AI for fuzzy matching."""
 
 import logging
-from typing import Optional, Dict
+from typing import Optional, Dict, TypedDict
+from typing_extensions import TypeGuard
 import json
 import re
 from pathlib import Path
@@ -13,6 +14,27 @@ logger = logging.getLogger(__name__)
 
 # Cache file path (stores dynamically resolved tickers)
 CACHE_FILE = Path(__file__).parent.parent / "data" / "ticker_cache.json"
+
+
+class TickerResolutionResponse(TypedDict):
+    symbol: str
+    name: str
+    sector: str
+    is_resolved: bool
+
+
+def _is_resolution_response(data: object) -> TypeGuard[TickerResolutionResponse]:
+    if not isinstance(data, dict):
+        return False
+    if not isinstance(data.get("symbol"), str):
+        return False
+    if not isinstance(data.get("name"), str):
+        return False
+    if not isinstance(data.get("sector"), str):
+        return False
+    if not isinstance(data.get("is_resolved"), bool):
+        return False
+    return True
 
 class TickerResolver:
     """Resolves fuzzy names or partial inputs to stock tickers and industries."""
@@ -196,7 +218,7 @@ class TickerResolver:
         max_len = max(len1, len2)
         return 1.0 - (distance / max_len)
 
-    async def resolve_stock(self, query: str) -> Dict[str, str]:
+    async def resolve_stock(self, query: str) -> TickerResolutionResponse:
         """
         Map a fuzzy string (e.g. 'Mercedes', 'Google', 'Lilly') to a ticker, name, and sector.
         Includes fuzzy matching for spelling errors and dynamic caching of AI results.
@@ -279,8 +301,9 @@ Important:
                         sector=data.get("sector", "")
                     )
                     
-                logger.info(f"AI resolved '{query}' to {data.get('symbol')} ({data.get('sector')})")
-                return data
+                if _is_resolution_response(data):
+                    logger.info(f"AI resolved '{query}' to {data.get('symbol')} ({data.get('sector')})")
+                    return data
         except Exception as e:
             logger.error(f"Ticker resolution failed for '{query}': {e}")
             

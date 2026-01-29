@@ -147,7 +147,7 @@ class ImpactAnalyzer:
             return NewsCategory.GENERAL_NEWS
         
         # Return category with highest keyword matches
-        return max(category_scores, key=category_scores.get)
+        return max(category_scores, key=lambda k: category_scores[k])
     
     def analyze_article(
         self, 

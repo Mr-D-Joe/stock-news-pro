@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Union
 from dataclasses import dataclass
 import requests
 
@@ -45,7 +45,7 @@ class RedditFetcher:
             try:
                 # Reddit JSON API: search within subreddit
                 url = f"https://www.reddit.com/r/{subreddit}/search.json"
-                params = {
+                params: dict[str, Union[str, int]] = {
                     "q": ticker,
                     "restrict_sr": "on",
                     "sort": "new",

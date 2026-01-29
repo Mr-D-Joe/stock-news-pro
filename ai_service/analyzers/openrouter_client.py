@@ -1,12 +1,16 @@
+from __future__ import annotations
 
 import logging
 import time
 import random
-from typing import Optional, Callable
+from typing import Optional, Callable, TYPE_CHECKING
 from ai_service.config import Settings
 from ai_service.analyzers.base_client import BaseAIClient, AIError
 
 logger = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    from openai.types.chat import ChatCompletionMessageParam
 
 class OpenRouterClient(BaseAIClient):
     """
@@ -42,7 +46,7 @@ class OpenRouterClient(BaseAIClient):
 
     def generate(self, prompt: str, system_instruction: Optional[str] = None, **kwargs) -> str:
         """Generate content with fallback support."""
-        messages = []
+        messages: list[ChatCompletionMessageParam] = []
         if system_instruction:
             messages.append({"role": "system", "content": system_instruction})
         
@@ -68,8 +72,8 @@ class OpenRouterClient(BaseAIClient):
                     temperature=kwargs.get("temperature", 0.7),
                     max_tokens=kwargs.get("max_output_tokens", 4096)
                 )
-                
-                return completion.choices[0].message.content
+                content = completion.choices[0].message.content or ""
+                return content
                 
             except Exception as e:
                 last_error = e

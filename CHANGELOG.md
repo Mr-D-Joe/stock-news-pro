@@ -18,6 +18,11 @@ All notable changes to this project are documented in this file.
 - **CI:** Removed remaining frontend lint violations (typed guards, unused symbols, react-refresh export warning).
 - **CI:** Cleared backend ruff lint violations (imports, exceptions, typevars, prompt context).
 - **CI:** Fixed frontend typecheck issues (portfolio API guards, heatmap treemap typing).
+- **CI:** Fixed backend mypy typecheck issues (typing cleanup, Optional fixes, import typing).
+- **CI:** Removed remaining Python typing.Any usages by introducing precise contracts (TypedDicts).
+- **CI:** Typed OpenRouter message payloads (removed arg-type ignore).
+- **CI:** Validated DDG deep-web results (removed trust-cast).
+- **CI:** Replaced ticker resolution cast with validated TypeGuard.
 
 ## [1.7.0] - 2026-01-29 - Phase A: Thematic Analysis
 ### Added

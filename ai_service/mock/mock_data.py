@@ -1,8 +1,17 @@
 """Mock data for development mode - 4 fictional stocks with complete data."""
 
 from datetime import datetime, timedelta
-from typing import Dict, List, Any
+from typing import Dict, List
 import random
+from ai_service.models.contracts import (
+    FundamentalsData,
+    NewsItem,
+    DeepWebSource,
+    SectorPerformanceData,
+    PriceHistoryResult,
+    AnalysisOutput,
+    EventItem,
+)
 
 # =============================================================================
 # MOCK STOCKS DATA (4 stocks across different sectors)
@@ -43,7 +52,7 @@ MOCK_STOCKS: Dict[str, Dict[str, str]] = {
 # MOCK FUNDAMENTALS
 # =============================================================================
 
-MOCK_FUNDAMENTALS: Dict[str, Dict[str, Any]] = {
+MOCK_FUNDAMENTALS: Dict[str, FundamentalsData] = {
     "ACME": {
         "pe_ratio": 24.5,
         "peg_ratio": 1.8,
@@ -126,7 +135,7 @@ MOCK_FUNDAMENTALS: Dict[str, Dict[str, Any]] = {
 # MOCK NEWS
 # =============================================================================
 
-def get_mock_news(ticker: str) -> List[Dict[str, Any]]:
+def get_mock_news(ticker: str) -> List[NewsItem]:
     """Return mock news articles for a ticker."""
     base_date = datetime.now()
     
@@ -187,7 +196,7 @@ def get_mock_news(ticker: str) -> List[Dict[str, Any]]:
 # MOCK DEEP WEB SOURCES
 # =============================================================================
 
-def get_mock_deep_web(ticker: str) -> List[Dict[str, Any]]:
+def get_mock_deep_web(ticker: str) -> List[DeepWebSource]:
     """Return mock deep web sources for a ticker."""
     deep_web_data = {
         "ACME": [
@@ -218,7 +227,7 @@ def get_mock_deep_web(ticker: str) -> List[Dict[str, Any]]:
 # MOCK SECTORS DATA
 # =============================================================================
 
-MOCK_SECTORS: Dict[str, Dict[str, Any]] = {
+MOCK_SECTORS: Dict[str, SectorPerformanceData] = {
     "Technology": {
         "name": "Technology",
         "market_cap": 15600000000000,
@@ -368,7 +377,7 @@ MOCK_SECTORS: Dict[str, Dict[str, Any]] = {
     }
 }
 
-def get_mock_sector_performance(period: str = "1d") -> List[Dict[str, Any]]:
+def get_mock_sector_performance(period: str = "1d") -> List[SectorPerformanceData]:
     """Return mock sector performance data for a given period.
     
     Supports periods: 1d, 1w, 1m, 1y
@@ -392,7 +401,7 @@ def get_mock_sector_performance(period: str = "1d") -> List[Dict[str, Any]]:
 # MOCK PRICE HISTORY
 # =============================================================================
 
-def get_mock_price_data(ticker: str, period: str = "1y") -> Dict[str, Any]:
+def get_mock_price_data(ticker: str, period: str = "1y") -> PriceHistoryResult:
     """Generate realistic mock price history.
     
     Supports periods: 24h, 1wk, 1mo, 3mo, 1y, 10y
@@ -533,7 +542,7 @@ def get_mock_sparkline_data(ticker: str, period: str = "1w") -> List[float]:
 # MOCK SECTOR NEWS
 # =============================================================================
 
-def get_mock_sector_news(sector: str) -> List[Dict[str, Any]]:
+def get_mock_sector_news(sector: str) -> List[NewsItem]:
     """Return mock sector-wide news (not stock-specific).
     
     Used for the sector news ticker in the GUI.
@@ -591,7 +600,7 @@ def get_mock_sector_news(sector: str) -> List[Dict[str, Any]]:
 # MOCK AI ANALYSIS RESPONSES
 # =============================================================================
 
-MOCK_ANALYSIS: Dict[str, Dict[str, Any]] = {
+MOCK_ANALYSIS: Dict[str, AnalysisOutput] = {
     "ACME": {
         "essay": """ACME Corporation präsentiert sich als überzeugende Investmentmöglichkeit im schnell wachsenden Markt für KI-gestützte Fertigungslösungen. Mit einem Marktanteil von 35% hat sich das Unternehmen als klarer Branchenführer etabliert und baut seinen Wettbewerbsvorsprung durch strategische Akquisitionen und signifikante F&E-Investitionen kontinuierlich aus.
 
@@ -694,7 +703,7 @@ Die Übernahmegerüchte und der angekündigte Aktiensplit unterstreichen die pos
     }
 }
 
-def get_mock_analysis(ticker: str) -> Dict[str, Any]:
+def get_mock_analysis(ticker: str) -> AnalysisOutput:
     """Get mock analysis response for ticker."""
     return MOCK_ANALYSIS.get(ticker.upper(), MOCK_ANALYSIS["ACME"])
 
@@ -702,7 +711,7 @@ def get_mock_analysis(ticker: str) -> Dict[str, Any]:
 # MOCK EVENTS (NEWS + AI IDENTIFIED)
 # =============================================================================
 
-def get_mock_events(ticker: str) -> List[Dict[str, Any]]:
+def get_mock_events(ticker: str) -> List[EventItem]:
     """Get mock pivotal events for a ticker."""
     base_date = datetime.now()
     

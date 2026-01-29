@@ -6,7 +6,7 @@ import logging
 import time
 import random
 from datetime import datetime
-from typing import Any, Optional, Callable
+from typing import Optional, Callable
 
 import requests
 
@@ -160,7 +160,7 @@ class GeminiClient(BaseAIClient):
         url = self._build_url(use_model, "generateContent")
         
         # Build request body
-        body: dict[str, Any] = {
+        body: dict[str, object] = {
             "contents": [
                 {
                     "parts": [{"text": prompt}]
@@ -300,9 +300,9 @@ class GeminiClient(BaseAIClient):
                 # Try parsing as simple timestamp first
                 if reset_time.isdigit():
                      import time
-                     now = time.time()
+                     now_ts = time.time()
                      # It's usually a future timestamp, so subtract current time
-                     delta = int(reset_time) - now
+                     delta = int(reset_time) - now_ts
                      return max(1, int(delta))
                 
                 # Try parsing as ISO date
@@ -310,8 +310,8 @@ class GeminiClient(BaseAIClient):
                 from datetime import datetime, timezone
                 dt = parsedate_to_datetime(reset_time)
                 # Ensure we compare timezone-aware datetimes
-                now = datetime.now(timezone.utc)
-                delta = (dt - now).total_seconds()
+                now_dt = datetime.now(timezone.utc)
+                delta = (dt - now_dt).total_seconds()
                 return max(1, int(delta))
              except Exception as e:
                  logger.debug(f"Failed to parse x-ratelimit-reset: {e}")
@@ -327,8 +327,8 @@ class GeminiClient(BaseAIClient):
                 from email.utils import parsedate_to_datetime
                 from datetime import datetime, timezone
                 dt = parsedate_to_datetime(retry_after)
-                now = datetime.now(timezone.utc)
-                delta = (dt - now).total_seconds()
+                now_dt = datetime.now(timezone.utc)
+                delta = (dt - now_dt).total_seconds()
                 return max(1, int(delta))
             except Exception as e:
                 logger.debug(f"Failed to parse Retry-After header: {e}")

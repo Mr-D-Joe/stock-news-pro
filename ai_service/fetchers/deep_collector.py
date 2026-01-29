@@ -1,12 +1,33 @@
 
 import logging
 import asyncio
-from typing import List, Dict, Any
+from typing import List, TypedDict, Optional
 from datetime import datetime
 from duckduckgo_search import DDGS
 from ai_service.config import Settings
+from ai_service.models.contracts import DeepWebSource
 
 logger = logging.getLogger(__name__)
+
+
+class DDGResult(TypedDict, total=False):
+    title: str
+    href: str
+    body: str
+
+
+def _normalize_ddg_result(item: object) -> Optional[DDGResult]:
+    if not isinstance(item, dict):
+        return None
+    title = item.get("title")
+    href = item.get("href")
+    body = item.get("body")
+    if not isinstance(title, str) or not isinstance(href, str):
+        return None
+    result: DDGResult = {"title": title, "href": href}
+    if isinstance(body, str):
+        result["body"] = body
+    return result
 
 class DeepCollector:
     """
@@ -18,13 +39,13 @@ class DeepCollector:
         self.settings = settings or Settings()
         # Rate limiting or concurrency control could go here
 
-    async def collect(self, ticker: str, company_name: str, limit: int = 5) -> List[Dict[str, Any]]:
+    async def collect(self, ticker: str, company_name: str, limit: int = 5) -> List[DeepWebSource]:
         """
         Perform a deep dive search for the given ticker.
         """
         logger.info(f"Starting Deep Web collection for {ticker} ({company_name})...")
         
-        results = []
+        results: list[DDGResult] = []
         
         # Define simple keyword-based search strategies (DDG doesn't support complex site: operators)
         queries = [
@@ -63,7 +84,7 @@ class DeepCollector:
         logger.info(f"Deep Collector found {len(final_list)} sources (filtered {filtered_count} irrelevant)")
         
         # Transform to standard "Article/Source" format
-        formatted = []
+        formatted: list[DeepWebSource] = []
         for r in final_list[:limit * 2]: # Return a bit more, filtering happens later
             formatted.append({
                 "title": r.get('title', 'Unknown Title'),
@@ -76,12 +97,18 @@ class DeepCollector:
             
         return formatted
 
-    def _search_ddg(self, query: str, max_results: int) -> List[Dict]:
+    def _search_ddg(self, query: str, max_results: int) -> List[DDGResult]:
         """Synchronous wrapper for DDGS."""
         try:
             with DDGS() as ddgs:
                 # Default backend is usually best now
-                return list(ddgs.text(query, max_results=max_results))
+                raw_items = list(ddgs.text(query, max_results=max_results))
+                normalized: list[DDGResult] = []
+                for item in raw_items:
+                    normalized_item = _normalize_ddg_result(item)
+                    if normalized_item:
+                        normalized.append(normalized_item)
+                return normalized
         except Exception as e:
              logger.warning(f"DDGS Text search failed: {e}")
              return []

@@ -14,7 +14,7 @@ Matches the DeltaValue Investment Research template exactly:
 import os
 import json
 from datetime import datetime
-from typing import Dict, List, Any
+from typing import Dict, List
 
 
 class HtmlReporter:
@@ -25,7 +25,7 @@ class HtmlReporter:
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-    def generate(self, data: Dict[str, Any], language: str = "German") -> str:
+    def generate(self, data: ReportData, language: str = "German") -> str:
         """Create standalone HTML report matching original template."""
         ticker = data.get("ticker", "UNKNOWN")
         company_name = data.get("company_name", ticker)
@@ -637,3 +637,4 @@ class HtmlReporter:
             {''.join(items)}
         </div>
         '''
+from ai_service.models.contracts import ReportData

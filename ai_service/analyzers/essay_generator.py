@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional
+from typing import Optional, Sequence
 
 from ai_service.analyzers.base_client import BaseAIClient
 from ai_service.analyzers.provider_factory import ProviderFactory
 from ai_service.config import Settings
 from ai_service.models.article import AnalysisResult, ArticleCollection
+from ai_service.models.contracts import AnalysisOutput, NewsItem, DeepWebSource, FundamentalsData
 from ai_service.pipeline.base import PipelineContext, PipelineStep
 
 logger = logging.getLogger(__name__)
@@ -97,10 +98,10 @@ class EssayGenerator(PipelineStep[ArticleCollection, AnalysisResult]):
         ticker: str, 
         company_name: str, 
         language: str, 
-        news_context: list = None,
-        fundamentals: dict = None,
-        deep_sources: list = None
-    ) -> dict:
+        news_context: Sequence[NewsItem | str] | None = None,
+        fundamentals: FundamentalsData | None = None,
+        deep_sources: Sequence[DeepWebSource | str] | None = None
+    ) -> AnalysisOutput:
         """
         Generate a complete DeltaValue analysis using AI's built-in knowledge.
         Returns a structured dictionary (JSON).
@@ -115,7 +116,7 @@ class EssayGenerator(PipelineStep[ArticleCollection, AnalysisResult]):
         if news_context:
             # Deduplicate by title (fuzzy match via lowercase strip)
             seen_titles = set()
-            unique_items = []
+            unique_items: list[NewsItem | str] = []
             for item in news_context:
                 if isinstance(item, dict):
                     title = item.get('title', '').lower().strip()
@@ -125,7 +126,7 @@ class EssayGenerator(PipelineStep[ArticleCollection, AnalysisResult]):
                 else:
                     unique_items.append(item)
             
-            items = []
+            items: list[str] = []
             for item in unique_items:  # ALL unique articles
                 if isinstance(item, dict):
                     source = item.get('source', 'News')
@@ -143,14 +144,17 @@ class EssayGenerator(PipelineStep[ArticleCollection, AnalysisResult]):
         # Build Deep Web section (expanded context)
         deep_section = "No deep web sources found."
         if deep_sources:
-            items = []
+            deep_items: list[str] = []
             for item in deep_sources:
-                source = item.get('source', 'DeepWeb')
-                title = item.get('title', 'Doc')
-                url = item.get('url', 'N/A')
-                summary = item.get('summary', '')[:2000]  # 2000 chars for economic content
-                items.append(f"- [DEEP WEB / {source}] {title} ({url}): {summary}")
-            deep_section = "\n".join(items)
+                if isinstance(item, dict):
+                    source = item.get('source', 'DeepWeb')
+                    title = item.get('title', 'Doc')
+                    url = item.get('url', 'N/A')
+                    summary = item.get('summary', '')[:2000]  # 2000 chars for economic content
+                    deep_items.append(f"- [DEEP WEB / {source}] {title} ({url}): {summary}")
+                else:
+                    deep_items.append(f"- [DEEP WEB] {str(item)}")
+            deep_section = "\n".join(deep_items)
     
         # Build fundamentals section
         fund_section = ""
@@ -252,4 +256,3 @@ class EssayGenerator(PipelineStep[ArticleCollection, AnalysisResult]):
         except Exception as e:
             logger.error(f"Standalone analysis failed: {e}")
             raise e
-

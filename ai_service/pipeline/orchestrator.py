@@ -3,12 +3,13 @@
 import os
 import logging
 import asyncio
-from typing import Dict, Any
+from typing import Dict
 
 from ai_service.models.article import ArticleCollection
 from ai_service.config import Settings
 from ai_service.processors.html_reporter import HtmlReporter
 from ai_service.analyzers.provider_factory import ProviderFactory
+from ai_service.models.contracts import PipelineResult, NewsItem, DeepWebSource
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +63,7 @@ class WorkflowOrchestrator:
             from ai_service.fetchers.deep_collector import DeepCollector
             return DeepCollector(self.settings)
 
-    async def run(self, request: ArticleCollection, language: str) -> Dict[str, Any]:
+    async def run(self, request: ArticleCollection, language: str) -> PipelineResult:
         """Execute the full report generation pipeline."""
         
         ticker = request.query_stocks[0] if request.query_stocks else "SPY"
@@ -75,7 +76,7 @@ class WorkflowOrchestrator:
         logger.info(f"Orchestrator starting for {company_name} ({ticker})")
         
         # 2. Fetch News (uses mock fetcher in DEV_MODE via get_fetcher)
-        news_articles = []
+        news_articles: list[NewsItem] = []
         news_items = []
         try:
             from ai_service.fetchers import get_fetcher
@@ -98,7 +99,7 @@ class WorkflowOrchestrator:
         # 2.5 Deep Web Search
         deep_collector = self._get_deep_collector()
         try:
-            deep_items = await deep_collector.collect(ticker, company_name, limit=6)
+            deep_items: list[DeepWebSource] = await deep_collector.collect(ticker, company_name, limit=6)
             logger.info(f"Deep Collector found {len(deep_items)} items")
             
             # In DEV_MODE, skip content fetching and summarization (data is pre-made)

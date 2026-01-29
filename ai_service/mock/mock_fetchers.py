@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime, timedelta
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Optional
 from dataclasses import dataclass
 
 from ai_service.mock.mock_data import (
@@ -13,6 +13,7 @@ from ai_service.mock.mock_data import (
     get_mock_price_data,
     get_mock_events,
 )
+from ai_service.models.contracts import FundamentalsData, PriceHistoryResult, EventItem, StockResolution, DeepWebSource
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +70,7 @@ class MockNewsFetcher:
             ]
         
         # Convert to MockFetchedNews objects
-        result = []
+        result: List[MockFetchedNews] = []
         for item in news_data[:max_items]:
             result.append(MockFetchedNews(
                 ticker=ticker,
@@ -113,7 +114,7 @@ class MockHistoricAnalyzer:
         self._client = None  # Not used in mock
         logger.info("MockHistoricAnalyzer initialized - NO external API calls will be made")
     
-    async def get_fundamentals(self, ticker: str) -> Dict[str, Any]:
+    async def get_fundamentals(self, ticker: str) -> FundamentalsData:
         """Get mock fundamental data for a ticker.
         
         Args:
@@ -142,7 +143,7 @@ class MockHistoricAnalyzer:
         logger.info(f"MockHistoricAnalyzer: Returned fundamentals for {ticker}")
         return fundamentals.copy()
     
-    async def get_price_data(self, ticker: str, period: str = "10y") -> Dict[str, Any]:
+    async def get_price_data(self, ticker: str, period: str = "10y") -> PriceHistoryResult:
         """Get mock price history for a ticker.
         
         Args:
@@ -160,8 +161,8 @@ class MockHistoricAnalyzer:
         return price_data
     
     def slice_periods(
-        self, full_data: Dict[str, Any], periods: List[str]
-    ) -> Dict[str, Dict]:
+        self, full_data: PriceHistoryResult, periods: List[str]
+    ) -> Dict[str, PriceHistoryResult]:
         """Slice full price data into smaller periods.
         
         Args:
@@ -171,7 +172,7 @@ class MockHistoricAnalyzer:
         Returns:
             Dict mapping period -> price_data
         """
-        result = {}
+        result: Dict[str, PriceHistoryResult] = {}
         data = full_data.get("data", [])
         
         if not data:
@@ -212,7 +213,7 @@ class MockHistoricAnalyzer:
     
     async def identify_pivotal_events(
         self, ticker: str, company_name: str
-    ) -> List[Dict]:
+    ) -> List[EventItem]:
         """Get mock pivotal events for a ticker.
         
         Args:
@@ -240,7 +241,7 @@ class MockDeepCollector:
     
     async def collect(
         self, ticker: str, company_name: str, limit: int = 6
-    ) -> List[Dict[str, Any]]:
+    ) -> List[DeepWebSource]:
         """Collect mock deep web sources for a ticker.
         
         Args:
@@ -271,7 +272,7 @@ class MockTickerResolver:
         self.settings = settings
         logger.info("MockTickerResolver initialized - NO external API calls will be made")
     
-    async def resolve_stock(self, query: str) -> Dict[str, Any]:
+    async def resolve_stock(self, query: str) -> StockResolution:
         """Resolve a stock query to ticker info.
         
         Args:

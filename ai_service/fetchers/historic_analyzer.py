@@ -1,13 +1,14 @@
 """Historical analysis of price data and pivotal news events."""
 
 import logging
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional
 from datetime import datetime, timedelta
 import yfinance as yf
 import json
 
 from ai_service.config import Settings
 from ai_service.analyzers.provider_factory import ProviderFactory
+from ai_service.models.contracts import FundamentalsData, PriceHistoryResult, PriceDataPoint, EventItem
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ class HistoricAnalyzer:
             self._client = ProviderFactory.get_client("gemini", self.settings)
         return self._client
 
-    async def get_fundamentals(self, ticker: str) -> Dict[str, Any]:
+    async def get_fundamentals(self, ticker: str) -> FundamentalsData:
         """Fetch fundamental data (P/E, PEG, Analysts, etc.) with fallbacks."""
         import asyncio
         import os
@@ -49,7 +50,7 @@ class HistoricAnalyzer:
                 logger.warning(f"Cache read failed, ignoring: {e}")
 
         loop = asyncio.get_event_loop()
-        fundamentals = {}
+        fundamentals: FundamentalsData = {}
         
         # Try 1: yfinance with retry
         for attempt in range(3):
@@ -175,7 +176,7 @@ class HistoricAnalyzer:
         return fundamentals
 
 
-    async def get_price_data(self, ticker: str, period: str = "10y") -> Dict[str, Any]:
+    async def get_price_data(self, ticker: str, period: str = "10y") -> PriceHistoryResult:
         """
         Fetch historical price data with fallback providers.
         
@@ -204,7 +205,7 @@ class HistoricAnalyzer:
         
         return {"error": "All providers failed", "ticker": ticker, "data": []}
 
-    async def _fetch_yahoo_chart(self, ticker: str, period: str) -> Dict[str, Any]:
+    async def _fetch_yahoo_chart(self, ticker: str, period: str) -> PriceHistoryResult:
         """Direct Yahoo Finance Chart API call (more reliable than yfinance lib)."""
         
         period_map = {
@@ -240,7 +241,7 @@ class HistoricAnalyzer:
             lows = quotes.get("low", [])
             volumes = quotes.get("volume", [])
             
-            data = []
+            data: list[PriceDataPoint] = []
             for i, ts in enumerate(timestamps):
                 if closes[i] is not None:
                     # Keep native types for JSON serialization
@@ -266,14 +267,14 @@ class HistoricAnalyzer:
             logger.warning(f"Yahoo Chart API failed for {ticker}: {e}")
             return {}
 
-    async def _run_request(self, url, params, headers):
+    async def _run_request(self, url: str, params: Dict[str, str], headers: Dict[str, str]):
         """Async wrapper for requests."""
         import requests
         import asyncio
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(None, lambda: requests.get(url, params=params, headers=headers, timeout=10))
 
-    async def _fetch_yfinance(self, ticker: str, period: str) -> Dict[str, Any]:
+    async def _fetch_yfinance(self, ticker: str, period: str) -> PriceHistoryResult:
         """Fallback to yfinance library."""
         try:
             # Run in executor to avoid blocking
@@ -289,7 +290,7 @@ class HistoricAnalyzer:
             if hist.empty:
                 return {}
                 
-            data = []
+            data: list[PriceDataPoint] = []
             for date, row in hist.iterrows():
                 data.append({
                     "date": date.isoformat(),
@@ -310,12 +311,12 @@ class HistoricAnalyzer:
             logger.warning(f"yfinance lib failed: {e}")
             return {}
 
-    async def _fetch_finnhub(self, ticker: str, period: str) -> Dict[str, Any]:
+    async def _fetch_finnhub(self, ticker: str, period: str) -> PriceHistoryResult:
         """Fetch from Finnhub (stub)."""
         # Implementation would go here if API key available
         return {}
 
-    def slice_periods(self, full_data: Dict[str, Any], periods: List[str]) -> Dict[str, Dict]:
+    def slice_periods(self, full_data: PriceHistoryResult, periods: List[str]) -> Dict[str, PriceHistoryResult]:
         """
         Slice full historical data (e.g. 10y) into smaller periods locally.
         Avoids multiple API calls by filtering data client-side.
@@ -329,7 +330,7 @@ class HistoricAnalyzer:
         """
         from datetime import datetime
         
-        result = {}
+        result: Dict[str, PriceHistoryResult] = {}
         data = full_data.get("data", [])
         
         if not data:
@@ -369,7 +370,7 @@ class HistoricAnalyzer:
         
         return result
 
-    async def identify_pivotal_events(self, ticker: str, company_name: str) -> List[Dict]:
+    async def identify_pivotal_events(self, ticker: str, company_name: str) -> List[EventItem]:
         """
         Use AI to identify pivotal events from news/price data context.
         This is a placeholder for the advanced 'History + News' analysis.

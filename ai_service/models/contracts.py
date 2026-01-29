@@ -47,6 +47,16 @@ class PriceHistory(TypedDict):
     source: str
 
 
+class PriceHistoryResult(TypedDict, total=False):
+    """Historical price data result with optional error."""
+    ticker: str
+    period: str
+    data: List[PriceDataPoint]
+    last_price: float
+    source: str
+    error: str
+
+
 class NewsItem(TypedDict, total=False):
     """News article data."""
     title: str
@@ -75,6 +85,23 @@ class EventItem(TypedDict, total=False):
     summary: str
     source: Optional[str]
     url: Optional[str]
+
+
+class SectorStockData(TypedDict):
+    """Sector stock item for heatmap/sector performance."""
+    symbol: str
+    name: str
+    performance: float
+    market_cap: int
+
+
+class SectorPerformanceData(TypedDict):
+    """Sector performance item for heatmap/sector performance."""
+    id: str
+    name: str
+    performance: float
+    market_cap: int
+    top_stocks: List[SectorStockData]
 
 
 class SWOTAnalysis(TypedDict):
