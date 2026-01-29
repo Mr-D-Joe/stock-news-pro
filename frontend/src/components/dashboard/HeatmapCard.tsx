@@ -4,6 +4,7 @@ import { useSectorPerformance } from '../../hooks/useDataFetching';
 import { useAppContext } from '../../context/AppContext';
 import { LayoutGrid, Loader2, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { SectorPerformance, SectorStock, Timeframe } from '../../types';
 
 // Helper to get color based on performance
 const getPerformanceColor = (performance: number) => {
@@ -21,7 +22,27 @@ const getPerformanceColor = (performance: number) => {
     return '#064e3b'; // emerald-950
 };
 
-const CustomizedContent = (props: any) => {
+type HeatmapStockNode = {
+    name: string;
+    performance: number;
+    market_cap: number;
+};
+
+type HeatmapSectorNode = SectorPerformance & {
+    children: HeatmapStockNode[];
+};
+
+type CustomizedContentProps = {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    name: string;
+    performance?: number;
+    depth: number;
+};
+
+const CustomizedContent = (props: CustomizedContentProps) => {
     const { x, y, width, height, name, performance, depth } = props;
 
     // Safety: Ensure performance is a number, default to 0
@@ -72,12 +93,17 @@ const CustomizedContent = (props: any) => {
     );
 };
 
-const HeatmapTooltip = ({ active, payload }: any) => {
+type HeatmapTooltipProps = {
+    active?: boolean;
+    payload?: Array<{ payload: HeatmapSectorNode | HeatmapStockNode }>;
+};
+
+const HeatmapTooltip = ({ active, payload }: HeatmapTooltipProps) => {
     if (!active || !payload || payload.length === 0) return null;
     const node = payload[0].payload;
     if (!node) return null;
 
-    const isSector = !!node.top_stocks;
+    const isSector = 'top_stocks' in node;
     return (
         <div className="bg-white border border-gray-200 rounded-lg shadow-md p-3 text-xs text-slate-700">
             <div className="font-bold text-slate-900 mb-1">{node.name}</div>
@@ -91,7 +117,7 @@ const HeatmapTooltip = ({ active, payload }: any) => {
                 <div className="mt-2">
                     <div className="font-semibold text-slate-800">Top Stocks</div>
                     <div className="mt-1 space-y-0.5">
-                        {node.top_stocks.slice(0, 3).map((s: any) => (
+                        {node.top_stocks.slice(0, 3).map((s: SectorStock) => (
                             <div key={s.symbol} className="flex justify-between gap-2">
                                 <span className="font-mono">{s.symbol}</span>
                                 <span>{s.performance > 0 ? '+' : ''}{s.performance.toFixed(2)}%</span>
@@ -106,19 +132,25 @@ const HeatmapTooltip = ({ active, payload }: any) => {
 
 export const HeatmapCard: React.FC = () => {
     const { uiState, setSelectedSector, setScope, setTimeframe } = useAppContext();
-    const timeframeToPeriod: Record<string, string> = {
+    const timeframeToPeriod: Record<Timeframe, string> = {
         '24H': '1d',
         '7D': '1w',
         '1M': '1m',
+        '3M': '1m',
+        '6M': '1m',
         '1Y': '1y',
+        '3Y': '1y',
+        '5Y': '1y',
+        '10Y': '1y',
+        'ALL': '1y',
     };
     const heatmapPeriod = timeframeToPeriod[uiState.selectedTimeframe] || '1d';
     const { data: sectors, isLoading, isError, error } = useSectorPerformance(heatmapPeriod);
 
     const treemapData = useMemo(() => {
-        return (sectors || []).map(s => ({
+        return (sectors || []).map((s: SectorPerformance) => ({
             ...s,
-            children: (s.top_stocks || []).map(stock => ({
+            children: (s.top_stocks || []).map((stock: SectorStock) => ({
                 name: stock.symbol,
                 performance: stock.performance,
                 market_cap: stock.market_cap,
@@ -126,8 +158,8 @@ export const HeatmapCard: React.FC = () => {
         }));
     }, [sectors]);
 
-    const handleNodeClick = (node: any) => {
-        if (node && node.id) {
+    const handleNodeClick = (node: HeatmapSectorNode | HeatmapStockNode) => {
+        if ('id' in node && node.id) {
             setSelectedSector(node.id);
             setScope('Sector');
             console.log(`Heatmap: Selected Sector ${node.id}`);
@@ -200,18 +232,18 @@ export const HeatmapCard: React.FC = () => {
                     Click a sector tile to focus analysis. Hover for details.
                 </p>
                 <div className="flex gap-1">
-                    {['1D', '1W', '1M', '1Y'].map(p => (
+                    {(['1D', '1W', '1M', '1Y'] as const).map(p => (
                         <button
                             key={p}
                             onClick={() => {
-                                const tfMap: Record<string, string> = {
+                                const tfMap: Record<'1D' | '1W' | '1M' | '1Y', Timeframe> = {
                                     '1D': '24H',
                                     '1W': '7D',
                                     '1M': '1M',
                                     '1Y': '1Y',
                                 };
                                 const tf = tfMap[p];
-                                if (tf) setTimeframe(tf as any);
+                                setTimeframe(tf);
                             }}
                             className={cn(
                                 "px-2 py-0.5 rounded text-[10px] font-bold border transition-colors",

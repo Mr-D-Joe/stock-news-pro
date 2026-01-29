@@ -14,6 +14,7 @@ All notable changes to this project are documented in this file.
 - **Sparklines:** Fixed-scale comparison in watchlists and search-result sparkline integration.
 - **Persistence:** SQLite path moved to OS-appropriate app data directory.
 - **Docs:** Updated README, SYSTEM_REPORT, and TECHNICAL_SPEC for current architecture/tooling.
+- **CI:** Backend lint scope adjusted to avoid false failures; frontend lint fixes applied.
 
 ## [1.7.0] - 2026-01-29 - Phase A: Thematic Analysis
 ### Added

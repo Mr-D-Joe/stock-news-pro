@@ -17,6 +17,7 @@ import { useTickerResolutionMutation, isResolutionSuccess } from '../hooks/useTi
 import { isUsingRealApi } from '../services/ApiService';
 import { cn } from '@/lib/utils';
 import { Sparkline } from '@/components/dashboard/Sparkline';
+import type { ReviewData, AnalystRatings, RiskAssessment, MarketSentiment } from '../types';
 
 export const TopBar: React.FC = () => {
     // UI State from Context (per DESIGN.md L119)
@@ -54,15 +55,20 @@ export const TopBar: React.FC = () => {
                 onSuccess: (result) => {
                     // Adapt ThemeResult to AnalysisResult structure if needed, or store it
                     // For now, let's assume result IS AnalysisResult compatible or we store explicitly
+                    const emptyReviewData: ReviewData = { peRatio: 0, pegRatio: 0, roe: 0, debtToEquity: 0 };
+                    const emptyRatings: AnalystRatings = { mean: 0, high: 0, low: 0, recommendation: 'N/A' };
+                    const emptyRisk: RiskAssessment = { level: 'Medium', description: '' };
+                    const emptySentiment: MarketSentiment = { trend: 'Neutral', score: 0 };
+
                     setAnalysisResult({
                         report: {
                             stock: uiState.themeQuery,
                             summary: result.description,
                             deepAnalysis: result.essay,
-                            reviewData: {} as any,
-                            analystRatings: {} as any,
-                            riskAssessment: {} as any,
-                            marketSentiment: {} as any,
+                            reviewData: emptyReviewData,
+                            analystRatings: emptyRatings,
+                            riskAssessment: emptyRisk,
+                            marketSentiment: emptySentiment,
                             businessContext: "",
                             generatedAt: result.generated_at
                         },

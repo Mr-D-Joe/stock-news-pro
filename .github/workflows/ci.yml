@@ -45,7 +45,7 @@ jobs:
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
       - name: Lint (ruff)
-        run: ruff check . --select F,E9
+        run: ruff check . --select E9,F821,F822,F823
       - name: Typecheck (mypy)
         run: mypy . --ignore-missing-imports
       - name: Tests

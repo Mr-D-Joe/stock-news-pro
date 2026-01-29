@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { usePortfolio } from '../hooks/usePortfolio';
-import { Plus, Trash, Database } from 'lucide-react';
+import { Plus, Database } from 'lucide-react';
 
 export const PortfolioDebug: React.FC = () => {
     const { transactions, loading, addTransaction, fetchPortfolio } = usePortfolio();
