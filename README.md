@@ -203,25 +203,38 @@ Current stage:
 	•	Architecture-ready
 	•	Not production-ready
 
-⸻
+---
+
+## Pricing
+
+**Current Model: Free & Open Source**
+
+Stock News Pro is currently available at no cost under the MIT License.
+
+| Tier | Price | Status |
+|------|-------|--------|
+| Community | Free | ✅ Active |
+| Pro | — | 🔮 Planned |
+| Enterprise | — | 🔮 Planned |
+
+> [!NOTE]
+> **Future Roadmap:** Commercial tiers (Pro, Enterprise) may be introduced in future versions to support advanced features, priority support, or managed services. Any commercial offerings will be clearly announced and will not affect the availability of the open-source Community tier for existing functionality.
+
+---
 
 ## License
 
-MIT License
+This project is licensed under the **MIT License**.  
+See [`LICENSE`](./LICENSE) for the full license text.
 
-Copyright (c) 2026 Joern
+**Copyright © 2026 Joern. All rights reserved.**
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+> [!NOTE]
+> **Licensing Reservation:** The copyright holder reserves the right to change the licensing terms for future versions of this software. Any such changes will apply only to versions released after the licensing change and will be clearly documented.
+>
+> **No Warranty:** This software is provided "as is", without warranty of any kind. See the LICENSE file for full disclaimer terms.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-⸻
+---
 
 ## Final Note 
 
