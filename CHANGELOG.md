@@ -25,6 +25,7 @@ All notable changes to this project are documented in this file.
 - **CI:** Replaced ticker resolution cast with validated TypeGuard.
 - **CI:** Fixed ReportData typing import in HTML reporter (ruff F821).
 - **CI:** Added types-requests to dev requirements for mypy CI.
+- **CI:** Fixed pytest module import path via tests conftest.
 
 ## [1.7.0] - 2026-01-29 - Phase A: Thematic Analysis
 ### Added
