@@ -26,6 +26,8 @@ All notable changes to this project are documented in this file.
 - **CI:** Fixed ReportData typing import in HTML reporter (ruff F821).
 - **CI:** Added types-requests to dev requirements for mypy CI.
 - **CI:** Fixed pytest module import path via tests conftest.
+- **CI:** Exported Transaction model in ai_service.models to fix test imports.
+- **CI:** Added transaction model module to resolve ai_service.models import in tests.
 
 ## [1.7.0] - 2026-01-29 - Phase A: Thematic Analysis
 ### Added

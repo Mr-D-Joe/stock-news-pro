@@ -14,7 +14,7 @@ from ai_service.config import Settings
 from ai_service.database import get_session
 from ai_service.fetchers.historic_analyzer import HistoricAnalyzer
 from ai_service.health import router as health_router
-from ai_service.models import Transaction
+from ai_service.models.transaction import Transaction
 from ai_service.models.article import ArticleCollection, AnalysisResult
 from ai_service.pipeline.base import PipelineContext, PipelineConfig
 from ai_service.processors.browser_extractor import BrowserExtractor
