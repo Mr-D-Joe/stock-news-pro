@@ -50,6 +50,14 @@ export interface Report {
     generatedAt: string; // [NEW] ISO Timestamp
 }
 
+export type DataOrigin = 'mock' | 'live';
+
+export interface SanitizationTrace {
+    version: string;
+    status: 'applied' | 'skipped';
+    appliedAt: string;
+}
+
 export interface Stock {
     symbol: string;
     name: string;
@@ -85,6 +93,8 @@ export interface AnalysisResult {
     chartData: ChartPoint[];
     volumeData?: ChartPoint[]; // [NEW] 48h hourly
     themeResult?: ThemeResult; // [NEW] Theme Analysis Data
+    dataOrigin: DataOrigin;
+    sanitization: SanitizationTrace;
 }
 
 export interface ThemeResult {
@@ -94,6 +104,8 @@ export interface ThemeResult {
     losers: ThemeAsset[];
     essay: string;
     generated_at: string;
+    dataOrigin: DataOrigin;
+    sanitization: SanitizationTrace;
 }
 
 export interface ThemeAsset {
@@ -158,5 +170,4 @@ export interface SparklineResponse {
     data: number[];
     source: string;
 }
-
 

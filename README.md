@@ -57,7 +57,6 @@ Technologies:
 - React
 - TypeScript
 - TailwindCSS
-- ShadCN/UI
 - Vite
 - Tauri desktop shell
 

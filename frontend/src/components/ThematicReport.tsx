@@ -2,6 +2,7 @@
 import React from 'react';
 import type { ThemeResult, ThemeAsset } from '../types';
 import { TrendingUp, TrendingDown, Info, BookOpen } from 'lucide-react';
+import { DataOriginBadge } from './DataOriginBadge';
 
 interface ThematicReportProps {
     data: ThemeResult;
@@ -49,6 +50,9 @@ export const ThematicReport: React.FC<ThematicReportProps> = ({ data }) => {
                         <p className="text-slate-600 text-lg leading-relaxed">
                             {data.description}
                         </p>
+                        <div className="mt-3">
+                            <DataOriginBadge dataOrigin={data.dataOrigin} sanitization={data.sanitization} />
+                        </div>
                     </div>
                 </div>
             </div>

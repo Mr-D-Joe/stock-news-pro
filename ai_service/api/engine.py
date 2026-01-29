@@ -5,7 +5,7 @@ Provides REST endpoints for the C++ Engine to interact with the AI Service.
 
 from fastapi import APIRouter, HTTPException, Query, BackgroundTasks
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Literal, List
 from datetime import datetime
 import logging
 import asyncio
@@ -186,6 +186,35 @@ class SparklineResponse(BaseModel):
     period: str
     data: list[float]
     source: str
+
+
+class ErrorInfo(BaseModel):
+    code: str
+    message: str
+
+
+class NewsResponseEnvelope(BaseModel):
+    status: Literal["success", "partial", "error"]
+    data: Optional[NewsResponse] = None
+    error: Optional[ErrorInfo] = None
+
+
+class AnalysisResponseEnvelope(BaseModel):
+    status: Literal["success", "partial", "error"]
+    data: Optional[AnalysisResponse] = None
+    error: Optional[ErrorInfo] = None
+
+
+class SectorPerformanceEnvelope(BaseModel):
+    status: Literal["success", "partial", "error"]
+    data: Optional[List[SectorPerformance]] = None
+    error: Optional[ErrorInfo] = None
+
+
+class SparklineResponseEnvelope(BaseModel):
+    status: Literal["success", "partial", "error"]
+    data: Optional[SparklineResponse] = None
+    error: Optional[ErrorInfo] = None
 
 
 
@@ -549,8 +578,8 @@ async def get_sectors(
     
     settings = Settings()
     
+    data = get_mock_sector_performance(period)
     if settings.dev_mode:
-        data = get_mock_sector_performance(period)
         return [SectorPerformance(**s) for s in data]
     
     # In Real mode, this would fetch from a real provider (e.g. FMP)
@@ -588,3 +617,53 @@ async def get_sparkline(
         source=source
     )
 
+
+# ==================== Versioned API (v1) ====================
+
+@router.post("/v1/news", response_model=NewsResponseEnvelope)
+async def submit_news_v1(submission: NewsSubmission):
+    try:
+        data = await submit_news(submission)
+        return NewsResponseEnvelope(status="success", data=data)
+    except HTTPException as exc:
+        return NewsResponseEnvelope(status="error", error=ErrorInfo(code=str(exc.status_code), message=str(exc.detail)))
+    except Exception as exc:
+        return NewsResponseEnvelope(status="error", error=ErrorInfo(code="500", message=str(exc)))
+
+
+@router.post("/v1/analyze", response_model=AnalysisResponseEnvelope)
+async def request_analysis_v1(request: AnalysisRequest):
+    try:
+        data = await request_analysis(request)
+        return AnalysisResponseEnvelope(status="success", data=data)
+    except HTTPException as exc:
+        return AnalysisResponseEnvelope(status="error", error=ErrorInfo(code=str(exc.status_code), message=str(exc.detail)))
+    except Exception as exc:
+        return AnalysisResponseEnvelope(status="error", error=ErrorInfo(code="500", message=str(exc)))
+
+
+@router.get("/v1/sectors/performance", response_model=SectorPerformanceEnvelope)
+async def get_sectors_v1(
+    period: str = Query("1d", description="Time period for performance (1d, 1w, 1m, 1y)")
+):
+    try:
+        data = await get_sectors(period)
+        return SectorPerformanceEnvelope(status="success", data=data)
+    except HTTPException as exc:
+        return SectorPerformanceEnvelope(status="error", error=ErrorInfo(code=str(exc.status_code), message=str(exc.detail)))
+    except Exception as exc:
+        return SectorPerformanceEnvelope(status="error", error=ErrorInfo(code="500", message=str(exc)))
+
+
+@router.get("/v1/stocks/{ticker}/sparkline", response_model=SparklineResponseEnvelope)
+async def get_sparkline_v1(
+    ticker: str,
+    period: str = Query("1w", description="Time period (1d, 1w, 1m)")
+):
+    try:
+        data = await get_sparkline(ticker, period)
+        return SparklineResponseEnvelope(status="success", data=data)
+    except HTTPException as exc:
+        return SparklineResponseEnvelope(status="error", error=ErrorInfo(code=str(exc.status_code), message=str(exc.detail)))
+    except Exception as exc:
+        return SparklineResponseEnvelope(status="error", error=ErrorInfo(code="500", message=str(exc)))

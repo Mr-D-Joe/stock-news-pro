@@ -5,7 +5,8 @@
  * Used when VITE_USE_REAL_API=true
  */
 
-import type { Stock, NewsItem, Report, AnalysisResult, ChartPoint, SectorPerformance, SparklineResponse, Transaction } from '../types';
+import type { Stock, NewsItem, Report, AnalysisResult, ChartPoint, SectorPerformance, SparklineResponse, Transaction, ThemeResult } from '../types';
+import { sanitizeText, buildSanitizationTrace } from './sanitization';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
@@ -26,6 +27,21 @@ async function fetchJSON<T>(endpoint: string, options?: RequestInit): Promise<T>
     }
 
     return response.json();
+}
+
+type ApiEnvelope<T> = {
+    status: 'success' | 'partial' | 'error';
+    data?: T;
+    error?: { code: string; message: string };
+};
+
+async function fetchEnvelope<T>(endpoint: string, options?: RequestInit): Promise<T> {
+    const response = await fetchJSON<ApiEnvelope<T>>(endpoint, options);
+    if (response.status !== 'success' || !response.data) {
+        const message = response.error?.message || 'Unknown API error';
+        throw new Error(message);
+    }
+    return response.data;
 }
 
 // ==================== Type Mappings ====================
@@ -147,8 +163,8 @@ export const RealApiService = {
             }>(`/api/price_history?ticker=${ticker}&period=10y`);
 
             // 3. Request AI analysis
-            const analysis = await fetchJSON<BackendAnalysisResponse>(
-                '/api/engine/analyze',
+            const analysis = await fetchEnvelope<BackendAnalysisResponse>(
+                '/api/engine/v1/analyze',
                 {
                     method: 'POST',
                     body: JSON.stringify({
@@ -164,10 +180,11 @@ export const RealApiService = {
 
             // 5. Build AnalysisResult
             const fund = fundamentals.fundamentals;
+            const sanitization = buildSanitizationTrace();
             const report: Report = {
                 stock: ticker,
-                summary: analysis.summary,
-                deepAnalysis: analysis.essay,
+                summary: sanitizeText(analysis.summary),
+                deepAnalysis: sanitizeText(analysis.essay),
                 reviewData: {
                     peRatio: fund?.pe_ratio || 0,
                     pegRatio: fund?.peg_ratio || 0,
@@ -189,7 +206,7 @@ export const RealApiService = {
                         analysis.sentiment?.includes('bear') ? 'Bearish' : 'Neutral',
                     score: 50,
                 },
-                businessContext: fund?.business_summary || '',
+                businessContext: sanitizeText(fund?.business_summary || ''),
                 generatedAt: analysis.generated_at,
             };
 
@@ -202,8 +219,10 @@ export const RealApiService = {
                 report,
                 stockNews: [], // Would need stock-specific news endpoint
                 sectorNews,
-                essay: analysis.essay,
+                essay: sanitizeText(analysis.essay),
                 chartData,
+                dataOrigin: 'live',
+                sanitization,
             };
         } catch (error) {
             console.error('RealApiService.runAnalysis error:', error);
@@ -231,8 +250,8 @@ export const RealApiService = {
      */
     getSectorPerformance: async (period: string = '1d'): Promise<SectorPerformance[]> => {
         try {
-            return await fetchJSON<SectorPerformance[]>(
-                `/api/engine/sectors/performance?period=${period}`
+            return await fetchEnvelope<SectorPerformance[]>(
+                `/api/engine/v1/sectors/performance?period=${period}`
             );
         } catch (error) {
             console.error('RealApiService.getSectorPerformance error:', error);
@@ -245,8 +264,8 @@ export const RealApiService = {
      */
     getSparklineData: async (ticker: string, period: string = '1w'): Promise<SparklineResponse> => {
         try {
-            return await fetchJSON<SparklineResponse>(
-                `/api/engine/stocks/${ticker}/sparkline?period=${period}`
+            return await fetchEnvelope<SparklineResponse>(
+                `/api/engine/v1/stocks/${ticker}/sparkline?period=${period}`
             );
         } catch (error) {
             console.error('RealApiService.getSparklineData error:', error);
@@ -269,12 +288,20 @@ export const RealApiService = {
     /**
      * Analyze a theme/keyword via backend
      */
-    analyzeTheme: async (query: string): Promise<any> => {
+    analyzeTheme: async (query: string): Promise<ThemeResult> => {
         try {
-            return await fetchJSON<any>('/analyze/theme', {
+            const result = await fetchEnvelope<any>('/v1/analyze/theme', {
                 method: 'POST',
                 body: JSON.stringify({ query }),
             });
+            const sanitization = buildSanitizationTrace();
+            return {
+                ...result,
+                description: sanitizeText(result.description || ''),
+                essay: sanitizeText(result.essay || ''),
+                dataOrigin: 'live',
+                sanitization,
+            };
         } catch (error) {
             console.error('RealApiService.analyzeTheme error:', error);
             throw error;

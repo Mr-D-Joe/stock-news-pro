@@ -5,11 +5,13 @@ import type {
     Report,
     Essay,
     AnalysisResult,
+    ThemeResult,
     SectorPerformance,
     SparklineResponse,
     ChartPoint,
     Transaction
 } from '../types';
+import { sanitizeText, buildSanitizationTrace } from './sanitization';
 
 // ==================== Helper Functions ====================
 
@@ -440,11 +442,21 @@ export const MockApiService = {
                     sectorNews = sectorNews.map(n => ({ ...n, title: newsTranslations[n.title] || n.title }));
                 }
 
+                const sanitization = buildSanitizationTrace();
+                const sanitizedReport = {
+                    ...baseReport,
+                    summary: sanitizeText(baseReport.summary),
+                    deepAnalysis: sanitizeText(baseReport.deepAnalysis),
+                    businessContext: sanitizeText(baseReport.businessContext),
+                    generatedAt: new Date().toISOString(),
+                };
+                const sanitizedEssay = sanitizeText(baseEssay.text);
+
                 const result: AnalysisResult = {
-                    report: { ...baseReport, generatedAt: new Date().toISOString() },
+                    report: sanitizedReport,
                     stockNews,
                     sectorNews,
-                    essay: baseEssay.text,
+                    essay: sanitizedEssay,
                     chartData: stock.history.map((val: number, i: number) => {
                         // Generate relative dates from "Full History"
                         const daysAgo = stock.history.length - 1 - i;
@@ -467,7 +479,9 @@ export const MockApiService = {
                             value: stock.price + (Math.random() - 0.5), // Price at that hour (approx)
                             volume: Math.floor(baseVol)
                         };
-                    })
+                    }),
+                    dataOrigin: 'mock',
+                    sanitization,
                 };
                 resolve(result);
             }, 1000);
@@ -513,16 +527,19 @@ export const MockApiService = {
     },
 
     // [NEW] Theme Analysis Mock
-    analyzeTheme: async (query: string): Promise<AnalysisResult> => {
+    analyzeTheme: async (query: string): Promise<ThemeResult> => {
         await new Promise(r => setTimeout(r, 1500));
+        const sanitization = buildSanitizationTrace();
         return {
             theme: query,
-            description: "Mock Theme Analysis",
+            description: sanitizeText("Mock Theme Analysis"),
             winners: [],
             losers: [],
-            essay: "This is a mock analysis for theme: " + query,
-            generated_at: new Date().toISOString()
-        } as any;
+            essay: sanitizeText("This is a mock analysis for theme: " + query),
+            generated_at: new Date().toISOString(),
+            dataOrigin: 'mock',
+            sanitization
+        };
     },
 
     async getPortfolio(): Promise<Transaction[]> {
@@ -536,4 +553,3 @@ export const MockApiService = {
         return { ...transaction, id: Math.floor(Math.random() * 1000) };
     }
 };
-

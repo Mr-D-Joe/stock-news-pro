@@ -1,7 +1,8 @@
 import React from 'react';
-import type { ReviewData, AnalystRatings, RiskAssessment, MarketSentiment } from '../../types';
+import type { ReviewData, AnalystRatings, RiskAssessment, MarketSentiment, DataOrigin, SanitizationTrace } from '../../types';
 import { Pin, Diamond, ShieldAlert, TrendingUp, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { DataOriginBadge } from '../DataOriginBadge';
 
 interface MarketOverviewCardProps {
     executiveSummary: string;
@@ -11,6 +12,8 @@ interface MarketOverviewCardProps {
     marketSentiment: MarketSentiment;
     businessContext: string;
     generatedAt: string;
+    dataOrigin: DataOrigin;
+    sanitization: SanitizationTrace;
 }
 
 export const MarketOverviewCard: React.FC<MarketOverviewCardProps> = ({
@@ -20,7 +23,9 @@ export const MarketOverviewCard: React.FC<MarketOverviewCardProps> = ({
     riskAssessment,
     marketSentiment,
     businessContext,
-    generatedAt
+    generatedAt,
+    dataOrigin,
+    sanitization
 }) => {
     return (
         <div className="w-full flex flex-col gap-6">
@@ -32,10 +37,13 @@ export const MarketOverviewCard: React.FC<MarketOverviewCardProps> = ({
                         <Pin className="h-5 w-5 text-red-700 fill-red-700" />
                         <h3 className="text-lg font-bold text-slate-800">Executive Summary</h3>
                     </div>
-                    {/* Timestamp */}
-                    <div className="flex items-center gap-1 text-xs text-blue-600/70 font-mono">
-                        <Clock className="h-3 w-3" />
-                        {new Date(generatedAt).toLocaleTimeString()}
+                    <div className="flex items-center gap-4">
+                        <DataOriginBadge dataOrigin={dataOrigin} sanitization={sanitization} />
+                        {/* Timestamp */}
+                        <div className="flex items-center gap-1 text-xs text-blue-600/70 font-mono">
+                            <Clock className="h-3 w-3" />
+                            {new Date(generatedAt).toLocaleTimeString()}
+                        </div>
                     </div>
                 </div>
                 <p className="text-slate-800 text-base leading-relaxed">

@@ -30,7 +30,7 @@ It represents an **observed system state**, not an intended design.
 
 ## DATE
 
-2026-01-28
+2026-01-29
 
 ---
 
@@ -42,19 +42,21 @@ Technical Architecture Review & Feature Audit
 
 ## SCOPE
 
-Frontend (React / Tauri), Sparklines, Heatmap & Backend Mocks
+Frontend (React / Tauri), Theme Analysis, Portfolio Persistence, Heatmap & Sparklines, Backend API v1, CI Gates
 
 ---
 
 # 1. Executive Summary
 
-Stock News Pro is a desktop-native financial analytics dashboard (v1.5) that has successfully integrated advanced visualization features:
+Stock News Pro is a desktop-native financial analytics dashboard (v1.7+ evolution) that now includes:
 
-- **Sector Heatmap:** Hierarchical treemap for market overview.
-- **Sparklines:** Compact trend-charts across the UI.
-- **Enhanced Data Layer:** Clean separation between Mock and Real service providers.
+- **Theme Analysis:** Dedicated thematic analysis flow with winners/losers + essay.
+- **Portfolio Persistence (Phase B):** Transaction endpoints and local SQLite persistence.
+- **Sector Heatmap & Sparklines:** Treemap visualization and compact trend views.
+- **API v1 Envelopes:** Versioned endpoints with explicit status and error objects.
+- **Data Origin + Sanitization Trace:** UI badges for data provenance and sanitization status.
 
-The system remains in **Mock-First** mode, providing a high-fidelity visual experience without external API dependencies.
+The system remains **Mock-First** with a defined Real API switch and a service-layer abstraction.
 
 ---
 
@@ -62,36 +64,38 @@ The system remains in **Mock-First** mode, providing a high-fidelity visual expe
 
 ## Observed Architecture Style
 
-Component-Based Monolithic SPA (React) with Python Sidecar (FastAPI).
+Component-Based SPA (React) + Python Sidecar (FastAPI) + Tauri Desktop Shell.
 
 ## Observed Separation of Concerns
 
 | Layer | Observation |
-|------|------------|
-| UI | React Components (Tailwind styled) |
-| State | AppContext (React Context) |
-| Services | ApiService Abstraction (Mock/Real) |
-| Desktop | Tauri v2 shell (Frontend only integration) |
-| Backend | Python FastAPI (Mock/Logic) |
+|------|-------------|
+| UI | React components + Tailwind styling |
+| State | AppContext (UI) + TanStack Query (server-state) |
+| Services | ApiService (Mock/Real) + Provider switch |
+| Desktop | Tauri v2 shell, backend lifecycle hook present |
+| Backend | FastAPI API + SQLModel persistence |
 
 ## Observed Technology Stack
 
 - React 19
 - TypeScript ~5.9
-- Vite 7.3
+- Vite 7.2
 - TailwindCSS 3.4
-- FastAPI (Python 3.12)
+- FastAPI (Python 3.x)
 - Recharts 3.6
 - Lucide React
 
 ---
 
-# 3. Module Overview
+# 3. Module Overview (Notable)
 
-- **`HeatmapCard.tsx`**: Implements hierarchical market treemap.
-- **`WatchlistCard.tsx`**: Integrates Sparklines with list views.
-- **`Sparkline.tsx`**: Generic SVG mini-chart component.
-- **`mock_data.py`**: Centralized source for all technical mock entities.
+- **`ThematicReport.tsx`**: Thematic analysis UI with winners/losers and essay.
+- **`PortfolioDebug.tsx`**: Portfolio persistence debug UI.
+- **`HeatmapCard.tsx`**: Market sector treemap visualization.
+- **`Sparkline.tsx`**: Compact SVG mini-chart component.
+- **`api/engine.py`**: Engine API endpoints + v1 envelope endpoints.
+- **`database.py`**: SQLite persistence with OS-appropriate storage path.
 
 ---
 
@@ -99,51 +103,50 @@ Component-Based Monolithic SPA (React) with Python Sidecar (FastAPI).
 
 Observed flow:
 
-User Interaction  
-→ AppContext Update  
-→ Custom Hooks (useDataFetching)  
-→ ApiService (MockApiService)  
-→ UI Render  
+User Interaction
+→ AppContext Update
+→ Custom Hooks (useDataFetching)
+→ ApiService (Mock/Real)
+→ UI Render
 
-✔ This perfectly matches **DES-ARCH-02** (Unidirectional Data Flow).
+✔ This matches **DES-ARCH-02** (Unidirectional Data Flow).
 
 ---
 
-# 5. API Behavior (Mock)
+# 5. API Behavior (v1)
 
 Observed characteristics:
 
-- Async FastAPI endpoints.
-- `DEV_MODE` compliant responses.
-- Structured Response Models (Pydantic).
-
-⚠️ **Governance Observation (NFR-REQ-05):**
-While the backend provides "source" and "origin" flags, the UI does not yet explicitly display "Mock" badges on a per-component basis. This is a prioritized compliance fix.
+- Versioned endpoints under `/api/engine/v1/*` and `/v1/*` for theme/portfolio.
+- Response envelopes include `status` + `data` + `error`.
+- Structured errors returned via `error` objects for v1 routes.
 
 ---
 
-# 6. LLM Integration Status
-
-Observed:
-- AI-Engine endpoints defined (`/analyze`).
-- Caching logic with content hashes implemented.
-- Mock AI responses follow the required structured format.
-
----
-
-# 7. Compliance with DESIGN.md
+# 6. Compliance with DESIGN.md (Selected)
 
 ### Observed Compliance
 
-- [x] DES-ARCH-01 (Strikte Schichtung)
-- [x] DES-FE-01 (Komponentenbasierte Architektur)
-- [x] DES-GOV-17 (Mock-First Adherence)
-- [x] DES-ARCH-19 (Desktop Target - Tauri initialized)
+- [x] DES-FE-01 (Component-based UI)
+- [x] DES-FE-04 (Custom hooks for data access)
+- [x] DES-FE-05 (Service-layer abstraction)
+- [x] DES-GOV-17 (Mock-first adherence)
+- [x] DES-GOV-27 (Sanitization trace metadata in UI)
+- [x] DES-FE-18 / NFR-REQ-05 (Data origin visible in UI)
 
-### Deviations / Gaps
+### Remaining Gaps / Risks
 
-- **DES-FE-18 / NFR-REQ-05:** Missing explicit "Mock" indicators in feature cards.
-- **TA-REQ-*:** Tauri lifecycle (auto-start backend) not yet fully connected to the Python process.
+- **Desktop lifecycle (TA-REQ-*)**: Full backend auto-start/stop orchestration still partial.
+- **Full real data parity**: Real API coverage remains limited; some calls still mock.
+
+---
+
+# 7. CI / Quality Gates
+
+Observed:
+
+- CI pipeline configured for lint + typecheck + tests (frontend + backend).
+- Python linting (ruff) and typecheck (mypy) run in CI.
 
 ---
 
@@ -151,33 +154,35 @@ Observed:
 
 | Area | Risk | Status |
 |------|------|--------|
-| UI Compliance | Missing data origin labels | **Action Required** |
-| Deployment | Tauri IPC not finalized | Pending |
-| Token Budget | Telemetry logic missing | Pending |
+| Desktop Lifecycle | Backend auto-start/stop incomplete | Pending |
+| Real API Parity | Limited live data endpoints | Pending |
+| Data Provenance | UI origin badges in place | Addressed |
 
 ---
 
 # 9. Architectural Readiness
 
 Ready for:
-- UX refinement.
-- Integration testing of real data providers.
-- Tauri packaging (Frontend only).
+
+- UX refinement
+- Expanded real data integrations
+- End-to-end integration testing
 
 Not ready for:
-- Production LLM usage (Missing budgets).
-- Windows/macOS native distribution (Lifecycle incomplete).
+
+- Production LLM usage (token budgets + telemetry incomplete)
+- Full native packaging (lifecycle not finalized)
 
 ---
 
 # 10. Final Assessment
 
-Internal consistency: **HIGH**  
-Extensibility: **HIGH**  
-Governance compliance: **SATISFACTORY** (Gap in data provenance display).
+Internal consistency: **HIGH**
+Extensibility: **HIGH**
+Governance compliance: **IMPROVED** (data provenance + sanitization trace now visible)
 
 **Verdict:**
-v1.5 of Stock News Pro represents a significant leap in visual analytics. The core architecture is robust and follows the constitutional mandates. The focus must now shift to parity between visual output and metadata visibility.
+The system has advanced beyond v1.5 prototype scope with new thematic analysis and persistence work. The next focus should be full lifecycle orchestration and real-data parity while maintaining governance constraints.
 
 ---
 

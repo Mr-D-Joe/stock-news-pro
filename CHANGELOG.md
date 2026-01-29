@@ -6,8 +6,14 @@ All notable changes to this project are documented in this file.
 ### Added
 - **Persistence Layer:** SQLite database integration via SQLModel in Backend `ai_service`.
 - **Backend API:** New endpoints for Portfolio Management (`/portfolio`).
+- **API v1:** Versioned endpoints with status/error envelopes for engine/theme/portfolio.
+- **CI Gates:** GitHub Actions workflow with frontend lint/typecheck and backend lint/typecheck/tests.
+- **Sanitization Trace:** UI metadata for sanitization status/version.
 ### Changed
-- **Docs:** Aligned README repository structure and backend status with current project layout.
+- **Heatmap:** Timeframe sync + tooltip improvements + nested top-stocks support.
+- **Sparklines:** Fixed-scale comparison in watchlists and search-result sparkline integration.
+- **Persistence:** SQLite path moved to OS-appropriate app data directory.
+- **Docs:** Updated README, SYSTEM_REPORT, and TECHNICAL_SPEC for current architecture/tooling.
 
 ## [1.7.0] - 2026-01-29 - Phase A: Thematic Analysis
 ### Added

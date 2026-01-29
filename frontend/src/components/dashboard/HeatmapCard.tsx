@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Treemap, ResponsiveContainer, Tooltip } from 'recharts';
 import { useSectorPerformance } from '../../hooks/useDataFetching';
 import { useAppContext } from '../../context/AppContext';
@@ -72,9 +72,59 @@ const CustomizedContent = (props: any) => {
     );
 };
 
+const HeatmapTooltip = ({ active, payload }: any) => {
+    if (!active || !payload || payload.length === 0) return null;
+    const node = payload[0].payload;
+    if (!node) return null;
+
+    const isSector = !!node.top_stocks;
+    return (
+        <div className="bg-white border border-gray-200 rounded-lg shadow-md p-3 text-xs text-slate-700">
+            <div className="font-bold text-slate-900 mb-1">{node.name}</div>
+            {typeof node.performance === 'number' && (
+                <div className="mb-1">Performance: {node.performance > 0 ? '+' : ''}{node.performance.toFixed(2)}%</div>
+            )}
+            {typeof node.market_cap === 'number' && (
+                <div className="mb-1">Market Cap: ${(node.market_cap / 1e9).toFixed(1)}B</div>
+            )}
+            {isSector && node.top_stocks?.length > 0 && (
+                <div className="mt-2">
+                    <div className="font-semibold text-slate-800">Top Stocks</div>
+                    <div className="mt-1 space-y-0.5">
+                        {node.top_stocks.slice(0, 3).map((s: any) => (
+                            <div key={s.symbol} className="flex justify-between gap-2">
+                                <span className="font-mono">{s.symbol}</span>
+                                <span>{s.performance > 0 ? '+' : ''}{s.performance.toFixed(2)}%</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 export const HeatmapCard: React.FC = () => {
-    const { setSelectedSector, setScope } = useAppContext();
-    const { data: sectors, isLoading, isError, error } = useSectorPerformance('1d');
+    const { uiState, setSelectedSector, setScope, setTimeframe } = useAppContext();
+    const timeframeToPeriod: Record<string, string> = {
+        '24H': '1d',
+        '7D': '1w',
+        '1M': '1m',
+        '1Y': '1y',
+    };
+    const heatmapPeriod = timeframeToPeriod[uiState.selectedTimeframe] || '1d';
+    const { data: sectors, isLoading, isError, error } = useSectorPerformance(heatmapPeriod);
+
+    const treemapData = useMemo(() => {
+        return (sectors || []).map(s => ({
+            ...s,
+            children: (s.top_stocks || []).map(stock => ({
+                name: stock.symbol,
+                performance: stock.performance,
+                market_cap: stock.market_cap,
+            })),
+        }));
+    }, [sectors]);
 
     const handleNodeClick = (node: any) => {
         if (node && node.id) {
@@ -133,14 +183,14 @@ export const HeatmapCard: React.FC = () => {
             <div className="h-[450px] w-full p-2 bg-slate-50/30">
                 <ResponsiveContainer width="100%" height="100%">
                     <Treemap
-                        data={(sectors || []) as any}
+                        data={(treemapData || []) as any}
                         dataKey="market_cap"
                         nameKey="name"
                         stroke="#fff"
                         content={<CustomizedContent />}
                         onClick={(node) => handleNodeClick(node)}
                     >
-                        <Tooltip />
+                        <Tooltip content={<HeatmapTooltip />} />
                     </Treemap>
                 </ResponsiveContainer>
             </div>
@@ -153,9 +203,21 @@ export const HeatmapCard: React.FC = () => {
                     {['1D', '1W', '1M', '1Y'].map(p => (
                         <button
                             key={p}
+                            onClick={() => {
+                                const tfMap: Record<string, string> = {
+                                    '1D': '24H',
+                                    '1W': '7D',
+                                    '1M': '1M',
+                                    '1Y': '1Y',
+                                };
+                                const tf = tfMap[p];
+                                if (tf) setTimeframe(tf as any);
+                            }}
                             className={cn(
                                 "px-2 py-0.5 rounded text-[10px] font-bold border transition-colors",
-                                p === '1D' ? "bg-blue-600 text-white border-blue-600" : "bg-white text-slate-500 border-gray-200 hover:bg-slate-50"
+                                p === (heatmapPeriod === '1d' ? '1D' : heatmapPeriod === '1w' ? '1W' : heatmapPeriod === '1m' ? '1M' : '1Y')
+                                    ? "bg-blue-600 text-white border-blue-600"
+                                    : "bg-white text-slate-500 border-gray-200 hover:bg-slate-50"
                             )}
                         >
                             {p}

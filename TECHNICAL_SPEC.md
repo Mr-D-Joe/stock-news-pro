@@ -1,8 +1,8 @@
 # TECHNICAL_SPEC — Stock News Pro
 ## Implementation-Level Specification
 
-Version: 1.2  
-Datum: 2026-01-28  
+Version: 1.3  
+Datum: 2026-01-29  
 Status: Active
 
 ---
@@ -100,3 +100,19 @@ Der Analyse-Cache wird bei einer Änderung des Kontextwerts „language“ volls
 #### 3.2.2 TECH-SPEC-CACHE-02 — Persistenz über Zeitrahmenwechsel
 
 Analyseergebnisse bleiben bei einem Wechsel des Kontextwerts „time_range“ im Cache erhalten (Compound-Key Nutzung).
+
+---
+
+## 4. CI Tooling Dependencies
+
+### 4.1 TECH-SPEC-TOOL-01 — Ruff (Linting)
+
+**Zweck:** Python-Linting im CI (Fehlererkennung, Syntax- und Logikprobleme).  
+**Scope:** CI-only (entwicklungsbezogen).  
+**Austauschstrategie:** Austauschbar durch `flake8` oder `pylint`, sofern gleiche Gate-Policy erfüllt bleibt.
+
+### 4.2 TECH-SPEC-TOOL-02 — mypy (Typecheck)
+
+**Zweck:** Python-Typprüfung im CI (statische Typvalidierung).  
+**Scope:** CI-only (entwicklungsbezogen).  
+**Austauschstrategie:** Austauschbar durch `pyright` oder `pyre`, sofern gleiche Gate-Policy erfüllt bleibt.

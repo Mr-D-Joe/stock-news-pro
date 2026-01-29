@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSparklineData } from '../../hooks/useDataFetching';
+import { useSparklineBatch } from '../../hooks/useDataFetching';
 import { Sparkline } from './Sparkline';
 import { Bookmark, TrendingUp, TrendingDown, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -10,10 +10,11 @@ interface WatchlistItemProps {
     name: string;
     price: number;
     change: number;
+    sparkline?: number[];
+    range?: [number, number];
 }
 
-const WatchlistItem: React.FC<WatchlistItemProps> = ({ symbol, name, price, change }) => {
-    const { data: sparkline } = useSparklineData(symbol, '1w');
+const WatchlistItem: React.FC<WatchlistItemProps> = ({ symbol, name, price, change, sparkline, range }) => {
     const { setSelectedStock, setScope } = useAppContext();
 
     const isPositive = change >= 0;
@@ -37,10 +38,12 @@ const WatchlistItem: React.FC<WatchlistItemProps> = ({ symbol, name, price, chan
             <div className="flex-1 px-4 flex justify-center">
                 {sparkline && (
                     <Sparkline
-                        data={sparkline.data}
+                        data={sparkline}
                         width={80}
                         height={24}
                         strokeWidth={1.5}
+                        normalized
+                        range={range}
                     />
                 )}
             </div>
@@ -67,6 +70,7 @@ export const WatchlistCard: React.FC = () => {
         { symbol: "NOVA", name: "NovaCraft Energy", price: 82.15, change: 3.4 },
         { symbol: "FINX", name: "FinanceX Holdings", price: 65.40, change: 0.8 }
     ];
+    const { data: sparklineBatch, range } = useSparklineBatch(watchlist.map(w => w.symbol), '1w');
 
     return (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col h-full">
@@ -83,9 +87,17 @@ export const WatchlistCard: React.FC = () => {
                 </div>
             </div>
             <div className="flex-1 overflow-y-auto">
-                {watchlist.map(item => (
-                    <WatchlistItem key={item.symbol} {...item} />
-                ))}
+                {watchlist.map(item => {
+                    const sparkline = sparklineBatch.find(s => s.ticker === item.symbol)?.data;
+                    return (
+                        <WatchlistItem
+                            key={item.symbol}
+                            {...item}
+                            sparkline={sparkline}
+                            range={range}
+                        />
+                    );
+                })}
             </div>
             <div className="p-3 bg-slate-50/50 border-t border-gray-100">
                 <button className="w-full py-2 text-[10px] font-bold text-blue-600 hover:text-blue-700 transition-colors uppercase tracking-widest">

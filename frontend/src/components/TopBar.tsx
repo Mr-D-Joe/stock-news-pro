@@ -10,12 +10,13 @@
 import React, { useState } from 'react';
 import { Globe, Play, Loader2, Search, PieChart, FlaskConical, Radio } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
-import { useRunAnalysisMutation, useRunThemeAnalysisMutation } from '../hooks/useDataFetching';
+import { useRunAnalysisMutation, useRunThemeAnalysisMutation, useStockSearch, useSparklineData } from '../hooks/useDataFetching';
 import { Lightbulb } from 'lucide-react';
 
 import { useTickerResolutionMutation, isResolutionSuccess } from '../hooks/useTickerResolution';
 import { isUsingRealApi } from '../services/ApiService';
 import { cn } from '@/lib/utils';
+import { Sparkline } from '@/components/dashboard/Sparkline';
 
 export const TopBar: React.FC = () => {
     // UI State from Context (per DESIGN.md L119)
@@ -40,6 +41,10 @@ export const TopBar: React.FC = () => {
     const analysisMutation = useRunAnalysisMutation();
     const themeAnalysisMutation = useRunThemeAnalysisMutation(); // [NEW]
     const resolutionMutation = useTickerResolutionMutation();
+    const searchResult = useStockSearch(stockInput, { enabled: stockInput.trim().length >= 1 });
+    const searchSymbol = searchResult.data?.symbol;
+    const { data: searchSparkline } = useSparklineData(searchSymbol || '', '1w');
+    const showSearchResult = !!searchResult.data?.symbol && stockInput.trim().length > 0 && searchResult.data?.symbol !== selectedStock;
 
     // Handle stock resolution and analysis
     const handleResolveAndAnalyze = async () => {
@@ -65,7 +70,9 @@ export const TopBar: React.FC = () => {
                         sectorNews: [],
                         essay: result.essay,
                         chartData: [],
-                        themeResult: result // Store the specific theme data
+                        themeResult: result, // Store the specific theme data
+                        dataOrigin: result.dataOrigin,
+                        sanitization: result.sanitization,
                     });
                     setAnalysisStatus('success');
                 }
@@ -169,6 +176,32 @@ export const TopBar: React.FC = () => {
                             }
                         }}
                     />
+                    {showSearchResult && (
+                        <div className="absolute left-0 right-0 top-[48px] z-20 bg-white border border-gray-200 rounded-lg shadow-md p-2">
+                            <div className="text-[10px] uppercase tracking-wider text-slate-400 mb-2">Search Result</div>
+                            <div
+                                className="flex items-center justify-between gap-3 p-2 rounded hover:bg-slate-50 cursor-pointer"
+                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={() => {
+                                    setSelectedStock(searchResult.data?.symbol || '');
+                                    setStockInput(searchResult.data?.symbol || '');
+                                }}
+                            >
+                                <div>
+                                    <div className="font-bold text-slate-800">{searchResult.data?.symbol}</div>
+                                    <div className="text-[10px] text-slate-500">{searchResult.data?.name}</div>
+                                </div>
+                                {searchSparkline?.data?.length ? (
+                                    <Sparkline
+                                        data={searchSparkline.data}
+                                        width={80}
+                                        height={24}
+                                        strokeWidth={1.5}
+                                    />
+                                ) : null}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* [NEW] Theme Input (Mutually Exclusive) */}

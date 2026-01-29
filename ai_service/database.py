@@ -1,9 +1,18 @@
 
 from sqlmodel import SQLModel, create_engine, Session
 import os
+import sys
+
+def _get_app_data_dir() -> str:
+    if sys.platform == "darwin":
+        return os.path.expanduser("~/Library/Application Support/StockNewsPro")
+    if sys.platform.startswith("win"):
+        base = os.environ.get("APPDATA", os.path.expanduser("~"))
+        return os.path.join(base, "StockNewsPro")
+    return os.path.expanduser("~/.local/share/stock-news-pro")
 
 # Ensure data directory exists
-DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+DATA_DIR = _get_app_data_dir()
 os.makedirs(DATA_DIR, exist_ok=True)
 
 SQLITE_FILE_NAME = "stock_news.db"

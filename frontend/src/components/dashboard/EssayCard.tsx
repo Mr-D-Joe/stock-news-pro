@@ -7,12 +7,16 @@
 import React from 'react';
 import { BookOpen, Sparkles } from 'lucide-react';
 import { MarkdownRenderer } from '../MarkdownRenderer';
+import type { DataOrigin, SanitizationTrace } from '../../types';
+import { DataOriginBadge } from '../DataOriginBadge';
 
 interface EssayCardProps {
     text: string;
+    dataOrigin: DataOrigin;
+    sanitization: SanitizationTrace;
 }
 
-export const EssayCard: React.FC<EssayCardProps> = ({ text }) => {
+export const EssayCard: React.FC<EssayCardProps> = ({ text, dataOrigin, sanitization }) => {
     return (
         <div className="w-full bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
             {/* Header */}
@@ -26,9 +30,12 @@ export const EssayCard: React.FC<EssayCardProps> = ({ text }) => {
                         <p className="text-xs text-slate-500">AI-synthesized market analysis</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-1 text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded-full">
-                    <Sparkles className="h-3 w-3" />
-                    <span className="font-medium">AI GENERATED</span>
+                <div className="flex items-center gap-3">
+                    <DataOriginBadge dataOrigin={dataOrigin} sanitization={sanitization} />
+                    <div className="flex items-center gap-1 text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded-full">
+                        <Sparkles className="h-3 w-3" />
+                        <span className="font-medium">AI GENERATED</span>
+                    </div>
                 </div>
             </div>
 

@@ -1,11 +1,14 @@
 import os
 import logging
 from fastapi import FastAPI
+from pydantic import BaseModel
+from typing import Optional, Literal, List
 
 logger = logging.getLogger(__name__)
 from ai_service.analyzers.provider_factory import ProviderFactory
 from ai_service.analyzers.impact_analyzer import ImpactAnalyzer
 from ai_service.models.article import ArticleCollection, AnalysisResult
+from ai_service.models import Transaction
 from ai_service.processors.browser_extractor import BrowserExtractor
 from ai_service.analyzers.essay_generator import EssayGenerator
 from ai_service.pipeline.base import PipelineContext, PipelineConfig
@@ -16,6 +19,52 @@ from ai_service.config import Settings
 from ai_service.processors.ticker_resolver import TickerResolver
 from ai_service.fetchers.historic_analyzer import HistoricAnalyzer
 from ai_service.processors.html_reporter import HtmlReporter
+
+
+class ApiError(BaseModel):
+    code: str
+    message: str
+
+
+class ThemeAsset(BaseModel):
+    symbol: str
+    name: str
+    reason: str
+    price: Optional[float] = None
+    change: Optional[float] = None
+
+
+class ThemeResponse(BaseModel):
+    theme: str
+    description: str
+    winners: List[ThemeAsset]
+    losers: List[ThemeAsset]
+    essay: str
+    generated_at: str
+
+
+class ThemeResponseEnvelope(BaseModel):
+    status: Literal["success", "partial", "error"]
+    data: Optional[ThemeResponse] = None
+    error: Optional[ApiError] = None
+
+
+class TransactionEnvelope(BaseModel):
+    status: Literal["success", "partial", "error"]
+    data: Optional[Transaction] = None
+    error: Optional[ApiError] = None
+
+
+class TransactionListEnvelope(BaseModel):
+    status: Literal["success", "partial", "error"]
+    data: Optional[list[Transaction]] = None
+    error: Optional[ApiError] = None
+
+
+class DeleteEnvelope(BaseModel):
+    status: Literal["success", "partial", "error"]
+    data: Optional[dict] = None
+    error: Optional[ApiError] = None
 
 # Configure logging
 logging.basicConfig(
@@ -58,7 +107,6 @@ from fastapi import Request, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from sqlmodel import Session, select
 from ai_service.database import get_session
-from ai_service.models import Transaction
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
@@ -264,21 +312,35 @@ async def analyze_full_report(request: ArticleCollection, language: str = "Germa
     
     return result
 
-@app.post("/analyze/theme")
+def _analyze_theme_impl(query: str) -> ThemeResponse:
+    from ai_service.theme_service import ThemeService
+    service = ThemeService()
+    return ThemeResponse(**service.analyze_theme(query))
+
+
+@app.post("/analyze/theme", response_model=ThemeResponse)
 async def analyze_theme(request: dict):
     """
     Analyze a thematic trend (e.g., "AI", "War").
     Returns Winners/Losers and an Essay.
     """
-    from ai_service.theme_service import ThemeService
-    
     query = request.get("query", "").strip()
     if not query:
-        return {"error": "Query parameter is required"}
-        
-    service = ThemeService()
-    service = ThemeService()
-    return service.analyze_theme(query)
+        raise HTTPException(status_code=400, detail="Query parameter is required")
+
+    return _analyze_theme_impl(query)
+
+
+@app.post("/v1/analyze/theme", response_model=ThemeResponseEnvelope)
+async def analyze_theme_v1(request: dict):
+    query = request.get("query", "").strip()
+    if not query:
+        return ThemeResponseEnvelope(status="error", error=ApiError(code="400", message="Query parameter is required"))
+    try:
+        data = _analyze_theme_impl(query)
+        return ThemeResponseEnvelope(status="success", data=data)
+    except Exception as exc:
+        return ThemeResponseEnvelope(status="error", error=ApiError(code="500", message=str(exc)))
 
 # --- PORTFOLIO API (Persistence) ---
 
@@ -316,6 +378,39 @@ async def delete_transaction(transaction_id: int, session: Session = Depends(get
     session.delete(transaction)
     session.commit()
     return {"ok": True}
+
+
+@app.post("/v1/portfolio/transactions", response_model=TransactionEnvelope)
+async def add_transaction_v1(transaction: Transaction, session: Session = Depends(get_session)):
+    try:
+        data = await add_transaction(transaction, session)
+        return TransactionEnvelope(status="success", data=data)
+    except HTTPException as exc:
+        return TransactionEnvelope(status="error", error=ApiError(code=str(exc.status_code), message=str(exc.detail)))
+    except Exception as exc:
+        return TransactionEnvelope(status="error", error=ApiError(code="500", message=str(exc)))
+
+
+@app.get("/v1/portfolio/transactions", response_model=TransactionListEnvelope)
+async def get_transactions_v1(session: Session = Depends(get_session)):
+    try:
+        data = await get_transactions(session)
+        return TransactionListEnvelope(status="success", data=data)
+    except HTTPException as exc:
+        return TransactionListEnvelope(status="error", error=ApiError(code=str(exc.status_code), message=str(exc.detail)))
+    except Exception as exc:
+        return TransactionListEnvelope(status="error", error=ApiError(code="500", message=str(exc)))
+
+
+@app.delete("/v1/portfolio/transactions/{transaction_id}", response_model=DeleteEnvelope)
+async def delete_transaction_v1(transaction_id: int, session: Session = Depends(get_session)):
+    try:
+        data = await delete_transaction(transaction_id, session)
+        return DeleteEnvelope(status="success", data=data)
+    except HTTPException as exc:
+        return DeleteEnvelope(status="error", error=ApiError(code=str(exc.status_code), message=str(exc.detail)))
+    except Exception as exc:
+        return DeleteEnvelope(status="error", error=ApiError(code="500", message=str(exc)))
 
 @app.get("/api/quota")
 async def get_quota_status():
@@ -392,4 +487,3 @@ async def get_quota_status():
         status["recommendation"] = "Check individual providers."
     
     return status
-

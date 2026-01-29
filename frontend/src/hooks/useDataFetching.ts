@@ -6,7 +6,7 @@
  * - UI components MUST NEVER perform raw fetch or business logic
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useQueries } from '@tanstack/react-query';
 import { ApiService } from '../services/ApiService';
 import type { AnalysisResult, Stock, SectorPerformance, SparklineResponse } from '../types';
 
@@ -137,12 +137,38 @@ export function useSparklineData(ticker: string, period: string = '1w') {
     });
 }
 
+export function useSparklineBatch(tickers: string[], period: string = '1w') {
+    const queries = useQueries({
+        queries: tickers.map((ticker) => ({
+            queryKey: queryKeys.sparkline(ticker, period),
+            queryFn: async (): Promise<SparklineResponse> => {
+                return ApiService.getSparklineData(ticker, period);
+            },
+            enabled: !!ticker,
+            staleTime: 5 * 60 * 1000,
+        })),
+    });
+
+    const responses = queries.map(q => q.data).filter(Boolean) as SparklineResponse[];
+    const allPoints = responses.flatMap(r => r.data || []);
+    const range: [number, number] | undefined = allPoints.length
+        ? [Math.min(...allPoints), Math.max(...allPoints)]
+        : undefined;
+
+    return {
+        data: responses,
+        range,
+        isLoading: queries.some(q => q.isLoading),
+    };
+}
+
 export default {
     useAnalysis,
     useStockSearch,
     useStocks,
     useSectorPerformance,
     useSparklineData,
+    useSparklineBatch,
     useRunAnalysisMutation,
     useRunThemeAnalysisMutation,
 };

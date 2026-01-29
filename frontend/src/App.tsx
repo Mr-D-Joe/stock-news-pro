@@ -83,6 +83,8 @@ const Dashboard = () => {
                   marketSentiment={analysisResult.report.marketSentiment}
                   businessContext={analysisResult.report.businessContext}
                   generatedAt={analysisResult.report.generatedAt}
+                  dataOrigin={analysisResult.dataOrigin}
+                  sanitization={analysisResult.sanitization}
                 />
 
                 {/* Phase B: Portfolio Persistence Debug */}
@@ -107,8 +109,14 @@ const Dashboard = () => {
                   <SummarizerCard
                     summary={analysisResult.report.deepAnalysis}
                     metrics={[]}
+                    dataOrigin={analysisResult.dataOrigin}
+                    sanitization={analysisResult.sanitization}
                   />
-                  <EssayCard text={analysisResult.essay} />
+                  <EssayCard
+                    text={analysisResult.essay}
+                    dataOrigin={analysisResult.dataOrigin}
+                    sanitization={analysisResult.sanitization}
+                  />
                 </div>
               </div>
 
