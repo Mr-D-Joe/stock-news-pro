@@ -7,12 +7,20 @@ export const usePortfolio = () => {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const service = ApiService as {
+        getPortfolio?: () => Promise<Transaction[]>;
+        addTransaction?: (tx: Transaction) => Promise<Transaction>;
+    };
 
     const fetchPortfolio = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
-            const data = await ApiService.getPortfolio();
+            if (!service.getPortfolio) {
+                setError("Portfolio API not available");
+                return;
+            }
+            const data = await service.getPortfolio();
             setTransactions(data);
         } catch (err) {
             console.error(err);
@@ -20,12 +28,16 @@ export const usePortfolio = () => {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [service]);
 
     const addTransaction = useCallback(async (tx: Transaction) => {
         setLoading(true);
         try {
-            const newTx = await ApiService.addTransaction(tx);
+            if (!service.addTransaction) {
+                setError("Portfolio API not available");
+                throw new Error("Portfolio API not available");
+            }
+            const newTx = await service.addTransaction(tx);
             setTransactions(prev => [newTx, ...prev]);
             return newTx;
         } catch (err) {
@@ -35,7 +47,7 @@ export const usePortfolio = () => {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [service]);
 
     const deleteTransaction = useCallback(async (id: number) => {
         void id;

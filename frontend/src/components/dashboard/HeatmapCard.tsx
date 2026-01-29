@@ -5,6 +5,7 @@ import { useAppContext } from '../../context/AppContext';
 import { LayoutGrid, Loader2, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { SectorPerformance, SectorStock, Timeframe } from '../../types';
+import type { TreemapNode } from 'recharts';
 
 // Helper to get color based on performance
 const getPerformanceColor = (performance: number) => {
@@ -26,29 +27,39 @@ type HeatmapStockNode = {
     name: string;
     performance: number;
     market_cap: number;
+    [key: string]: unknown;
 };
 
 type HeatmapSectorNode = SectorPerformance & {
     children: HeatmapStockNode[];
+    [key: string]: unknown;
 };
 
-type CustomizedContentProps = {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    name: string;
-    performance?: number;
-    depth: number;
+type HeatmapNodePayload = HeatmapSectorNode | HeatmapStockNode;
+
+const getNodePayload = (node: TreemapNode): HeatmapNodePayload | null => {
+    const payload = (node as { payload?: unknown }).payload;
+    if (payload && typeof payload === 'object' && 'name' in payload) {
+        return payload as HeatmapNodePayload;
+    }
+    return null;
 };
 
-const CustomizedContent = (props: CustomizedContentProps) => {
-    const { x, y, width, height, name, performance, depth } = props;
+const isHeatmapSectorNode = (data: HeatmapNodePayload): data is HeatmapSectorNode => {
+    return (
+        typeof (data as HeatmapSectorNode).id === 'string' &&
+        Array.isArray((data as HeatmapSectorNode).top_stocks)
+    );
+};
+
+const renderCustomizedContent = (node: TreemapNode) => {
+    const { x, y, width, height, depth } = node;
+    const payload = getNodePayload(node);
+    const name = payload?.name ?? node.name;
+    const perfValue = typeof payload?.performance === 'number' ? payload.performance : 0;
+    const hasPerf = typeof payload?.performance === 'number';
 
     // Safety: Ensure performance is a number, default to 0
-    const perfValue = typeof performance === 'number' ? performance : 0;
-    const hasPerf = typeof performance === 'number';
-
     return (
         <g>
             <rect
@@ -95,29 +106,31 @@ const CustomizedContent = (props: CustomizedContentProps) => {
 
 type HeatmapTooltipProps = {
     active?: boolean;
-    payload?: Array<{ payload: HeatmapSectorNode | HeatmapStockNode }>;
+    payload?: Array<{ payload: TreemapNode }>;
 };
 
 const HeatmapTooltip = ({ active, payload }: HeatmapTooltipProps) => {
     if (!active || !payload || payload.length === 0) return null;
     const node = payload[0].payload;
     if (!node) return null;
+    const data = getNodePayload(node);
+    if (!data) return null;
 
-    const isSector = 'top_stocks' in node;
+    const isSector = isHeatmapSectorNode(data);
     return (
         <div className="bg-white border border-gray-200 rounded-lg shadow-md p-3 text-xs text-slate-700">
-            <div className="font-bold text-slate-900 mb-1">{node.name}</div>
-            {typeof node.performance === 'number' && (
-                <div className="mb-1">Performance: {node.performance > 0 ? '+' : ''}{node.performance.toFixed(2)}%</div>
+            <div className="font-bold text-slate-900 mb-1">{data.name}</div>
+            {typeof data.performance === 'number' && (
+                <div className="mb-1">Performance: {data.performance > 0 ? '+' : ''}{data.performance.toFixed(2)}%</div>
             )}
-            {typeof node.market_cap === 'number' && (
-                <div className="mb-1">Market Cap: ${(node.market_cap / 1e9).toFixed(1)}B</div>
+            {typeof data.market_cap === 'number' && (
+                <div className="mb-1">Market Cap: ${(data.market_cap / 1e9).toFixed(1)}B</div>
             )}
-            {isSector && node.top_stocks?.length > 0 && (
+            {isSector && data.top_stocks.length > 0 && (
                 <div className="mt-2">
                     <div className="font-semibold text-slate-800">Top Stocks</div>
                     <div className="mt-1 space-y-0.5">
-                        {node.top_stocks.slice(0, 3).map((s: SectorStock) => (
+                        {data.top_stocks.slice(0, 3).map((s: SectorStock) => (
                             <div key={s.symbol} className="flex justify-between gap-2">
                                 <span className="font-mono">{s.symbol}</span>
                                 <span>{s.performance > 0 ? '+' : ''}{s.performance.toFixed(2)}%</span>
@@ -158,11 +171,12 @@ export const HeatmapCard: React.FC = () => {
         }));
     }, [sectors]);
 
-    const handleNodeClick = (node: HeatmapSectorNode | HeatmapStockNode) => {
-        if ('id' in node && node.id) {
-            setSelectedSector(node.id);
+    const handleNodeClick = (node: TreemapNode) => {
+        const data = getNodePayload(node);
+        if (data && isHeatmapSectorNode(data)) {
+            setSelectedSector(data.id);
             setScope('Sector');
-            console.log(`Heatmap: Selected Sector ${node.id}`);
+            console.log(`Heatmap: Selected Sector ${data.id}`);
         }
     };
 
@@ -219,8 +233,8 @@ export const HeatmapCard: React.FC = () => {
                         dataKey="market_cap"
                         nameKey="name"
                         stroke="#fff"
-                        content={<CustomizedContent />}
-                        onClick={(node) => handleNodeClick(node as HeatmapSectorNode | HeatmapStockNode)}
+                        content={renderCustomizedContent}
+                        onClick={handleNodeClick}
                     >
                         <Tooltip content={<HeatmapTooltip />} />
                     </Treemap>

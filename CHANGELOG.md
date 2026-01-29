@@ -17,6 +17,7 @@ All notable changes to this project are documented in this file.
 - **CI:** Backend lint scope adjusted to avoid false failures; frontend lint fixes applied.
 - **CI:** Removed remaining frontend lint violations (typed guards, unused symbols, react-refresh export warning).
 - **CI:** Cleared backend ruff lint violations (imports, exceptions, typevars, prompt context).
+- **CI:** Fixed frontend typecheck issues (portfolio API guards, heatmap treemap typing).
 
 ## [1.7.0] - 2026-01-29 - Phase A: Thematic Analysis
 ### Added
