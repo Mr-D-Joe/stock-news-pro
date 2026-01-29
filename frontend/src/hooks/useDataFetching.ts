@@ -104,6 +104,18 @@ export function useRunAnalysisMutation() {
     });
 }
 
+export function useRunThemeAnalysisMutation() {
+    return useMutation({
+        mutationFn: async (query: string) => {
+            return ApiService.analyzeTheme(query);
+        },
+        onSuccess: (data) => {
+            // Can optionally cache or just return
+            console.log("Theme Analysis Success:", data);
+        }
+    });
+}
+
 export function useSectorPerformance(period: string = '1d') {
     return useQuery({
         queryKey: queryKeys.sectors(period),
@@ -132,4 +144,5 @@ export default {
     useSectorPerformance,
     useSparklineData,
     useRunAnalysisMutation,
+    useRunThemeAnalysisMutation,
 };

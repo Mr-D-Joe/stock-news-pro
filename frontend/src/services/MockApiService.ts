@@ -499,5 +499,40 @@ export const MockApiService = {
                 });
             }, 150);
         });
+    },
+
+    // [NEW] Theme Analysis Mock
+    analyzeTheme: async (query: string): Promise<any> => {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                // Return structure matching Python backend mock
+                if (query.toLowerCase().includes('ai')) {
+                    resolve({
+                        theme: "Artificial Intelligence",
+                        description: "Explosive growth sector driven by Generative AI and LLMs.",
+                        winners: [
+                            { symbol: "NVDA", name: "NVIDIA Corp", reason: "GPU Monopoly" },
+                            { symbol: "MSFT", name: "Microsoft", reason: "OpenAI Stake" }
+                        ],
+                        losers: [
+                            { symbol: "CHGG", name: "Chegg", reason: "Disrupted by ChatGPT" }
+                        ],
+                        essay: "## The AI Revolution (Browser Mock)\n\nArtificial Intelligence is reshaping the global economy.",
+                        generated_at: new Date().toISOString(),
+                        is_mock: true
+                    });
+                } else {
+                    resolve({
+                        theme: query,
+                        description: `Analysis for theme '${query}' (Browser Mock).`,
+                        winners: [],
+                        losers: [],
+                        essay: `## Analysis for ${query}\n\nThis is a generated mock response.`,
+                        generated_at: new Date().toISOString(),
+                        is_mock: true
+                    });
+                }
+            }, 500);
+        });
     }
 };

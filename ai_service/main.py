@@ -246,6 +246,21 @@ async def analyze_full_report(request: ArticleCollection, language: str = "Germa
     
     return result
 
+@app.post("/analyze/theme")
+async def analyze_theme(request: dict):
+    """
+    Analyze a thematic trend (e.g., "AI", "War").
+    Returns Winners/Losers and an Essay.
+    """
+    from ai_service.theme_service import ThemeService
+    
+    query = request.get("query", "").strip()
+    if not query:
+        return {"error": "Query parameter is required"}
+        
+    service = ThemeService()
+    return service.analyze_theme(query)
+
 @app.get("/api/quota")
 async def get_quota_status():
     """

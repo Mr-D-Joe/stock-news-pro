@@ -21,6 +21,7 @@ interface UIState {
     selectedLanguage: string;
     selectedTimeframe: Timeframe;
     selectedScope: AnalysisScope;
+    themeQuery: string; // [NEW]
 }
 
 interface AppContextType {
@@ -33,6 +34,7 @@ interface AppContextType {
     setSelectedLanguage: (language: string) => void;
     setTimeframe: (tf: Timeframe) => void;
     setScope: (scope: AnalysisScope) => void;
+    setThemeQuery: (query: string) => void; // [NEW]
 
     // Resolution helpers (pure functions, no fetching)
     resolveLanguage: (input: string) => string;
@@ -56,6 +58,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         selectedLanguage: 'English',
         selectedTimeframe: '24H',
         selectedScope: 'Combined',
+        themeQuery: '', // [NEW] Initial empty
     });
 
     // Analysis result (populated by components using TanStack Query hooks)
@@ -63,8 +66,20 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [analysisStatus, setAnalysisStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
     // UI Setters
+    // [NEW] Theme Query Setter (Mutually Exclusive with Stock)
+    const setThemeQuery = (query: string) =>
+        setUIState(s => ({
+            ...s,
+            themeQuery: query,
+            selectedStock: query ? '' : s.selectedStock // Clear stock if theme set
+        }));
+
     const setSelectedStock = (stock: string) =>
-        setUIState(s => ({ ...s, selectedStock: stock }));
+        setUIState(s => ({
+            ...s,
+            selectedStock: stock,
+            themeQuery: stock ? '' : s.themeQuery // Clear theme if stock set
+        }));
 
     const setSelectedSector = (sector: string) =>
         setUIState(s => ({ ...s, selectedSector: sector }));
@@ -91,6 +106,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             setSelectedLanguage,
             setTimeframe,
             setScope,
+            setThemeQuery, // [NEW] Added to provider
             resolveLanguage,
             analysisResult,
             setAnalysisResult,

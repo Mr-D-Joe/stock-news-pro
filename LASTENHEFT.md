@@ -16,6 +16,7 @@ Status: Draft
 
 | Version | Datum       | Abschnitt | Änderungstyp | Beschreibung |
 |--------:|------------|-----------|--------------|--------------|
+| 1.7 | 2026-01-29 | 2.12, 3.6 | Erweiterung | Einführung der Themen-Analyse (UI-REQ-THEMESEL, BE-REQ-THEME) für Schlagwortsuche (Phase A). |
 | 1.6 | 2026-01-28 | 2.10, 4.5 | Refactoring | Entfernung des Analyse-Scope-Selectors (UI-REQ-SCOPE-xx) zur Vereinfachung sowie Einführung der Port-Isolation (BE-REQ-PORT-01) und des Dashboard Heroes (UI-REQ-HERO-01). |
 | 1.5 | 2026-01-28 | 2.13, 3.7 | Erweiterung | Einführung der Sparkline-Anforderungen (UI-REQ-SPARK-01 bis -04, BE-REQ-SPARK-01 bis -02) für kompakte Trend-Visualisierungen |
 | 1.4 | 2026-01-28 | 2.12, 3.6 | Erweiterung | Einführung der Sektor-Heatmap-Anforderungen (UI-REQ-HEATMAP-01 bis -09, BE-REQ-SECTOR-01 bis -04) für interaktive Treemap-Visualisierung der Marktsektoren |
@@ -479,7 +480,11 @@ Die Benutzeroberfläche muss einen Kontextwert time_range führen.
 
 #### 2.1.14 UI-REQ-CTX-06 — UI-Kontext: Thematische Suchanfrage
 
-Die Benutzeroberfläche muss einen Kontextwert theme_query führen.
+Die Benutzeroberfläche muss einen Kontextwert `theme_query` führen.
+
+#### 2.1.15 UI-REQ-CTX-10 — Kontext-Exklusivität
+
+Die Benutzeroberfläche muss sicherstellen, dass `selected_stock` und `theme_query` nicht gleichzeitig belegt sind (gegenseitiger Ausschluss).
 
 #### 2.1.15 UI-REQ-CTX-07 — Gleichzeitige Kontextführung
 
@@ -773,7 +778,25 @@ Die Komponente ermöglicht das Lesen umfangreicher Texte durch Bereitstellung ei
 
 ### 2.10 [ENTFERNT] Analyse-Scope Steuerung (F-UI-10)
 
-(Dieser Abschnitt wurde in Version 1.6 entfernt, da die Scope-Steuerung als unnötige Komplexität identifiziert wurde. Das System analysiert nun standardmäßig im maximalen Kontext).
+(Dieser Abschnitt wurde in Version 1.6 entfernt).
+
+### 2.12 Thematische Suche (F-UI-12)
+
+#### 2.12.1 UI-REQ-THEMESEL-01 — Bereitstellung eines Themen-Eingabefeldes
+
+Die Benutzeroberfläche stellt ein dediziertes Eingabefeld für thematische Suchbegriffe (z. B. "Künstliche Intelligenz") bereit.
+
+#### 2.12.2 UI-REQ-THEMESEL-02 — Exklusives Eingabeverhalten
+
+Bei Eingabe in das Themen-Feld wird eine eventuell bestehende Aktien-Auswahl (`selected_stock`) automatisch entfernt.
+
+#### 2.12.3 UI-REQ-THEMESEL-03 — Tooltip-Hilfe
+
+Das Eingabefeld muss bei Benutzerinteraktion (Hover/Focus) einen erklärenden Hilfetext (Tooltip) anzeigen.
+
+#### 2.12.4 UI-REQ-THEMESEL-04 — Auslösung der Themen-Analyse
+
+Die Benutzeroberfläche löst bei Bestätigung der Themeneingabe eine Analyseanfrage an den Themen-Endpunkt aus.
 
 ### 2.11 Volumen-Chart (F-UI-11)
 
@@ -969,7 +992,23 @@ Das System muss optimierte, kompakte Zeitreihendaten (z. B. aggregierte Schlussk
 
 Das System muss die Sparkline-Daten in Abhängigkeit vom gewählten Zeitraum (z. B. 1D, 1W, 1M) liefern.
 
-## 4. Desktop-Integration (Tauri)
+### 3.8 Thematische Analyse (Backend)
+
+#### 3.8.1 BE-REQ-THEME-01 — Bereitstellung eines Themen-Analyse-Endpunkts
+
+Das System stellt einen API-Endpunkt `/analyze/theme` zur Verfügung.
+
+#### 3.8.2 BE-REQ-THEME-02 — Identifikation von Gewinnern und Verlierern
+
+Der Analyse-Dienst identifiziert basierend auf dem Suchbegriff relevante Sektoren oder Einzelwerte und klassifiziert diese als Chancen (Winners) oder Risiken (Losers).
+
+#### 3.8.3 BE-REQ-THEME-03 — Generierung eines Themen-Reports
+
+Der Analyse-Dienst generiert einen textuellen Report, der das Thema und seine Auswirkungen auf den Markt beschreibt.
+
+---
+
+## 4. Desktop-Integration & Systemverhalten
 
 #### 4.1 TA-REQ-NATIVE-01 — Bereitstellung einer nativen Desktop-Anwendung
 

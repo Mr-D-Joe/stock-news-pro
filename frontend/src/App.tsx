@@ -9,6 +9,7 @@ import { NewsTicker } from '@/components/dashboard/NewsTicker';
 import { SummarizerCard } from '@/components/dashboard/SummarizerCard';
 import { EssayCard } from '@/components/dashboard/EssayCard';
 import { StatusBar } from '@/components/StatusBar';
+import { ThematicReport } from '@/components/ThematicReport'; // [NEW]
 
 import { BackendService } from '@/services/BackendService';
 
@@ -65,8 +66,10 @@ const Dashboard = () => {
             <DashboardHero />
           )}
 
-          {/* STRICT 2-COL LAYOUT */}
-          {analysisResult && (
+          {/* STRICT 2-COL LAYOUT OR THEMATIC REPORT */}
+          {analysisResult && analysisResult.themeResult ? (
+            <ThematicReport data={analysisResult.themeResult} />
+          ) : analysisResult && (
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
 
               {/* --- LEFT COLUMN: MARKET OVERVIEW (40-45%) --- */}

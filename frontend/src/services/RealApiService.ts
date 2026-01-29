@@ -265,6 +265,21 @@ export const RealApiService = {
             return false;
         }
     },
+
+    /**
+     * Analyze a theme/keyword via backend
+     */
+    analyzeTheme: async (query: string): Promise<any> => {
+        try {
+            return await fetchJSON<any>('/analyze/theme', {
+                method: 'POST',
+                body: JSON.stringify({ query }),
+            });
+        } catch (error) {
+            console.error('RealApiService.analyzeTheme error:', error);
+            throw error;
+        }
+    },
 };
 
 export default RealApiService;

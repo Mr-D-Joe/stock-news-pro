@@ -84,6 +84,24 @@ export interface AnalysisResult {
     essay: string;
     chartData: ChartPoint[];
     volumeData?: ChartPoint[]; // [NEW] 48h hourly
+    themeResult?: ThemeResult; // [NEW] Theme Analysis Data
+}
+
+export interface ThemeResult {
+    theme: string;
+    description: string;
+    winners: ThemeAsset[];
+    losers: ThemeAsset[];
+    essay: string;
+    generated_at: string;
+}
+
+export interface ThemeAsset {
+    symbol: string;
+    name: string;
+    reason: string;
+    price?: number;
+    change?: number;
 }
 
 export interface AppState {
