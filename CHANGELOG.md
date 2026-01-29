@@ -28,6 +28,7 @@ All notable changes to this project are documented in this file.
 - **CI:** Fixed pytest module import path via tests conftest.
 - **CI:** Exported Transaction model in ai_service.models to fix test imports.
 - **CI:** Added transaction model module to resolve ai_service.models import in tests.
+- **CI:** Added Playwright fallback in browser extractor to keep tests running when browsers are unavailable.
 
 ## [1.7.0] - 2026-01-29 - Phase A: Thematic Analysis
 ### Added

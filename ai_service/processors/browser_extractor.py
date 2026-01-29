@@ -17,7 +17,10 @@ class BrowserExtractor(PipelineStep[ArticleCollection, ArticleCollection]):
         self.max_concurrent = max_concurrent
         self.timeout_ms = timeout_ms
 
-    async def _extract_text_from_url(self, url: str, context: BrowserContext) -> str:
+    async def _extract_text_from_url(self, url: str, context: BrowserContext | None) -> str:
+        if context is None:
+            logger.info("Browser context unavailable; skipping extraction for %s", url)
+            return ""
         page = await context.new_page()
         try:
             # Go to URL with timeout
@@ -48,35 +51,43 @@ class BrowserExtractor(PipelineStep[ArticleCollection, ArticleCollection]):
             await page.close()
 
     async def _process_async(self, input_data: ArticleCollection) -> ArticleCollection:
-        async with async_playwright() as p:
-            # Launch browser (headless by default)
-            browser = await p.chromium.launch()
-            context = await browser.new_context(
-                user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-            )
-            
-            tasks = []
-            # Calculate how many to process - maybe limit to top N to save time?
-            # For now, process all defined in collection, but respect concurrency
-            semaphore = asyncio.Semaphore(self.max_concurrent)
+        tasks = []
+        # Calculate how many to process - maybe limit to top N to save time?
+        # For now, process all defined in collection, but respect concurrency
+        semaphore = asyncio.Semaphore(self.max_concurrent)
 
-            async def sem_task(article: Article):
-                async with semaphore:
-                    if not article.content or len(article.content) < 200: # Only if content is missing or short
-                        logger.info(f"Scraping {article.link}...")
-                        text = await self._extract_text_from_url(article.link, context)
-                        if text:
-                            article.content = text
-                        else:
-                            logger.info(f"No text extracted for {article.link}")
+        async def sem_task(article: Article, context: BrowserContext | None):
+            async with semaphore:
+                if not article.content or len(article.content) < 200:  # Only if content is missing or short
+                    logger.info(f"Scraping {article.link}...")
+                    text = await self._extract_text_from_url(article.link, context)
+                    if text:
+                        article.content = text
+                    else:
+                        logger.info(f"No text extracted for {article.link}")
 
+        async def run_tasks(context: BrowserContext | None):
+            tasks.clear()
             for article in input_data.articles:
-                tasks.append(sem_task(article))
-            
+                tasks.append(sem_task(article, context))
             await asyncio.gather(*tasks)
-            
-            await browser.close()
-            
+
+        browser = None
+        try:
+            async with async_playwright() as p:
+                # Launch browser (headless by default)
+                browser = await p.chromium.launch()
+                context = await browser.new_context(
+                    user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                )
+                await run_tasks(context)
+        except Exception as e:
+            logger.warning("Browser launch failed, falling back to no-op extraction: %s", e)
+            await run_tasks(None)
+        finally:
+            if browser is not None:
+                await browser.close()
+
         return input_data
 
     def process(self, input_data: ArticleCollection, context: PipelineContext) -> ArticleCollection:
