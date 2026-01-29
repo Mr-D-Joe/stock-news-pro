@@ -9,7 +9,8 @@ import { NewsTicker } from '@/components/dashboard/NewsTicker';
 import { SummarizerCard } from '@/components/dashboard/SummarizerCard';
 import { EssayCard } from '@/components/dashboard/EssayCard';
 import { StatusBar } from '@/components/StatusBar';
-import { ThematicReport } from '@/components/ThematicReport'; // [NEW]
+import { ThematicReport } from '@/components/ThematicReport';
+import { PortfolioDebug } from '@/components/PortfolioDebug'; // [NEW Phase B Debug]
 
 import { BackendService } from '@/services/BackendService';
 
@@ -83,6 +84,9 @@ const Dashboard = () => {
                   businessContext={analysisResult.report.businessContext}
                   generatedAt={analysisResult.report.generatedAt}
                 />
+
+                {/* Phase B: Portfolio Persistence Debug */}
+                <PortfolioDebug />
               </div>
 
               {/* --- RIGHT COLUMN: EVENT & AI MONITOR (55-60%) --- */}

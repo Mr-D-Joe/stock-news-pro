@@ -36,11 +36,29 @@ def handle_sigint(signum, frame):
 
 signal.signal(signal.SIGINT, handle_sigint)
 
-app = FastAPI(title="Stock News AI Service", version="1.0.0")
+signal.signal(signal.SIGINT, handle_sigint)
+
+# --- LIFECYCLE: Database & Resource Management ---
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Initialize Database
+    from ai_service.database import init_db
+    logger.info("💽 Initializing persistence layer (SQLite)...")
+    init_db()
+    yield
+    # Shutdown: (Optional cleanup)
+    logger.info("🛑 Shutting down AI Service...")
+
+app = FastAPI(title="Stock News AI Service", version="1.0.0", lifespan=lifespan)
 
 # --- RESILIENCE: Global Exception Handler ---
-from fastapi import Request
+from fastapi import Request, Depends, HTTPException
 from fastapi.responses import JSONResponse
+from sqlmodel import Session, select
+from ai_service.database import get_session
+from ai_service.models import Transaction
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
@@ -259,7 +277,45 @@ async def analyze_theme(request: dict):
         return {"error": "Query parameter is required"}
         
     service = ThemeService()
+    service = ThemeService()
     return service.analyze_theme(query)
+
+# --- PORTFOLIO API (Persistence) ---
+
+@app.post("/portfolio/transactions", response_model=Transaction)
+async def add_transaction(transaction: Transaction, session: Session = Depends(get_session)):
+    """
+    Add a new transaction to the portfolio.
+    (BE-REQ-PORTFOLIO-02)
+    """
+    session.add(transaction)
+    session.commit()
+    session.refresh(transaction)
+    logger.info(f"💾 Persisted Transaction: {transaction.symbol} x {transaction.amount}")
+    return transaction
+
+@app.get("/portfolio/transactions", response_model=list[Transaction])
+async def get_transactions(session: Session = Depends(get_session)):
+    """
+    Get all portfolio transactions.
+    (BE-REQ-PORTFOLIO-03)
+    """
+    statement = select(Transaction).order_by(Transaction.timestamp.desc())
+    results = session.exec(statement)
+    return results.all()
+
+@app.delete("/portfolio/transactions/{transaction_id}")
+async def delete_transaction(transaction_id: int, session: Session = Depends(get_session)):
+    """
+    Delete a transaction by ID.
+    (BE-REQ-PORTFOLIO-04)
+    """
+    transaction = session.get(Transaction, transaction_id)
+    if not transaction:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    session.delete(transaction)
+    session.commit()
+    return {"ok": True}
 
 @app.get("/api/quota")
 async def get_quota_status():

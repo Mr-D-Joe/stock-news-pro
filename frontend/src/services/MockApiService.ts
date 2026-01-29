@@ -1,4 +1,15 @@
-import type { Stock, NewsItem, Report, Essay, AnalysisResult, SectorPerformance, SparklineResponse } from '../types';
+
+import type {
+    Stock,
+    NewsItem,
+    Report,
+    Essay,
+    AnalysisResult,
+    SectorPerformance,
+    SparklineResponse,
+    ChartPoint,
+    Transaction
+} from '../types';
 
 // ==================== Helper Functions ====================
 
@@ -305,7 +316,7 @@ export const MockApiService = {
         if (fuzzyMatch) {
             const resolvedSymbol = ALIASES[fuzzyMatch];
             const stock = STOCKS.find(s => s.symbol === resolvedSymbol);
-            console.log(`[Fuzzy Match] ${query} → ${fuzzyMatch} → ${resolvedSymbol}`);
+            console.log(`[Fuzzy Match] ${query} → ${fuzzyMatch} → ${resolvedSymbol} `);
             return {
                 symbol: resolvedSymbol,
                 sector: stock ? stock.sector : "General",
@@ -357,7 +368,7 @@ export const MockApiService = {
                 if (!baseReport) {
                     baseReport = {
                         stock: cleanTicker,
-                        summary: `${stock.name} (${cleanTicker}) is a notable player in the ${stock.sector} sector. Current market conditions show mixed signals requiring careful analysis.`,
+                        summary: `${stock.name} (${cleanTicker}) is a notable player in the ${stock.sector} sector.Current market conditions show mixed signals requiring careful analysis.`,
                         deepAnalysis: `## Market Position\n${stock.name} maintains a competitive position in ${stock.sector}.\n\n## Financials\nRecent price action around $${stock.price.toFixed(2)} suggests consolidation phase.\n\n## Key Catalysts\nUpcoming earnings reports and sector developments will be critical drivers.`,
                         reviewData: { peRatio: 18 + Math.random() * 10, pegRatio: 1.2 + Math.random(), roe: 12 + Math.random() * 10, debtToEquity: 0.5 + Math.random() },
                         analystRatings: { mean: stock.price * 1.15, high: stock.price * 1.35, low: stock.price * 0.85, recommendation: "HOLD" },
@@ -371,7 +382,7 @@ export const MockApiService = {
                 if (!baseEssay) {
                     baseEssay = {
                         stock: cleanTicker,
-                        text: `## Analysis of ${stock.name}\n\n### Sector Context\nThe ${stock.sector} sector is currently navigating macroeconomic headwinds. ${stock.name} is positioned to adapt to these changes.\n\n### Investment Thesis\nInvestors should consider the risk/reward profile carefully before initiating positions.\n\n### Outlook\nMonitor upcoming earnings reports for ${cleanTicker} to gauge future performance trajectory.`
+                        text: `## Analysis of ${stock.name} \n\n### Sector Context\nThe ${stock.sector} sector is currently navigating macroeconomic headwinds.${stock.name} is positioned to adapt to these changes.\n\n### Investment Thesis\nInvestors should consider the risk / reward profile carefully before initiating positions.\n\n### Outlook\nMonitor upcoming earnings reports for ${cleanTicker} to gauge future performance trajectory.`
                     };
                 }
 
@@ -392,19 +403,19 @@ export const MockApiService = {
                         baseEssay.text = "## Luxus Definiert\nMercedes setzt weiterhin den Standard für automobilen Luxus.\n\n### Der Chinesische Markt\nSchlüssel für zukünftiges Wachstum, aber mit starker lokaler Konkurrenz.\n\n### Ausblick\nDie Premium-Positionierung schützt vor Preiskämpfen im Massenmarkt.";
                     } else {
                         // Generic German Fallback for ALL unknown/other stocks
-                        baseReport.summary = `${stock.name} (${cleanTicker}) ist ein bedeutender Akteur im ${stock.sector}-Sektor. Aktuelle Marktbedingungen zeigen gemischte Signale.`;
-                        baseReport.deepAnalysis = `## Marktposition\n${stock.name} hält eine wettbewerbsfähige Position im ${stock.sector}-Sektor.\n\n## Finanzdaten\nDer aktuelle Kurs um $${stock.price.toFixed(2)} deutet auf eine Konsolidierungsphase hin.\n\n## Strategieausblick\nKommende Quartalszahlen werden entscheidend für die weitere Entwicklung sein.`;
+                        baseReport.summary = `${stock.name} (${cleanTicker}) ist ein bedeutender Akteur im ${stock.sector} -Sektor.Aktuelle Marktbedingungen zeigen gemischte Signale.`;
+                        baseReport.deepAnalysis = `## Marktposition\n${stock.name} hält eine wettbewerbsfähige Position im ${stock.sector} -Sektor.\n\n## Finanzdaten\nDer aktuelle Kurs um $${stock.price.toFixed(2)} deutet auf eine Konsolidierungsphase hin.\n\n## Strategieausblick\nKommende Quartalszahlen werden entscheidend für die weitere Entwicklung sein.`;
                         baseReport.riskAssessment = { level: baseReport.riskAssessment.level, description: "Branchen­typische Risiken. Marktentwicklungen genau beobachten." };
-                        baseReport.businessContext = `${stock.name} ist hauptsächlich in der ${stock.sector}-Branche tätig und bedient globale Märkte mit innovativen Lösungen.`;
-                        baseEssay.text = `## Analyse von ${stock.name}\n\n### Sektorkontext\nDer ${stock.sector}-Sektor navigiert derzeit durch makroökonomische Gegenwinde. ${stock.name} ist gut positioniert, sich an diese Veränderungen anzupassen.\n\n### Investitionsthese\nAnleger sollten das Risiko-Rendite-Profil sorgfältig prüfen.\n\n### Ausblick\nDie kommenden Quartalszahlen für ${cleanTicker} werden Aufschluss über die zukünftige Entwicklung geben.`;
+                        baseReport.businessContext = `${stock.name} ist hauptsächlich in der ${stock.sector} -Branche tätig und bedient globale Märkte mit innovativen Lösungen.`;
+                        baseEssay.text = `## Analyse von ${stock.name} \n\n### Sektorkontext\nDer ${stock.sector} -Sektor navigiert derzeit durch makroökonomische Gegenwinde.${stock.name} ist gut positioniert, sich an diese Veränderungen anzupassen.\n\n### Investitionsthese\nAnleger sollten das Risiko - Rendite - Profil sorgfältig prüfen.\n\n### Ausblick\nDie kommenden Quartalszahlen für ${cleanTicker} werden Aufschluss über die zukünftige Entwicklung geben.`;
                     }
                 } else if (language !== "English") {
                     // Universal Simulator for other languages (Turkish, French, etc.)
                     const langPrefix = `(${language.toUpperCase().substring(0, 2)})`;
-                    baseReport.summary = `${langPrefix} ${baseReport.summary}`;
-                    baseReport.deepAnalysis = `## ${langPrefix} Detailed Analysis\n\n${baseReport.deepAnalysis}`;
-                    baseReport.businessContext = `${langPrefix} ${baseReport.businessContext}`;
-                    baseEssay.text = `## ${langPrefix} Analysis of ${stock.name}\n\n${baseEssay.text}`;
+                    baseReport.summary = `${langPrefix} ${baseReport.summary} `;
+                    baseReport.deepAnalysis = `## ${langPrefix} Detailed Analysis\n\n${baseReport.deepAnalysis} `;
+                    baseReport.businessContext = `${langPrefix} ${baseReport.businessContext} `;
+                    baseEssay.text = `## ${langPrefix} Analysis of ${stock.name} \n\n${baseEssay.text} `;
                 }
 
                 // Filter news
@@ -502,37 +513,27 @@ export const MockApiService = {
     },
 
     // [NEW] Theme Analysis Mock
-    analyzeTheme: async (query: string): Promise<any> => {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                // Return structure matching Python backend mock
-                if (query.toLowerCase().includes('ai')) {
-                    resolve({
-                        theme: "Artificial Intelligence",
-                        description: "Explosive growth sector driven by Generative AI and LLMs.",
-                        winners: [
-                            { symbol: "NVDA", name: "NVIDIA Corp", reason: "GPU Monopoly" },
-                            { symbol: "MSFT", name: "Microsoft", reason: "OpenAI Stake" }
-                        ],
-                        losers: [
-                            { symbol: "CHGG", name: "Chegg", reason: "Disrupted by ChatGPT" }
-                        ],
-                        essay: "## The AI Revolution (Browser Mock)\n\nArtificial Intelligence is reshaping the global economy.",
-                        generated_at: new Date().toISOString(),
-                        is_mock: true
-                    });
-                } else {
-                    resolve({
-                        theme: query,
-                        description: `Analysis for theme '${query}' (Browser Mock).`,
-                        winners: [],
-                        losers: [],
-                        essay: `## Analysis for ${query}\n\nThis is a generated mock response.`,
-                        generated_at: new Date().toISOString(),
-                        is_mock: true
-                    });
-                }
-            }, 500);
-        });
+    analyzeTheme: async (query: string): Promise<AnalysisResult> => {
+        await new Promise(r => setTimeout(r, 1500));
+        return {
+            theme: query,
+            description: "Mock Theme Analysis",
+            winners: [],
+            losers: [],
+            essay: "This is a mock analysis for theme: " + query,
+            generated_at: new Date().toISOString()
+        } as any;
+    },
+
+    async getPortfolio(): Promise<Transaction[]> {
+        return [
+            { id: 1, symbol: "MOCK", amount: 10, price_at_purchase: 150.00, timestamp: new Date().toISOString(), type: "buy" }
+        ];
+    },
+
+    async addTransaction(transaction: Transaction): Promise<Transaction> {
+        console.log("Mock add transaction", transaction);
+        return { ...transaction, id: Math.floor(Math.random() * 1000) };
     }
 };
+

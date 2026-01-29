@@ -18,3 +18,4 @@ pypdf>=3.0
 json_repair>=0.25.0
 
 # Future: grpcio grpcio-tools for Protobuf support
+sqlmodel>=0.0.14

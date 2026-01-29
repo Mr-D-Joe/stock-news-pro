@@ -20,6 +20,7 @@ Dieses Dokument definiert die verbindlichen Regeln für Architektur, Governance 
 | 1.3 | 2026-01-27 | Governance | Erweiterung | Übernahme der Governance zur Interpretation und normativen Autorität als normative Governance in DESIGN.md |
 | 1.3 | 2026-01-27 | Governance | Erweiterung | Übernahme der Dokumentationsartefakte (SYSTEM_REPORT, README, TECHNICAL_SPEC, STYLEGUIDE, PROMPTS) als Dokumenten-Governance in DESIGN.md |
 | 1.3 | 2026-01-27 | Architektur | Erweiterung | Übernahme der Desktop-Integration (native Desktop-App, Backend-Lifecycle, typisierte IPC) als Architektur-Requirements in DESIGN.md |
+| 1.3 | 2026-01-27 | Governance | Erweiterung | Einfügung der Governance-Regel DES-GOV-48 zur verpflichtenden Pflege von CHANGELOG.md |
 | 1.3 | 2026-01-27 | Architektur / LLM | Erweiterung | Übernahme der API- und LLM-Governance (Mock/Real-Modus, Warnung, Provider-Priorisierung, Cache-Precheck, Token-Telemetrie) als normative Regeln in DESIGN.md |
 | 1.2 | 2026-01-27 | Governance / LLM | Entkopplung | Auflösung der inhaltlichen Überlappung zwischen deterministischer Aufgabenlösung (DES-GOV-09) und LLM-Aufrufkriterium (DES-LLM-07) durch eindeutige Zuständigkeiten je Requirement |
 | 1.2 | 2026-01-27 | Frontend | Präzisierung | Klare Trennung von Render-Ökonomie (DES-FE-08) und Rendering-Strategie (DES-FE-20) |
@@ -201,6 +202,9 @@ Mehrdeutige Anforderungen werden vor Ableitung oder Implementierung präzisiert.
 
 ### DES-GOV-47 — Normative Gültigkeit freigegebener Versionen
 Normative Gültigkeit besitzen die freigegebenen Versionen von DESIGN.md und LASTENHEFT.md.
+
+### DES-GOV-48 — Pflege von CHANGELOG.md
+Jede funktionale Änderung, Fehlerbehebung oder Release-Erstellung wird in `CHANGELOG.md` dokumentiert.
 
 ---
 

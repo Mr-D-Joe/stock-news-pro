@@ -33,10 +33,14 @@ This project follows a strict strict directory layout to maintain separation of 
    - Is this change covered by `LASTENHEFT.md`?
    - Does it violate any `DESIGN.md` constraints?
 
-2. **Branching:**
+2. **Update Documentation:**
+   - **`CHANGELOG.md`**: Log your specific changes under "Unreleased" or current version. (Rule `DES-GOV-48`)
+   - **`LASTENHEFT.md`**: Update requirements if functionality changes.
+
+3. **Branching:**
    - Use descriptive names: `feat/new-chart`, `fix/ticker-resolution`, `docs/update-readme`.
 
-3. **Commit Messages:**
+4. **Commit Messages:**
    - Use [Conventional Commits](https://www.conventionalcommits.org/).
    - Format: `type(scope): description`
    - Example: `feat(ui): add volume chart component`

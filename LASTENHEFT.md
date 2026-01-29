@@ -16,6 +16,7 @@ Status: Draft
 
 | Version | Datum       | Abschnitt | Änderungstyp | Beschreibung |
 |--------:|------------|-----------|--------------|--------------|
+| 1.8 | 2026-01-29 | 3.7, 4.6 | Erweiterung | Einführung der Portfolio-Persistenz (BE-REQ-PERSIST, BE-REQ-PORTFOLIO) für Phase B. |
 | 1.7 | 2026-01-29 | 2.12, 3.6 | Erweiterung | Einführung der Themen-Analyse (UI-REQ-THEMESEL, BE-REQ-THEME) für Schlagwortsuche (Phase A). |
 | 1.6 | 2026-01-28 | 2.10, 4.5 | Refactoring | Entfernung des Analyse-Scope-Selectors (UI-REQ-SCOPE-xx) zur Vereinfachung sowie Einführung der Port-Isolation (BE-REQ-PORT-01) und des Dashboard Heroes (UI-REQ-HERO-01). |
 | 1.5 | 2026-01-28 | 2.13, 3.7 | Erweiterung | Einführung der Sparkline-Anforderungen (UI-REQ-SPARK-01 bis -04, BE-REQ-SPARK-01 bis -02) für kompakte Trend-Visualisierungen |
@@ -998,9 +999,27 @@ Das System muss die Sparkline-Daten in Abhängigkeit vom gewählten Zeitraum (z.
 
 Das System stellt einen API-Endpunkt `/analyze/theme` zur Verfügung.
 
-#### 3.8.2 BE-REQ-THEME-02 — Identifikation von Gewinnern und Verlierern
+#### 3.8.2 BE-REQ-THEME-02 — Identifikation thematischer Gewinner und Verlierer
 
-Der Analyse-Dienst identifiziert basierend auf dem Suchbegriff relevante Sektoren oder Einzelwerte und klassifiziert diese als Chancen (Winners) oder Risiken (Losers).
+Der Endpunkt muss eine Liste von assoziierten Aktien zurückgeben, die als "Winners" (positiver Einfluss) oder "Losers" (negativer Einfluss/Risiko) klassifiziert sind.
+
+### 3.9 Portfolio Management (Backend)
+
+#### 3.9.1 BE-REQ-PORTFOLIO-01 — Bereitstellung von Portfolio-Endpunkten
+
+Das System stellt API-Endpunkte zur Verwaltung von Portfolio-Transaktionen bereit.
+
+#### 3.9.2 BE-REQ-PORTFOLIO-02 — Hinzufügen von Transaktionen
+
+Das System ermöglicht das Hinzufügen einer Transaktion (Ticker, Menge, Preis, Datum) über einen API-Aufruf.
+
+#### 3.9.3 BE-REQ-PORTFOLIO-03 — Abrufen des Portfolios
+
+Das System ermöglicht das Abrufen aller gespeicherten Transaktionen als Liste.
+
+#### 3.9.4 BE-REQ-PORTFOLIO-04 — Löschen von Transaktionen
+
+Das System ermöglicht das Löschen einer Transaktion anhand ihrer ID.
 
 #### 3.8.3 BE-REQ-THEME-03 — Generierung eines Themen-Reports
 
@@ -1103,5 +1122,19 @@ Längere Analyseausgaben müssen scrollbar und strukturiert darstellbar sein.
 ### 7.7 NFR-REQ-07 — Zustandserhalt bei UI-Navigation
 
 Beim Wechsel zwischen UI-Bereichen müssen gesetzte Kontextwerte erhalten bleiben.
+
+### 4.6 Datenpersistenz (Data Persistence)
+
+#### 4.6.1 BE-REQ-PERSIST-01 — SQLite-basierte Speicherung
+
+Das System verwendet eine SQLite-Datenbank zur lokalen Speicherung von persistenten Nutzerdaten, insbesondere Portfolio-Transaktionen.
+
+#### 4.6.2 BE-REQ-PERSIST-02 — Persistenter Speicherort
+
+Die Datenbankdatei wird in einem betriebssystemkonformen Anwendungsdatenverzeichnis abgelegt, um Datenverlust bei Anwendungsneustarts zu verhindern.
+
+#### 4.6.3 BE-REQ-PERSIST-03 — Automatische Initialisierung
+
+Das System prüft beim Start die Existenz der Datenbank und initialisiert bei Bedarf das Schema (Tabellen) automatisch.
 
 Ende des Lastenhefts

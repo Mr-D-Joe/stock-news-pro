@@ -104,6 +104,15 @@ export interface ThemeAsset {
     change?: number;
 }
 
+export interface Transaction {
+    id?: number;
+    symbol: string;
+    amount: number;
+    price_at_purchase: number;
+    timestamp?: string;
+    type?: string;
+}
+
 export interface AppState {
     selectedStock: string;
     selectedSector: string;

@@ -5,7 +5,7 @@
  * Used when VITE_USE_REAL_API=true
  */
 
-import type { Stock, NewsItem, Report, AnalysisResult, ChartPoint, SectorPerformance, SparklineResponse } from '../types';
+import type { Stock, NewsItem, Report, AnalysisResult, ChartPoint, SectorPerformance, SparklineResponse, Transaction } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
