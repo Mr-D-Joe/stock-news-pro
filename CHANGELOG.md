@@ -6,6 +6,8 @@ All notable changes to this project are documented in this file.
 ### Added
 - **Persistence Layer:** SQLite database integration via SQLModel in Backend `ai_service`.
 - **Backend API:** New endpoints for Portfolio Management (`/portfolio`).
+### Changed
+- **Docs:** Aligned README repository structure and backend status with current project layout.
 
 ## [1.7.0] - 2026-01-29 - Phase A: Thematic Analysis
 ### Added

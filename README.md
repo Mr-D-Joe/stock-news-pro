@@ -71,11 +71,11 @@ Responsibilities:
 
 ---
 
-### Backend (Planned)
+### Backend (Prototype / Planned)
 
 Characteristics:
 
-- JSON API
+- JSON API (mock / prototype)
 - Fully decoupled from frontend
 - Language-agnostic
 - Replaceable
@@ -86,6 +86,11 @@ Responsibilities:
 - Business logic
 - Persistence
 - API contract enforcement
+
+Current state:
+
+- Prototype service in `ai_service/`
+- Production backend still planned
 
 ---
 
@@ -125,11 +130,10 @@ Responsibilities:
 
 ```text
 /frontend        React frontend application
-/ai_service      Mock and future AI service layer
-/engine          Legacy engine (deprecated)
-/shared          Shared schemas or contracts
-
-Legacy JavaFX and C++ components are deprecated and kept only for historical reference.
+/ai_service      Mock and prototype AI service layer
+/docs            Project documentation and release checklists
+/system_reports  System report snapshots
+```
 
 ⸻
 
@@ -245,4 +249,3 @@ This is by design to support:
 	•	Enterprise auditability
 	•	Long-term maintainability
 	•	Architectural integrity
-
