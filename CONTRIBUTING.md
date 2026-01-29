@@ -50,7 +50,7 @@ If you are an AI agent working on this repo:
 2. **Atomic Changes:** Do not refactor unrelated files "while you are at it". Stick to the user's prompt.
 3. **No Hallucinations:** If a file or function is not present, ask before creating it. Do not invent new architectural layers (e.g., "Redux") if they are not specified in `DESIGN.md`.
 4. **Mocking:** If adding a new data feature, implement it as a **Mock** first (see `DES-GOV-17`).
-5. **Remote Verification:** A project conclusion or task completion is only considered "clean" if `git push` has been successfully executed AND verified (e.g., via browser check or explicit git status check indicating parity). Local commits are insufficient.
+5. **Remote Verification:** A project conclusion or task completion is only considered "clean" if `git push` has been successfully executed AND verified. Verification **MUST include both technical parity check** (git status/hash) **AND visual content confirmation** (via Browser/Server-View) to ensure files are actually present and correct on the remote. Local commits are insufficient.
 
 ## 5. Release Process
 
